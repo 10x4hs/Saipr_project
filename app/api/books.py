@@ -3,15 +3,16 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_sources
+from app.api.deps import current_user, get_book, get_sources, verify_csrf
 from app.core.config import Settings, get_settings
 from app.db.session import get_session
+from app.models import Book, User
 from app.services import books as book_service
 from app.services.pace import min_dwell_ms
 from app.services.search import FULLTEXT_SOURCES, search_all
 from app.sources.base import BookSource, SourceError
 
-router = APIRouter(prefix="/api/v1/books", tags=["books"])
+router = APIRouter(prefix="/api/v1/books", tags=["books"], dependencies=[Depends(verify_csrf)])
 
 
 class BookHitOut(BaseModel):
@@ -92,6 +93,7 @@ async def import_book(
     body: ImportIn,
     sources: dict[str, BookSource] = Depends(get_sources),
     session: AsyncSession = Depends(get_session),
+    _: User = Depends(current_user),
 ) -> BookOut:
     src = sources.get(body.source)
     if src is None or body.source not in FULLTEXT_SOURCES:
@@ -105,10 +107,13 @@ async def import_book(
     return BookOut.model_validate(book)
 
 
+@router.get("/{book_id}", response_model=BookOut)
+async def get_book_detail(book: Book = Depends(get_book)) -> BookOut:
+    return BookOut.model_validate(book)
+
+
 @router.get("/{book_id}/chunks/{chunk_index}", response_model=ChunkOut)
-async def get_chunk(
-    book_id: int, chunk_index: int, session: AsyncSession = Depends(get_session)
-) -> ChunkOut:
+async def get_chunk(book_id: int, chunk_index: int, session: AsyncSession = Depends(get_session)) -> ChunkOut:
     found = await book_service.get_chunk(session, book_id, chunk_index)
     if found is None:
         raise HTTPException(404, "chunk not found")
