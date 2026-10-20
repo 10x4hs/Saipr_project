@@ -19,15 +19,17 @@ class FakeSource(BookSource):
 
 
 def meta(source, isbn=None, fulltext=False, title="t"):
-    return BookMeta(source=source, external_id=isbn or title, title=title, isbn13=isbn,
-                    has_fulltext=fulltext)
+    return BookMeta(source=source, external_id=isbn or title, title=title, isbn13=isbn, has_fulltext=fulltext)
 
 
 async def test_merges_same_isbn_keeping_priority_order():
-    res = await search_all([
-        FakeSource("kakao", [meta("kakao", "9788936433598")]),
-        FakeSource("naver", [meta("naver", "9788936433598"), meta("naver", "9780000000002")]),
-    ], "q")
+    res = await search_all(
+        [
+            FakeSource("kakao", [meta("kakao", "9788936433598")]),
+            FakeSource("naver", [meta("naver", "9788936433598"), meta("naver", "9780000000002")]),
+        ],
+        "q",
+    )
     assert [h.meta.source for h in res.hits] == ["kakao", "naver"]
     assert res.hits[0].sources == ["kakao", "naver"]
     assert res.errors == {}
@@ -35,10 +37,13 @@ async def test_merges_same_isbn_keeping_priority_order():
 
 async def test_partial_failure_returns_other_results_without_leaking_message():
     secret = httpx.HTTPStatusError("https://x?key=SECRET", request=None, response=None)
-    res = await search_all([
-        FakeSource("google_books", exc=secret),
-        FakeSource("wikisource", [meta("wikisource", fulltext=True)]),
-    ], "q")
+    res = await search_all(
+        [
+            FakeSource("google_books", exc=secret),
+            FakeSource("wikisource", [meta("wikisource", fulltext=True)]),
+        ],
+        "q",
+    )
     assert len(res.hits) == 1
     assert res.errors == {"google_books": "HTTPStatusError"}
 
