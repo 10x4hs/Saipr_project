@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import Settings, get_settings
 from app.core.security import csrf_matches, new_csrf_token
 from app.db.session import get_session
-from app.models import Book, User
+from app.models import ApiToken, Book, User
+from app.services import tokens as token_service
 from app.sources.base import BookSource
 from app.sources.registry import build_sources
 
@@ -49,7 +50,38 @@ def logout_session(request: Request) -> None:
     request.session.clear()
 
 
+# ── Bearer 토큰 (네이티브 앱) ──────────────────────────────────
+
+_UNSET = object()
+BAD_TOKEN = "로그인이 만료됐어요. 다시 로그인해 주세요."
+
+
+def bearer_of(request: Request) -> str | None:
+    """Authorization: Bearer <token>의 토큰. 헤더가 없거나 다른 방식이면 None."""
+    scheme, _, value = request.headers.get("authorization", "").partition(" ")
+    if scheme.lower() != "bearer":
+        return None
+    return value.strip()
+
+
+async def bearer_auth(request: Request, session: AsyncSession) -> tuple[ApiToken, User] | None:
+    """요청의 Bearer 토큰을 한 번만 확인하고 결과를 요청에 붙여 둔다(CSRF 검사와 사용자 조회가 같이 쓴다)."""
+    cached = getattr(request.state, "bearer", _UNSET)
+    if cached is not _UNSET:
+        return cached
+    raw = bearer_of(request)
+    found = await token_service.lookup(session, raw) if raw is not None else None
+    request.state.bearer = found
+    return found
+
+
 async def optional_user(request: Request, session: AsyncSession = Depends(get_session)) -> User | None:
+    if bearer_of(request) is not None:
+        # 토큰을 보냈으면 쿠키로 되돌아가지 않는다. 틀린 토큰은 로그인하지 않은 것과 같다
+        found = await bearer_auth(request, session)
+        if found is None:
+            raise HTTPException(401, BAD_TOKEN)
+        return found[1]
     uid = request.session.get(SESSION_USER)
     if uid is None:
         return None
@@ -65,9 +97,18 @@ async def current_user(user: User | None = Depends(optional_user)) -> User:
     return user
 
 
-async def verify_csrf(request: Request) -> None:
-    """쿠키 세션을 쓰므로 상태를 바꾸는 요청은 토큰을 확인한다. 헤더(JS) 또는 폼 필드(HTML 폼)."""
+async def verify_csrf(request: Request, session: AsyncSession = Depends(get_session)) -> None:
+    """쿠키 세션을 쓰므로 상태를 바꾸는 요청은 토큰을 확인한다. 헤더(JS) 또는 폼 필드(HTML 폼).
+
+    유효한 Bearer 토큰으로 인증한 요청은 건너뛴다. 브라우저가 다른 사이트 요청에 자동으로 붙이는 것은
+    쿠키뿐이고 Authorization 헤더는 붙이지 않으므로 CSRF가 성립하지 않는다.
+    쿠키 세션만 있는 요청은 지금처럼 반드시 확인한다.
+    """
     if request.method not in UNSAFE:
+        return
+    if bearer_of(request) is not None:
+        if await bearer_auth(request, session) is None:
+            raise HTTPException(401, BAD_TOKEN)
         return
     given = request.headers.get(CSRF_HEADER)
     if given is None and request.headers.get("content-type", "").startswith(

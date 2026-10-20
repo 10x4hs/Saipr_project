@@ -14,13 +14,15 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
 from app import models  # noqa: F401  (메타데이터 등록)
-from app.api import auth, books, library, push, rooms, social, ws
+from app.api import auth, books, chat, friends, highlights, library, push, rooms, social, stats, ws
 from app.core.config import get_settings
 from app.db.base import Base
 from app.db.session import SessionLocal, engine
 from app.services import scheduler
 from app.services.auth import AuthError
 from app.services.battles import BattleError
+from app.services.friends import FriendError
+from app.services.highlights import HighlightError
 from app.services.library import LibraryError
 from app.services.points import ensure_challenges
 from app.services.reactions import ReactionError
@@ -88,11 +90,16 @@ def create_app() -> FastAPI:
     )
     for router in (
         auth.router,
+        auth.token_router,
         books.router,
         library.router,
         rooms.router,
         push.router,
         social.router,
+        friends.router,
+        highlights.router,
+        chat.router,
+        stats.router,
         ws.router,
         web.router,
     ):
@@ -113,9 +120,18 @@ def create_app() -> FastAPI:
         return await http_exception_handler(request, exc)
 
     app.add_exception_handler(StarletteHTTPException, http_error)
-    app.add_exception_handler(web.LoginRequired, lambda request, exc: web.login_redirect(request))
 
-    for exc in (AuthError, RoomError, ReactionError, TeamError, BattleError, LibraryError, ReadingError):
+    for exc in (
+        AuthError,
+        RoomError,
+        ReactionError,
+        TeamError,
+        BattleError,
+        LibraryError,
+        ReadingError,
+        FriendError,
+        HighlightError,
+    ):
         app.add_exception_handler(exc, status_error)
 
     @app.get("/health")

@@ -1,7 +1,8 @@
 """시연용 데이터. `python -m app.seed` (이미 있는 데이터는 건드리지 않음, 여러 번 실행해도 안전).
 
-- 퍼블릭 도메인 샘플 도서 3권(app/data/sample_books.json, 위키문헌 원문). 인터넷이 없어도 시연할 수 있다.
-- 데모 계정 4명 (비밀번호 모두 demo1234), 읽기방 1개, 팀 2개, 진행 중 페이지 레이스 1개.
+- 퍼블릭 도메인 샘플 도서 16권(app/data/sample_books.json, 위키문헌 원문 · 소설/시/수필).
+  책 소개·작가 소개는 위키백과 요약(CC BY-SA 4.0)을 미리 받아 두어 인터넷이 없어도 시연할 수 있다.
+- 데모 계정 4명 (비밀번호 모두 demo1234), 서로 팔로우, 읽기방 1개, 팀 2개, 진행 중 페이지 레이스 1개.
 """
 
 import asyncio
@@ -17,8 +18,8 @@ from app.core.config import get_settings
 from app.core.security import hash_password
 from app.db.base import Base
 from app.db.session import SessionLocal, engine
-from app.models import Battle, BattleType, Book, BookChunk, Room, Team, User
-from app.services import battles, rooms, teams
+from app.models import Battle, BattleType, Book, BookChunk, Follow, Room, Team, User
+from app.services import auth, battles, rooms, teams
 from app.services.chunker import chunk_text, target_for
 from app.services.points import ensure_challenges
 
@@ -32,8 +33,12 @@ DEMO_USERS = [
 ]
 
 
+INFO_FIELDS = ("genre", "description", "author_bio", "wiki_url")
+
+
 async def load_samples(session) -> list[Book]:
     books = []
+    now = utcnow()
     for item in json.loads(SAMPLES.read_text(encoding="utf-8")):
         book = await session.scalar(
             select(Book).where(Book.source == item["source"], Book.external_id == item["external_id"])
@@ -51,7 +56,14 @@ async def load_samples(session) -> list[Book]:
                 chunks=[BookChunk(chunk_index=i, text=c, char_count=len(c)) for i, c in enumerate(chunks)],
             )
             session.add(book)
-            await session.commit()
+        # 이미 있던 책(예전 시드)에도 장르·소개를 채운다. 비어 있는 칸만 채우므로 여러 번 돌려도 같다
+        for key in INFO_FIELDS:
+            if getattr(book, key) is None and item.get(key):
+                setattr(book, key, item[key])
+        if book.info_fetched_at is None and (item.get("description") or item.get("author_bio")):
+            # 미리 받아 둔 요약이 있으면 화면을 열 때 위키백과를 다시 부르지 않는다
+            book.info_fetched_at = now
+        await session.commit()
         books.append(book)
     return books
 
@@ -69,11 +81,23 @@ async def main() -> None:
         for nick, email in DEMO_USERS:
             u = await session.scalar(select(User).where(User.email == email))
             if u is None:
-                u = User(nickname=nick, email=email, password_hash=hashed)
+                u = User(
+                    nickname=nick,
+                    email=email,
+                    password_hash=hashed,
+                    friend_code=await auth.unique_friend_code(session),
+                )
                 session.add(u)
                 await session.commit()
             users.append(u)
         seoyeon, junho, doyoon, minji = users
+
+        # 친구 피드 시연: 넷이 서로 팔로우
+        for a in users:
+            for b in users:
+                if a.id != b.id and await session.get(Follow, (a.id, b.id)) is None:
+                    session.add(Follow(follower_id=a.id, followee_id=b.id, created_at=utcnow()))
+        await session.commit()
 
         room = await session.scalar(select(Room).where(Room.name == "봄봄 같이 읽기"))
         if room is None:
@@ -98,6 +122,7 @@ async def main() -> None:
         print("시드 완료")
         print(f"  도서 {len(books)}권: " + ", ".join(b.title for b in books))
         print(f"  데모 계정 (비밀번호 {PASSWORD}): " + ", ".join(e for _, e in DEMO_USERS))
+        print("  친구 코드: " + ", ".join(f"{u.nickname} {u.friend_code}" for u in users))
         print(f"  초대 링크: {get_settings().public_base_url}/r/{room.invite_code}")
     await engine.dispose()
 

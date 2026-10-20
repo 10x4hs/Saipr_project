@@ -4,8 +4,12 @@
     방 이벤트: progress.updated · reaction.created · member.joined · presence.changed
 /ws/me
     내 알림: notification.created
+(방 채널에는 message.created — 읽기방 채팅 — 도 나간다)
 
 - 로그인 세션 쿠키로 인증하고, 다른 사이트에서 연 소켓(Origin 불일치)은 거절한다.
+- 네이티브 앱은 ?token=<Bearer 토큰>으로 인증한다. 토큰은 브라우저가 자동으로 붙이지 않으므로
+  다른 사이트가 남의 권한으로 소켓을 열 수 없다 — 이때는 Origin 검사를 건너뛴다.
+  틀린 토큰이면 쿠키로 되돌아가지 않고 거절한다.
 - 재연결 시 last_event_id 이후의 버퍼된 이벤트를 먼저 보낸다.
 - sync 모드 방에서는 클라이언트가 {"type": "presence", "chunk_index": n}을 보내면 1초에 한 번까지 중계한다.
 """
@@ -23,6 +27,7 @@ from app.db.session import get_session
 from app.models import Room, RoomMode, User
 from app.realtime.broker import Event, broker, room_channel, user_channel
 from app.services import rooms as room_service
+from app.services import tokens as token_service
 
 router = APIRouter()
 PRESENCE_INTERVAL = 1.0
@@ -38,6 +43,17 @@ def _same_origin(ws: WebSocket) -> bool:
 async def _user(ws: WebSocket, session: AsyncSession) -> User | None:
     uid = ws.session.get(SESSION_USER) if "session" in ws.scope else None
     return await session.get(User, uid) if uid is not None else None
+
+
+async def _authenticate(ws: WebSocket, session: AsyncSession) -> User | None:
+    """토큰이 있으면 토큰으로(Origin 검사 없음), 없으면 같은 사이트의 세션 쿠키로."""
+    token = ws.query_params.get("token")
+    if token is not None:
+        found = await token_service.lookup(session, token)
+        return found[1] if found else None
+    if not _same_origin(ws):
+        return None
+    return await _user(ws, session)
 
 
 async def _pump(
@@ -82,10 +98,7 @@ async def room_socket(
     last_event_id: int | None = None,
     session: AsyncSession = Depends(get_session),
 ) -> None:
-    if not _same_origin(ws):
-        await ws.close(code=status.WS_1008_POLICY_VIOLATION)
-        return
-    user = await _user(ws, session)
+    user = await _authenticate(ws, session)
     room = await session.get(Room, room_id)
     allowed = (
         user is not None and room is not None and await room_service.is_member(session, room_id, user.id)
@@ -118,10 +131,7 @@ async def room_socket(
 
 @router.websocket("/ws/me")
 async def my_socket(ws: WebSocket, session: AsyncSession = Depends(get_session)) -> None:
-    if not _same_origin(ws):
-        await ws.close(code=status.WS_1008_POLICY_VIOLATION)
-        return
-    user = await _user(ws, session)
+    user = await _authenticate(ws, session)
     await session.close()
     if user is None:
         await ws.close(code=status.WS_1008_POLICY_VIOLATION)

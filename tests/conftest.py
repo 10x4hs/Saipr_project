@@ -130,3 +130,39 @@ async def age_accounts(session_factory, hours: float = 48) -> None:
     async with session_factory() as s:
         await s.execute(update(models.User).values(created_at=datetime.now(UTC) - timedelta(hours=hours)))
         await s.commit()
+
+
+async def token_signup(c: httpx.AsyncClient, nickname: str = "앱사용자", email: str | None = None) -> dict:
+    """네이티브 앱처럼 토큰으로 가입. 이후 요청에 Bearer 헤더가 붙는다(쿠키 · CSRF 없음)."""
+    email = email or f"app-{nickname.encode().hex()}@test.kr"
+    r = await c.post(
+        "/api/v1/auth/token/signup",
+        json={
+            "nickname": nickname,
+            "email": email,
+            "password": "password123",
+            "password_confirm": "password123",
+        },
+    )
+    assert r.status_code == 201, r.text
+    body = r.json()
+    c.headers["Authorization"] = f"Bearer {body['token']}"
+    return body["user"]
+
+
+async def set_position(session_factory, user_id: int, book_id: int, verified_chunk: int) -> None:
+    """체류시간 이벤트 없이 읽은 위치를 정한다(스포일러 가드 · 밑줄 위치 테스트용)."""
+    from sqlalchemy import select
+
+    async with session_factory() as s:
+        e = await s.scalar(
+            select(models.LibraryEntry).where(
+                models.LibraryEntry.user_id == user_id, models.LibraryEntry.book_id == book_id
+            )
+        )
+        if e is None:
+            e = models.LibraryEntry(user_id=user_id, book_id=book_id, shelf=models.Shelf.READING)
+            s.add(e)
+        e.verified_chunk = verified_chunk
+        e.progress_pct = 0
+        await s.commit()

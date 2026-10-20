@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import aware, utcnow
 from app.models import Book, BookChunk, ReadingEvent, Shelf, User
-from app.services import library, points, rooms
+from app.services import activity, library, points, rooms
 from app.services.pace import credited_dwell_ms, is_verified, min_dwell_ms
 
 MAX_BATCH = 200
@@ -158,13 +158,17 @@ async def record_events(
         prev = max(prev, at) if prev else at
         result.accepted += 1
 
-    before = entry.verified_chunk
+    before, before_pct = entry.verified_chunk, entry.progress_pct
     if result.newly_verified:
         entry.verified_chunk = max(entry.verified_chunk, *result.newly_verified)
         entry.progress_pct = min(100, (entry.verified_chunk + 1) * 100 // book.total_chunks)
         if entry.shelf is Shelf.WANT:
             entry.shelf = Shelf.READING
         result.points_awarded = await points.award_chunks(session, user.id, len(result.newly_verified), now)
+        # 친구 피드: 첫 청크 · 25/50/75% · 끝까지
+        if before < 0:
+            await activity.record(session, user.id, "started", book.id, ref=f"started:{book.id}", now=now)
+        await activity.progress_changed(session, user.id, book.id, before_pct, entry.progress_pct, now)
 
     await session.flush()
     result.slow_down = await _needs_slow_down(session, user.id, book.id, now)

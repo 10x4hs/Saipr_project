@@ -236,6 +236,10 @@ async def complete_book(
     (레이스에서 트래커를 빼는 것과 같은 원칙, PRD READ-02).
     """
     now = now or utcnow()
+    from app.services import activity  # activity → library → points 순환 import를 피한다
+
+    if entry.shelf is not Shelf.DONE:
+        await activity.finished(session, entry.user_id, entry.book_id, now)
     entry.shelf = Shelf.DONE
     if not book.has_fulltext:
         entry.progress_pct = 100

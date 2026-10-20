@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.clock import utcnow
 from app.models import Book, LibraryEntry, Shelf
 from app.sources.base import BookMeta
 
@@ -72,9 +73,13 @@ async def set_tracker_progress(session: AsyncSession, user_id: int, book: Book, 
     if book.has_fulltext:
         raise LibraryError("앱 안에서 읽는 책은 진행률을 직접 입력할 수 없어요.")
     entry = await ensure_entry(session, user_id, book.id)
+    before_pct = entry.progress_pct
     entry.progress_pct = max(0, min(100, pct))
     if entry.shelf is Shelf.WANT and entry.progress_pct > 0:
         entry.shelf = Shelf.READING
+    from app.services import activity  # activity가 library를 쓰므로 순환 import를 피한다
+
+    await activity.progress_changed(session, user_id, book.id, before_pct, entry.progress_pct, utcnow())
     await session.commit()
     return entry
 

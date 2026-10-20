@@ -12,7 +12,7 @@ from app.core.clock import aware, utcnow
 from app.db.session import defer_publish
 from app.models import Book, LibraryEntry, Room, RoomMember, RoomMode, Shelf, User
 from app.realtime.broker import broker, room_channel
-from app.services import library
+from app.services import activity, library
 from app.services.notifications import notify
 
 MAX_MEMBERS = 8
@@ -66,6 +66,7 @@ async def create_room(
     await session.flush()
     session.add(RoomMember(room_id=room.id, user_id=owner.id, joined_at=now))
     await library.ensure_entry(session, owner.id, book.id, Shelf.READING)
+    await activity.joined_room(session, owner.id, book.id, room.id, room.name, now)
     await session.commit()
     return room
 
@@ -153,6 +154,7 @@ async def join(session: AsyncSession, code: str, user: User, now: datetime | Non
             "verified_chunk": entry.verified_chunk,
         },
     )
+    await activity.joined_room(session, user.id, room.book_id, room.id, room.name, now)
     await notify(
         session,
         room.owner_id,
