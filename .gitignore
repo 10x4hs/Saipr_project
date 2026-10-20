@@ -17,3 +17,7 @@ dist/
 
 # 웹 푸시 VAPID 개인 키 (자동 생성)
 .vapid_private.pem
+
+# Flet 앱 빌드 결과
+mobile/build/
+mobile/storage/

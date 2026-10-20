@@ -1,0 +1,53 @@
+[project]
+name = "saipr-app"
+version = "1.0.0"
+description = "함께읽기 — 같은 책을 각자의 속도로, 친구와 함께 읽는 소셜 독서 앱"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "Saipr Team" }]
+dependencies = [
+    "flet>=1.0.4,<1.1",
+    "flet-charts>=1.0.4,<1.1",
+    "httpx>=0.27",
+    "websockets>=12",
+]
+
+[dependency-groups]
+dev = [
+    "flet-cli>=1.0.4,<1.1",
+    "flet-desktop>=1.0.4,<1.1",
+    "flet-web>=1.0.4,<1.1",
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.flet]
+org = "kr.saipr"
+product = "함께읽기"
+company = "Saipr"
+copyright = "Copyright (C) 2026 Saipr Team"
+icon_background = "#9ea3a9"
+
+[tool.flet.app]
+path = "src"
+
+[tool.flet.android]
+# 같은 와이파이의 개발 서버(http://) 접속을 허용한다 — 배포 서버는 https를 쓴다
+permission."android.permission.INTERNET" = true
+
+[tool.flet.splash]
+color = "#9ea3a9"
+dark_color = "#0b1020"
+
+[tool.ruff]
+line-length = 150  # Flet 위젯 트리는 한 줄에 속성이 많다
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501", "E731"]  # 위젯 트리의 긴 줄 · 작은 lambda 이벤트 핸들러

@@ -45,3 +45,18 @@ jobs:
         run: python -m app.seed && python -m app.seed
       - name: realtime E2E on Postgres (GOAL 5)
         run: pytest -q tests/test_realtime.py
+
+  mobile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "flet>=1.0.4,<1.1" "flet-charts>=1.0.4,<1.1" httpx websockets pytest pytest-asyncio ruff
+      - run: ruff check .
+      - run: python -m compileall -q src
+      - run: pytest -q
