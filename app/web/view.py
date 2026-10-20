@@ -1,4 +1,4 @@
-"""화면 표시용 도우미 — 템플릿 필터, 시안의 사진 배경, 남은 시간 문구.
+"""화면 표시용 도우미 — 템플릿 필터, 시안의 사진 배경.
 
 규칙은 services/에 두고 여기서는 보여 주기만 한다.
 """
@@ -33,45 +33,11 @@ def kst_today() -> str:
     return f"{d.month}월 {d.day}일 {WEEKDAYS[d.weekday()]}요일"
 
 
-def num(x: float) -> str:
-    """점수 표시: 128.0 → '128', 2.45 → '2.5'."""
-    return f"{round(x, 1):g}"
-
-
-def clock() -> str:
-    """PC 폰 프레임 상단의 시계 (strftime의 %-H는 Windows에서 안 돼서 직접 만든다)."""
-    d = utcnow().astimezone(KST)
-    return f"{d.hour}:{d.minute:02d}"
-
-
-def time_left(end: datetime | None, now: datetime | None = None) -> str:
-    """'2일 14시간 남음' · '3시간 남음' · '끝났어요'."""
-    if end is None:
-        return ""
-    secs = int((aware(end) - (now or utcnow())).total_seconds())
-    if secs <= 0:
-        return "끝났어요"
-    days, rem = divmod(secs, 86400)
-    hours, rem = divmod(rem, 3600)
-    if days:
-        return f"{days}일 {hours}시간 남음" if hours else f"{days}일 남음"
-    if hours:
-        return f"{hours}시간 남음"
-    return f"{max(1, rem // 60)}분 남음"
-
-
 def dday(end: datetime | None) -> str:
     if end is None:
         return ""
     days = (aware(end).astimezone(KST).date() - utcnow().astimezone(KST).date()).days
     return "D-day" if days == 0 else (f"D-{days}" if days > 0 else "종료")
-
-
-def date_label(end: datetime | None) -> str:
-    if end is None:
-        return ""
-    d = aware(end).astimezone(KST)
-    return f"{d.month}월 {d.day}일({WEEKDAYS[d.weekday()]})"
 
 
 def _blob(x: float, y: float, w: float, h: float, bg: str, blur: float) -> str:
@@ -124,11 +90,8 @@ BACKDROP_NIGHT = _backdrop(True)
 def register(env) -> None:
     env.filters.update(
         av=av_color,
-        num=num,
         initial=initial,
         cover=cover_color,
-        left=time_left,
         dday=dday,
-        datelabel=date_label,
     )
     env.globals.update(BACKDROP_DAY=BACKDROP_DAY, BACKDROP_NIGHT=BACKDROP_NIGHT, kst_today=kst_today)

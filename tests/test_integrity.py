@@ -133,17 +133,11 @@ async def test_unfinished_fulltext_book_gives_no_completion_points(api, session_
     assert "complete" not in [h["source"] for h in history]
 
 
-async def test_web_track_rejects_unknown_source(api):
-    from tests.test_web import HTML, csrf_of, web_signup
-
+async def test_track_rejects_unknown_source(api):
     async with api() as c:
-        await web_signup(c, "트래커")
-        page = await c.get("/search", headers=HTML)
-        r = await c.post(
-            "/books/track",
-            data={"source": "made-up", "external_id": "x", "title": "x", "csrf_token": csrf_of(page.text)},
-        )
-        assert r.status_code == 303  # 오류 안내와 함께 되돌아감
+        await signup(c, "트래커")
+        r = await c.post("/api/v1/books/track", json={"source": "made-up", "external_id": "x", "title": "x"})
+        assert r.status_code == 400
         assert (await c.get("/api/v1/library")).json() == []
 
 
@@ -235,9 +229,6 @@ async def test_battle_hidden_from_outsiders(api, session_factory):
     await signup(outsider, "구경꾼")
     assert (await outsider.get(f"/api/v1/battles/{battle['id']}")).status_code == 404
     assert (await outsider.get(f"/api/v1/battles/{battle['id']}/highlights")).status_code == 404
-    assert (
-        await outsider.get(f"/battles/{battle['id']}", headers={"accept": "text/html"})
-    ).status_code == 404
 
 
 # ── 6. 시간대 ───────────────────────────────────────────

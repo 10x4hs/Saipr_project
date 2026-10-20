@@ -1,4 +1,4 @@
-"""PWA(서비스 워커·매니페스트·오프라인) · VAPID 웹 푸시 · 연속 읽기."""
+"""VAPID 웹 푸시(API · 알림 발송) · 연속 읽기. PWA 화면은 웹에서 빠졌다 — 제품은 mobile/ 앱."""
 
 import asyncio
 import base64
@@ -20,34 +20,6 @@ SUB = {
         "auth": "tBHItJI5svbpez7KI4CCXg",
     },
 }
-
-
-async def test_service_worker_manifest_offline(api):
-    async with api() as c:
-        sw = await c.get("/sw.js")
-        assert sw.status_code == 200 and sw.headers["service-worker-allowed"] == "/"
-        assert sw.headers["cache-control"] == "no-cache" and "saipr-v" in sw.text
-        m = (await c.get("/manifest.webmanifest")).json()
-        assert m["display"] == "standalone" and m["lang"] == "ko"
-        for icon in m["icons"]:
-            assert (await c.get(icon["src"])).status_code == 200
-        off = await c.get("/offline", headers={"accept": "text/html"})
-        assert off.status_code == 200 and "오프라인" in off.text
-
-
-async def test_pages_link_pwa_and_motion(api):
-    async with api() as c:
-        await signup(c)
-        html = (await c.get("/", headers={"accept": "text/html"})).text
-    for needle in (
-        'rel="manifest"',
-        "speculationrules",
-        "motion.css",
-        "pwa.js",
-        "liquid-refract",
-        "tab-pill",
-    ):
-        assert needle in html, needle
 
 
 async def test_vapid_public_key_is_uncompressed_p256_point(api):

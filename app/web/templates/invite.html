@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block title %}{{ room.name }} 초대{% endblock %}
-{% block screen_class %}{% if not user %}no-tabs{% endif %}{% endblock %}
 {% block content %}
 <div class="col" style="gap:3px;margin-top:8px"><span class="cap muted">함께 읽자는 초대가 왔어요</span><h1 style="font-size:28px">{{ room.name }}</h1></div>
 <div class="glass card"><div class="row start" style="gap:14px">
@@ -11,10 +10,41 @@
 {% include "_members.html" %}
 {% if expired %}
 <div class="glass flash error">초대 링크가 만료됐어요. 방장에게 새 링크를 받아 주세요.</div>
-{% elif user %}
-<form method="post" action="/r/{{ code }}/join"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="solid btn block">참여하기</button></form>
 {% else %}
-<a class="solid btn block" href="/login?next={{ ('/r/' ~ code)|urlencode }}">로그인하고 참여하기</a>
-<p class="cap" style="text-align:center">처음이에요? <a class="link" href="/signup?next={{ ('/r/' ~ code)|urlencode }}">가입하고 참여하기</a></p>
+<div class="glass frosted card" id="join">
+  <h2>앱에서 참여하기</h2>
+  <span class="cap">초대 코드</span>
+  <div class="code" id="invite-code">{{ code }}</div>
+  <button class="solid btn block" type="button" id="copy-code" data-code="{{ code }}" style="background:var(--ink);color:#fff">코드 복사하기</button>
+  {% if joined %}
+  <p class="cap">이미 이 방에 들어와 있어요. 앱의 함께 → 읽기방에서 바로 열 수 있어요.</p>
+  {% else %}
+  <ol class="steps">
+    <li>함께읽기 앱(안드로이드 APK)을 열고 로그인해요.</li>
+    <li>아래 탭의 <strong>함께</strong> → <strong>읽기방</strong>으로 가요.</li>
+    <li><strong>초대 코드로 들어가기</strong>에 위 코드를 붙여 넣으면 끝이에요.</li>
+  </ol>
+  {% endif %}
+</div>
+{% if user %}
+<p class="cap" style="text-align:center">로그인됨 · {{ user.nickname }} — 앱에서도 같은 계정으로 로그인해 주세요.</p>
+{% else %}
+<p class="cap" style="text-align:center">아직 계정이 없어요? <a class="link" href="/signup?next={{ ('/r/' ~ code)|urlencode }}">가입하기</a> · <a class="link" href="/login?next={{ ('/r/' ~ code)|urlencode }}">로그인</a></p>
 {% endif %}
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+  // 코드 복사: 클립보드를 못 쓰면 코드를 골라 둬서 길게 눌러 복사할 수 있게 한다
+  (function () {
+    var btn = document.getElementById("copy-code"), toast = document.getElementById("toast");
+    if (!btn) return;
+    function say(msg) { toast.textContent = msg; toast.hidden = false; setTimeout(function () { toast.hidden = true; }, 1800); }
+    function pick() { var r = document.createRange(); r.selectNodeContents(document.getElementById("invite-code")); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+    btn.addEventListener("click", function () {
+      if (navigator.clipboard) navigator.clipboard.writeText(btn.dataset.code).then(function () { say("초대 코드를 복사했어요"); }, function () { pick(); say("코드를 길게 눌러 복사해 주세요"); });
+      else { pick(); say("코드를 길게 눌러 복사해 주세요"); }
+    });
+  })();
+</script>
 {% endblock %}

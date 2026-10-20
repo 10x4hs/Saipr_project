@@ -4,98 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="csrf-token" content="{{ csrf }}">
-  <meta name="theme-color" content="{% block theme_color %}#6f767f{% endblock %}">
+  <meta name="theme-color" content="#6f767f">
   <meta name="color-scheme" content="light">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="함께읽기">
   <meta name="description" content="같은 책을 각자의 속도로 — 친구의 진행률과 문단 반응이 실시간으로 겹쳐 보이는 소셜 독서">
-  <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/static/icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
   <title>{% block title %}함께읽기{% endblock %} · 함께읽기</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/glass.css">
-  <link rel="stylesheet" href="/static/css/motion.css">
-  <script>
-  /* 페이지 전환 방향: 탭 순서(홈→검색→읽기방→리그)와 화면 깊이로 앞/뒤를 정한다.
-     'pagereveal'은 첫 렌더 직전에 일어나서 defer 스크립트로는 못 받으므로 여기(head, 동기)에 둔다. */
-  (function () {
-    function rank(href) {
-      var p = new URL(href, location.origin).pathname, tab = -1;
-      if (p === "/" || p.indexOf("/me") === 0) tab = 0;
-      else if (p.indexOf("/search") === 0 || p.indexOf("/books") === 0) tab = 1;
-      else if (p.indexOf("/rooms") === 0 || p.indexOf("/r/") === 0) tab = 2;
-      else if (p.indexOf("/teams") === 0 || p.indexOf("/battles") === 0) tab = 3;
-      return tab < 0 ? null : tab * 10 + Math.min(p.split("/").filter(Boolean).length, 9);
-    }
-    window.__vtDirection = function (from, to) {
-      var a = rank(from), b = rank(to);
-      return a === null || b === null || a === b ? null : (b > a ? "forward" : "back");
-    };
-    addEventListener("pagereveal", function (e) {
-      var act = window.navigation && navigation.activation;
-      if (!e.viewTransition || !act || !act.from) return;
-      var t = window.__vtDirection(act.from.url, act.entry.url);
-      if (t) e.viewTransition.types.add(t);
-      window.__vtLast = t || "default";
-    });
-  })();
-  </script>
-  {# 링크에 손을 올리면(또는 누르기 시작하면) 다음 화면을 미리 그려 둬서 바로 뜨게 한다 (Chromium).
-     부작용이 있는 화면(리더: 서재 기록, 내 정보: 알림 읽음 처리, 로그아웃 등)은 빼고 조회 화면만. #}
-  <script type="speculationrules">
-  {"prerender": [{"where": {"and": [
-      {"href_matches": "/*"},
-      {"not": {"href_matches": "/books/*/read*"}},
-      {"not": {"href_matches": "/me*"}},
-      {"not": {"href_matches": "/r/*"}},
-      {"not": {"href_matches": "/auth/*"}},
-      {"not": {"href_matches": "/static/*"}},
-      {"not": {"selector_matches": "[rel~=nofollow], form *"}}
-    ]}, "eagerness": "moderate"}]}
-  </script>
 </head>
 <body>
-{# Liquid Glass 굴절 필터 — Chromium만 backdrop-filter에서 렌더링한다 (liquid.js가 켤 때만 쓰임) #}
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <filter id="liquid-refract" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-    <feTurbulence type="fractalNoise" baseFrequency="0.008 0.014" numOctaves="2" seed="7" result="noise"/>
-    <feGaussianBlur in="noise" stdDeviation="2.5" result="soft"/>
-    <feDisplacementMap in="SourceGraphic" in2="soft" scale="22" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
-<div class="screen {% block screen_class %}{% endblock %}" data-tab-index="{{ {'home': 0, 'search': 1, 'rooms': 2, 'league': 3}.get(tab, '') }}" data-unread="{{ unread }}" data-depth="{{ path.strip('/').split('/')|reject('equalto', '')|list|length }}">
-  {{ BACKDROP_NIGHT if 'night' in self.screen_class() else BACKDROP_DAY }}
-  <div class="status" aria-hidden="true"><span>{{ clock }}</span><span>5G 100%</span></div>
-  <div class="scroll" id="scroll">
-    {% block body %}
+{# 웹에는 하단 탭이 없다 — 나머지 화면은 모두 앱에 있다 #}
+<div class="screen no-tabs">
+  {{ BACKDROP_DAY }}
+  <div class="scroll">
     <main class="content">
       {% if flash %}<div class="glass flash {{ flash.kind }}" role="status">{{ flash.message }}</div>{% endif %}
       {% block content %}{% endblock %}
     </main>
-    {% endblock %}
   </div>
-  {% block tabs %}
-  {% if user %}
-  <nav class="glass pill tabs" aria-label="주요 메뉴">
-    <a href="/" data-tab="0" {% if tab == 'home' %}aria-current="page"{% endif %}>{% if tab == 'home' %}<i class="tab-pill"></i>{% endif %}<b>⌂</b>홈{% if unread %}<span class="dot" aria-label="새 알림 {{ unread }}개"></span>{% endif %}</a>
-    <a href="/search" data-tab="1" {% if tab == 'search' %}aria-current="page"{% endif %}>{% if tab == 'search' %}<i class="tab-pill"></i>{% endif %}<b>⌕</b>검색</a>
-    <a href="/rooms" data-tab="2" {% if tab == 'rooms' %}aria-current="page"{% endif %}>{% if tab == 'rooms' %}<i class="tab-pill"></i>{% endif %}<b>◎</b>읽기방</a>
-    <a href="/teams" data-tab="3" {% if tab == 'league' %}aria-current="page"{% endif %}>{% if tab == 'league' %}<i class="tab-pill"></i>{% endif %}<b>▲</b>리그</a>
-  </nav>
-  {% endif %}
-  {% endblock %}
   <div class="toast" id="toast" role="status" hidden></div>
-  {% block overlay %}{% endblock %}
 </div>
-<script src="/static/js/motion.js" defer></script>
-<script src="/static/js/liquid.js" defer></script>
-{% if user %}<script src="/static/js/common.js" defer></script>{% endif %}
-<script src="/static/js/pwa.js" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

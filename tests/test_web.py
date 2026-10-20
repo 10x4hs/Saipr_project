@@ -1,8 +1,13 @@
-"""웹 화면: 모든 페이지가 렌더링되고, 폼 흐름(가입 → 방 만들기 → 초대 → 입장)이 동작한다."""
+"""웹 화면: 첫 화면(앱 안내) · 로그인/가입 폼 · 초대 미리보기만 남아 있다. 나머지는 mobile/ 앱과 JSON API."""
 
 import re
+from datetime import timedelta
 
-from tests.conftest import make_book
+from sqlalchemy import update
+
+from app.core.clock import utcnow
+from app.models import Room
+from tests.conftest import make_book, signup
 from tests.test_reading import CHUNK
 
 HTML = {"accept": "text/html"}
@@ -12,7 +17,8 @@ def csrf_of(html: str) -> str:
     return re.search(r'name="csrf-token" content="([^"]+)"', html).group(1)
 
 
-async def web_signup(c, nickname: str, next_path: str = "/") -> None:
+async def web_signup(c, nickname: str, next_path: str = "/") -> str:
+    """가입 폼으로 가입하고, 리다이렉트된 위치를 돌려준다."""
     page = await c.get(f"/signup?next={next_path}", headers=HTML)
     r = await c.post(
         "/signup",
@@ -26,17 +32,94 @@ async def web_signup(c, nickname: str, next_path: str = "/") -> None:
         },
     )
     assert r.status_code == 303, r.text
-    assert r.headers["location"] == next_path
+    return r.headers["location"]
 
 
-async def test_pages_require_login(api):
+async def web_login(c, email: str, password: str = "password123", next_path: str | None = None):
+    page = await c.get("/login", headers=HTML)
+    data = {"email": email, "password": password, "csrf_token": csrf_of(page.text)}
+    if next_path is not None:
+        data["next"] = next_path
+    return await c.post("/login", data=data)
+
+
+async def make_room(api, session_factory, name: str = "같이 읽어요") -> tuple[str, int]:
+    """API로 방을 만든다(방장 '서연'). (초대 코드, 방 id)."""
+    book = await make_book(session_factory, [CHUNK], title="봄봄")
+    owner = api()
+    await signup(owner, "서연")
+    room = (await owner.post("/api/v1/rooms", json={"book_id": book, "name": name})).json()
+    return room["invite_code"], room["id"]
+
+
+# ── 첫 화면 ──────────────────────────────────────────────
+
+
+async def test_landing_signed_out(api):
     async with api() as c:
         r = await c.get("/", headers=HTML)
-        assert r.status_code == 303 and r.headers["location"] == "/login?next=/"
+    assert r.status_code == 200
+    for needle in (
+        "함께읽기",
+        "앱에서 열어 주세요",
+        "초대 링크 미리보기와 계정 만들기만 해요",
+        'href="/login"',
+        'href="/signup"',
+    ):
+        assert needle in r.text, needle
+    assert "로그인됨" not in r.text and 'action="/logout"' not in r.text
+
+
+async def test_landing_signed_in_then_logout(api):
+    async with api() as c:
+        assert await web_signup(c, "서연") == "/"
+        page = await c.get("/", headers=HTML)
+        assert "환영해요, 서연님!" in page.text  # 가입 직후 안내
+        assert "로그인됨 · 서연" in page.text and 'action="/logout"' in page.text
+        assert 'href="/signup"' not in page.text
+        r = await c.post("/logout", data={"csrf_token": csrf_of(page.text)})
+        assert r.status_code == 303 and r.headers["location"] == "/"
+        page = await c.get("/", headers=HTML)
+        assert "로그인됨" not in page.text and 'href="/login"' in page.text
+
+
+async def test_removed_web_pages_are_gone(api):
+    async with api() as c:
+        await web_signup(c, "길잃음")
+        for path in ("/rooms", "/search", "/teams", "/me", "/books/1", "/books/1/read", "/sw.js", "/offline"):
+            r = await c.get(path, headers=HTML)
+            assert r.status_code == 404, path
+        assert (await c.get("/manifest.webmanifest")).status_code == 404
+        assert (await c.get("/static/js/reader.js")).status_code == 404
+        assert (await c.get("/static/css/glass.css")).status_code == 200
+        assert (await c.get("/static/icons/icon-192.png")).status_code == 200
+
+
+# ── 로그인 · 가입 ─────────────────────────────────────────
+
+
+async def test_auth_pages_render_and_csrf_is_enforced(api):
+    async with api() as c:
         assert (await c.get("/login", headers=HTML)).status_code == 200
         assert (await c.get("/signup", headers=HTML)).status_code == 200
-        # 토큰 없는 폼 전송은 거절
+        # 토큰 없는(또는 틀린) 폼 전송은 거절
         assert (await c.post("/login", data={"email": "a@b.kr", "password": "x"})).status_code == 403
+        bad = {
+            "nickname": "a",
+            "email": "a@b.kr",
+            "password": "x",
+            "password_confirm": "x",
+            "csrf_token": "nope",
+        }
+        assert (await c.post("/signup", data=bad)).status_code == 403
+        assert (await c.post("/logout")).status_code == 403
+
+
+async def test_signup_redirects_home_and_rejects_unsafe_next(api):
+    async with api() as c:
+        assert await web_signup(c, "준호", "//evil.example/x") == "/"
+    async with api() as c:
+        assert await web_signup(c, "민지", "https://evil.example") == "/"
 
 
 async def test_signup_form_errors_do_not_echo_password(api):
@@ -56,106 +139,71 @@ async def test_signup_form_errors_do_not_echo_password(api):
         assert "이메일 형식" in r.text and "secret-pw-1" not in r.text
 
 
-async def test_full_web_flow(api, session_factory):
-    book = await make_book(session_factory, [CHUNK, CHUNK], title="봄봄")
-    owner, friend = api(), api()
-    await web_signup(owner, "서연")
-
-    home = await owner.get("/", headers=HTML)
-    assert home.status_code == 200 and "오늘도" in home.text
-    token = csrf_of(home.text)
-
-    detail = await owner.get(f"/books/{book}", headers=HTML)
-    assert "읽기 시작" in detail.text
-    r = await owner.post(
-        "/rooms", data={"book_id": book, "name": "같이 읽어요", "mode": "async", "csrf_token": token}
-    )
-    assert r.status_code == 303
-    room_url = r.headers["location"]
-    room_page = await owner.get(room_url, headers=HTML)
-    assert room_page.status_code == 200
-    code = re.search(r"/r/([\w-]{8})", room_page.text).group(1)
-
-    # 비로그인 친구: 미리보기 → 가입 → 같은 초대 링크로 복귀 → 참여
-    preview = await friend.get(f"/r/{code}", headers=HTML)
-    assert (
-        preview.status_code == 200 and "같이 읽어요" in preview.text and "로그인하고 참여하기" in preview.text
-    )
-    await web_signup(friend, "준호", f"/r/{code}")
-    preview = await friend.get(f"/r/{code}", headers=HTML)
-    r = await friend.post(f"/r/{code}/join", data={"csrf_token": csrf_of(preview.text)})
-    assert r.status_code == 303 and r.headers["location"] == room_url
-    room_page = await friend.get(room_url, headers=HTML)
-    assert "서연" in room_page.text and ">나<" in room_page.text  # 내 줄은 시안처럼 "나"
-
-    reader = await friend.get(f"/books/{book}/read", headers=HTML)
-    assert reader.status_code == 200 and 'id="reader-root"' in reader.text
-    chunk = (await friend.get(f"/books/{book}/chunk/0")).json()
-    assert chunk["paragraphs"] == CHUNK and chunk["min_dwell_ms"] == 60_000
-
-    for path in ("/search?q=봄봄", "/teams", "/me", f"/books/{book}"):
-        assert (await friend.get(path, headers=HTML)).status_code == 200, path
-
-
-async def test_team_and_battle_pages(api, session_factory):
-    book = await make_book(session_factory, [CHUNK])
-    a, b = api(), api()
-    await web_signup(a, "가팀장")
-    await web_signup(b, "나팀장")
-    t = csrf_of((await a.get("/teams", headers=HTML)).text)
-    r = await a.post("/teams", data={"name": "가팀", "csrf_token": t})
-    team_a = r.headers["location"]
-    tb = csrf_of((await b.get("/teams", headers=HTML)).text)
-    team_b = (await b.post("/teams", data={"name": "나팀", "csrf_token": tb})).headers["location"]
-    # 배틀은 두 팀 모두 2명 이상이어야 한다
-    for team_url, owner, nick in ((team_a, a, "가팀원"), (team_b, b, "나팀원")):
-        code = re.search(
-            r"초대 코드 <strong>([\w-]+)</strong>", (await owner.get(team_url, headers=HTML)).text
-        ).group(1)
-        member = api()
-        await web_signup(member, nick)
-        page = await member.get("/teams", headers=HTML)
-        r = await member.post("/teams/join", data={"code": code, "csrf_token": csrf_of(page.text)})
-        assert r.headers["location"] == team_url
-
-    page = await a.get(f"/books/{book}", headers=HTML)
-    await a.post(f"/library/{book}/shelf", data={"shelf": "reading", "csrf_token": csrf_of(page.text)})
-    page = await a.get(team_a, headers=HTML)
-    assert "다른 팀에 도전하기" in page.text
-    r = await a.post(
-        "/battles",
-        data={
-            "type": "page_race",
-            "book_id": book,
-            "team_a_id": team_a.rsplit("/", 1)[1],
-            "team_b_id": team_b.rsplit("/", 1)[1],
-            "days": 7,
-            "csrf_token": csrf_of(page.text),
-        },
-    )
-    assert r.status_code == 303
-    battle = await a.get(r.headers["location"], headers=HTML)
-    assert battle.status_code == 200 and "가팀" in battle.text and "나팀" in battle.text
-
-
-async def test_service_error_flashes_and_redirects(api, session_factory):
-    book = await make_book(session_factory, [CHUNK])
+async def test_login_redirects_home_or_safe_next(api):
     async with api() as c:
-        await web_signup(c, "에러")
-        page = await c.get(f"/books/{book}", headers=HTML)
-        r = await c.post(
-            f"/library/{book}/progress",
-            data={"progress_pct": "50", "csrf_token": csrf_of(page.text)},
-            headers={"referer": f"http://test/books/{book}"},
+        await web_signup(c, "서연")
+    email = f"{'서연'.encode().hex()}@web.kr"
+    async with api() as c:
+        r = await web_login(c, email)
+        assert r.status_code == 303 and r.headers["location"] == "/"
+        # 이미 로그인했으면 로그인 화면은 다음 위치로 보낸다
+        r = await c.get("/login?next=/r/abcd1234", headers=HTML)
+        assert r.status_code == 303 and r.headers["location"] == "/r/abcd1234"
+    async with api() as c:
+        r = await web_login(c, email, next_path="/r/abcd1234")
+        assert r.headers["location"] == "/r/abcd1234"
+    async with api() as c:
+        r = await web_login(c, email, next_path="//evil.example")
+        assert r.headers["location"] == "/"
+    async with api() as c:
+        r = await web_login(c, email, password="wrong-password")
+        assert r.status_code == 200 and "이메일 또는 비밀번호가 맞지 않아요" in r.text
+
+
+# ── 초대 미리보기 ─────────────────────────────────────────
+
+
+async def test_invite_preview_shows_code_and_app_steps(api, session_factory):
+    code, _ = await make_room(api, session_factory)
+    async with api() as friend:
+        r = await friend.get(f"/r/{code}", headers=HTML)
+        assert r.status_code == 200
+        assert "같이 읽어요" in r.text and "봄봄" in r.text and "서연" in r.text
+        assert f'<div class="code" id="invite-code">{code}</div>' in r.text
+        assert "초대 코드로 들어가기" in r.text and "코드 복사하기" in r.text
+        # 사라진 웹 방 화면이나 웹 참여 폼으로 보내지 않는다
+        assert "/rooms/" not in r.text and f"/r/{code}/join" not in r.text
+        # 가입하면 같은 미리보기로 돌아온다
+        assert f"/signup?next=/r/{code}" in r.text
+        assert await web_signup(friend, "준호", f"/r/{code}") == f"/r/{code}"
+        r = await friend.get(f"/r/{code}", headers=HTML)
+        assert "로그인됨 · 준호" in r.text and code in r.text
+        assert (await friend.post(f"/r/{code}/join", data={"csrf_token": csrf_of(r.text)})).status_code in (
+            404,
+            405,
         )
-        assert r.status_code == 303 and r.headers["location"] == f"/books/{book}"
-        page = await c.get(f"/books/{book}", headers=HTML)
-        assert "직접 입력할 수 없어요" in page.text
 
 
-async def test_not_found_page(api):
+async def test_invite_preview_for_member_and_expired(api, session_factory):
+    code, room_id = await make_room(api, session_factory)
+    async with api() as friend:
+        await signup(friend, "준호")
+        assert (await friend.post(f"/api/v1/invites/{code}/join")).status_code == 200
+        r = await friend.get(f"/r/{code}", headers=HTML)
+        assert r.status_code == 200 and "이미 이 방에 들어와 있어요" in r.text
+    async with session_factory() as s:
+        await s.execute(
+            update(Room).where(Room.id == room_id).values(invite_expires_at=utcnow() - timedelta(days=1))
+        )
+        await s.commit()
     async with api() as c:
-        await web_signup(c, "길잃음")
-        r = await c.get("/books/999", headers=HTML)
-        assert r.status_code == 404 and "책을 찾을 수 없어요" in r.text
-        assert (await c.get("/r/nope0000", headers=HTML)).status_code == 404
+        r = await c.get(f"/r/{code}", headers=HTML)
+        assert r.status_code == 200 and "초대 링크가 만료됐어요" in r.text
+        assert 'id="invite-code"' not in r.text
+
+
+async def test_invite_preview_bad_code_is_404_page(api):
+    async with api() as c:
+        r = await c.get("/r/nope0000", headers=HTML)
+    assert r.status_code == 404
+    assert "초대 링크를 찾을 수 없어요" in r.text and "<html" in r.text
