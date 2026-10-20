@@ -1,5 +1,6 @@
 """친구 찾기 · 팔로우 · 응원 · 프로필 (docs/plans/2026-10-20-native-app-design.md '친구 · 피드')."""
 
+import pytest
 from sqlalchemy import select
 
 from app.models import Notification
@@ -72,6 +73,37 @@ async def test_cheer_once_a_day(api, session_factory):
     async with session_factory() as s:
         bodies = list(await s.scalars(select(Notification.body).where(Notification.kind == "cheer")))
     assert len(bodies) == 2 and "응원단님이 응원을 보냈어요" in bodies[0]
+
+
+async def test_double_tap_race_gives_409_not_500(session_factory, monkeypatch):
+    """두 요청이 동시에 '아직 안 했다'를 확인하고 들어온 상황 — 중복은 DB가 막고 409로 끝난다."""
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from app.models import Cheer, Follow, User
+    from app.services import friends
+    from app.services.friends import FriendError
+
+    async with session_factory() as s:
+        a, b = User(nickname="가"), User(nickname="나")
+        s.add_all([a, b])
+        await s.commit()
+        ids = a.id, b.id
+    async with session_factory() as s:
+        await friends.cheer(s, await s.get(User, ids[0]), ids[1])
+        await friends.follow(s, await s.get(User, ids[0]), ids[1])
+
+    real_get = AsyncSession.get
+
+    async def blind_get(self, model, key, *args, **kw):  # 앞선 확인이 경쟁에 져서 못 본 것처럼
+        return None if model in (Cheer, Follow) else await real_get(self, model, key, *args, **kw)
+
+    monkeypatch.setattr(AsyncSession, "get", blind_get)
+    async with session_factory() as s:
+        with pytest.raises(FriendError) as e:
+            await friends.cheer(s, await s.get(User, ids[0]), ids[1])
+        assert e.value.status == 409
+    async with session_factory() as s:
+        await friends.follow(s, await s.get(User, ids[0]), ids[1])  # 이미 팔로우 — 조용히 끝난다
 
 
 async def test_profile_shape_and_highlight_privacy(api, session_factory):

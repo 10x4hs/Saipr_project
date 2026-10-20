@@ -41,9 +41,13 @@ def no_network(req: httpx.Request) -> httpx.Response:
 
 @pytest.fixture(autouse=True)
 def _clean_broker():
+    from app.services import book_info
+
     broker.reset()
+    book_info._failed_at.clear()
     yield
     broker.reset()
+    book_info._failed_at.clear()
 
 
 @pytest.fixture

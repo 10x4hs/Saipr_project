@@ -50,16 +50,45 @@ async def _authenticate(ws: WebSocket, session: AsyncSession) -> User | None:
     token = ws.query_params.get("token")
     if token is not None:
         found = await token_service.lookup(session, token)
-        return found[1] if found else None
+        if not found:
+            return None
+        ws.state.token_id = found[0].id
+        return found[1]
     if not _same_origin(ws):
         return None
     return await _user(ws, session)
 
 
+def _revoked(ws: WebSocket, user_id: int):
+    """이 소켓을 연 토큰이 폐기됐는가 (로그아웃 · 다른 기기에서 정리)."""
+    token_id = getattr(ws.state, "token_id", None)
+
+    def check(e: Event) -> bool:
+        return (
+            token_id is not None
+            and e.type == token_service.REVOKED
+            and e.channel == user_channel(user_id)
+            and e.data.get("token_id") == token_id
+        )
+
+    return check
+
+
 async def _pump(
-    ws: WebSocket, channel: str, last_event_id: int | None, on_message=None, stop_on=None
+    ws: WebSocket,
+    channel: str,
+    last_event_id: int | None,
+    on_message=None,
+    stop_on=None,
+    revoked=None,
+    user_id: int | None = None,
 ) -> None:
     queue, replay = broker.subscribe(channel, last_event_id)
+    # 방 소켓은 토큰 폐기 소식을 듣기 위해 내 채널도 같이 본다
+    watch_channel = (
+        user_channel(user_id) if revoked and user_id and channel != user_channel(user_id) else None
+    )
+    watch = broker.subscribe(watch_channel)[0] if watch_channel else None
     try:
         for e in replay:
             await ws.send_json(e.as_json())
@@ -67,9 +96,18 @@ async def _pump(
         async def forward() -> None:
             while True:
                 e: Event = await queue.get()
+                if revoked is not None and revoked(e):
+                    await ws.close(code=status.WS_1008_POLICY_VIOLATION)
+                    return
                 await ws.send_json(e.as_json())
                 if stop_on is not None and stop_on(e):
                     await ws.close()
+                    return
+
+        async def watch_revoked() -> None:
+            while True:
+                if revoked(await watch.get()):
+                    await ws.close(code=status.WS_1008_POLICY_VIOLATION)
                     return
 
         async def receive() -> None:
@@ -79,6 +117,8 @@ async def _pump(
                     await on_message(msg)
 
         tasks = [asyncio.create_task(forward()), asyncio.create_task(receive())]
+        if watch is not None:
+            tasks.append(asyncio.create_task(watch_revoked()))
         done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
         for t in pending:
             t.cancel()
@@ -89,6 +129,8 @@ async def _pump(
         pass
     finally:
         broker.unsubscribe(channel, queue)
+        if watch is not None:
+            broker.unsubscribe(watch_channel, watch)
 
 
 @router.websocket("/ws/rooms/{room_id}")
@@ -126,7 +168,9 @@ async def room_socket(
         # 방을 나가면 연결할 때 확인한 멤버십이 끝난 것이므로 소켓도 닫는다
         return e.type == "member.left" and e.data.get("user_id") == user.id
 
-    await _pump(ws, room_channel(room_id), last_event_id, on_message, left_room)
+    await _pump(
+        ws, room_channel(room_id), last_event_id, on_message, left_room, _revoked(ws, user.id), user.id
+    )
 
 
 @router.websocket("/ws/me")
@@ -137,4 +181,4 @@ async def my_socket(ws: WebSocket, session: AsyncSession = Depends(get_session))
         await ws.close(code=status.WS_1008_POLICY_VIOLATION)
         return
     await ws.accept()
-    await _pump(ws, user_channel(user.id), None)
+    await _pump(ws, user_channel(user.id), None, revoked=_revoked(ws, user.id), user_id=user.id)

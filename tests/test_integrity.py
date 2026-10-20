@@ -82,6 +82,28 @@ async def test_events_backdated_before_last_sync_get_no_credit(session_factory):
     assert r.newly_verified == []
 
 
+async def test_long_offline_session_sent_in_several_batches_counts(session_factory):
+    """오프라인으로 오래 읽고 다시 연결되면 기록이 여러 배치로 나뉜다 — 뒤 배치도 진행률에 인정돼야 한다."""
+    uid, book = await reader(session_factory, 6, created=T0 - timedelta(days=1))
+    await record(session_factory, uid, book, [(0, 1_000, T0)], now=T0)
+    events = [(i, MIN_MS + 1, T0 + timedelta(minutes=2 * i)) for i in range(1, 6)]
+    back = T0 + timedelta(minutes=30)
+    first = await record(session_factory, uid, book, events[:3], now=back)
+    second = await record(session_factory, uid, book, events[3:], now=back + timedelta(seconds=1))
+    assert first.newly_verified == [1, 2, 3]
+    assert second.newly_verified == [4, 5]
+
+
+async def test_resending_a_batch_right_after_sync_gets_no_extra_credit(session_factory):
+    uid, book = await reader(session_factory, 3, created=T0 - timedelta(days=1))
+    await record(session_factory, uid, book, [(0, 1_000, T0)], now=T0)
+    batch = [(1, MIN_MS // 2, T0 + timedelta(minutes=5))]
+    now = T0 + timedelta(minutes=10)
+    await record(session_factory, uid, book, batch, now=now)
+    r = await record(session_factory, uid, book, batch, now=now + timedelta(seconds=1))
+    assert r.newly_verified == []  # 같은 이벤트를 두 번 보내도 반쪽 + 반쪽이 되지 않는다
+
+
 async def test_brand_new_account_cannot_claim_long_reading(api, session_factory):
     book = await make_book(session_factory, [CHUNK] * 3)
     async with api() as c:

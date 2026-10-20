@@ -89,8 +89,9 @@ async def follow(session: AsyncSession, me: User, target_id: int, now: datetime 
         return
     now = now or utcnow()
     session.add(Follow(follower_id=me.id, followee_id=target.id, created_at=now))
-    await notify(session, target.id, "follow", f"{me.nickname}님이 나를 팔로우했어요.", None, now)
     try:
+        await session.flush()  # 알림 조회의 autoflush보다 먼저 — 중복이면 여기서 잡는다
+        await notify(session, target.id, "follow", f"{me.nickname}님이 나를 팔로우했어요.", None, now)
         await session.commit()
     except IntegrityError:
         # 같은 사람이 동시에 두 번 눌렀다 — 이미 팔로우된 상태다
@@ -150,10 +151,11 @@ async def cheer(session: AsyncSession, me: User, target_id: int, now: datetime |
     if await session.get(Cheer, (me.id, target.id, day)):
         raise FriendError("오늘은 이미 응원했어요. 내일 또 응원해 주세요.", 409)
     session.add(Cheer(sender_id=me.id, receiver_id=target.id, day=day, created_at=now))
-    n = await notify(
-        session, target.id, "cheer", f"{me.nickname}님이 응원을 보냈어요. 오늘도 같이 읽어요!", None, now
-    )
     try:
+        await session.flush()  # 동시에 두 번 눌러도 409가 되도록 알림보다 먼저 확인
+        n = await notify(
+            session, target.id, "cheer", f"{me.nickname}님이 응원을 보냈어요. 오늘도 같이 읽어요!", None, now
+        )
         await session.commit()
     except IntegrityError as e:
         await session.rollback()

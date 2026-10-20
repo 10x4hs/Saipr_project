@@ -1,6 +1,7 @@
 import asyncio
 import contextlib
 import logging
+import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -38,6 +39,25 @@ if not _app_log.handlers:
     _handler.setFormatter(logging.Formatter("%(levelname)s:     %(name)s - %(message)s"))
     _app_log.addHandler(_handler)
     _app_log.setLevel(logging.INFO)
+
+
+class RedactTokens(logging.Filter):
+    """접속 로그에 남는 WebSocket 주소의 ?token=…을 가린다 (앱 토큰은 90일짜리 비밀번호와 같다)."""
+
+    PATTERN = re.compile(r"(token=)[^&\s\"']+")
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        if isinstance(record.args, tuple):
+            record.args = tuple(
+                self.PATTERN.sub(r"\1***", a) if isinstance(a, str) else a for a in record.args
+            )
+        if isinstance(record.msg, str):
+            record.msg = self.PATTERN.sub(r"\1***", record.msg)
+        return True
+
+
+for _name in ("uvicorn.access", "uvicorn.error"):
+    logging.getLogger(_name).addFilter(RedactTokens())
 
 
 def wants_html_page(request: Request) -> bool:

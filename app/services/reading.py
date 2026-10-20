@@ -31,6 +31,7 @@ MAX_BATCH = 200
 FUTURE_SKEW = timedelta(seconds=30)
 RACE_LATE_LIMIT = timedelta(minutes=10)
 BUDGET_SLACK = timedelta(seconds=30)
+SYNC_WINDOW = timedelta(minutes=2)
 SLOW_DOWN_WINDOW = timedelta(minutes=1)
 SLOW_DOWN_STREAK = 5
 
@@ -117,13 +118,17 @@ async def record_events(
     min_ms = {i: min_dwell_ms(t, book.language) for i, t in texts.items()}
     totals = await _dwell_totals(session, user.id, book.id, indices)
     already = await _verified_chunks(session, user.id, book.id)
-    prev_at, last_received = (
-        await session.execute(
-            select(func.max(ReadingEvent.occurred_at), func.max(ReadingEvent.received_at)).where(
-                ReadingEvent.user_id == user.id
-            )
+    prev_at = await session.scalar(
+        select(func.max(ReadingEvent.occurred_at)).where(ReadingEvent.user_id == user.id)
+    )
+    # 기준선은 '지난 동기화'. 방금(SYNC_WINDOW 안에) 받은 배치는 같은 동기화의 앞부분으로 본다 —
+    # 오프라인으로 오래 읽은 기록을 여러 배치·여러 책으로 나눠 보내도 뒤 배치가 0이 되지 않게.
+    # 겹쳐 받는 것은 막힌다: 각 이벤트는 직전 이벤트 시각(prev) 뒤의 간격만큼만 인정된다.
+    last_received = await session.scalar(
+        select(func.max(ReadingEvent.received_at)).where(
+            ReadingEvent.user_id == user.id, ReadingEvent.received_at < now - SYNC_WINDOW
         )
-    ).one()
+    )
     prev = aware(prev_at) if prev_at else None
     floor = aware(last_received) if last_received else aware(user.created_at or now)
     budget_ms = int((now - floor + BUDGET_SLACK).total_seconds() * 1000)

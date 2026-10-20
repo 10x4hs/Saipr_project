@@ -79,7 +79,7 @@ async def _summary(client: httpx.AsyncClient, title: str) -> dict | None:
 
 
 def _page_url(data: dict) -> str | None:
-    url = (data.get("content_urls") or {}).get("desktop", {}).get("page")
+    url = ((data.get("content_urls") or {}).get("desktop") or {}).get("page")
     return url if isinstance(url, str) and url.startswith("https://") else None
 
 
@@ -98,6 +98,13 @@ def needs_fetch(book: Book, now: datetime) -> bool:
     return empty and now - aware(book.info_fetched_at) >= RETRY_EMPTY_AFTER
 
 
+# 위키백과가 느리거나 막혀도 책 화면이 오래 기다리지 않게
+TOTAL_TIMEOUT = 6.0
+FAIL_BACKOFF = timedelta(minutes=10)
+_failed_at: dict[int, datetime] = {}
+_locks: dict[int, asyncio.Lock] = {}
+
+
 async def ensure_info(
     session: AsyncSession, client: httpx.AsyncClient, book: Book, now: datetime | None = None
 ) -> Book:
@@ -105,6 +112,17 @@ async def ensure_info(
     now = now or utcnow()
     if not needs_fetch(book, now):
         return book
+    failed = _failed_at.get(book.id)
+    if failed is not None and now - failed < FAIL_BACKOFF:
+        return book  # 방금 실패했다 — 화면을 기다리게 하지 않는다
+    lock = _locks.setdefault(book.id, asyncio.Lock())
+    if lock.locked():
+        return book  # 같은 책을 다른 요청이 받는 중
+    async with lock:
+        return await _fetch(session, client, book, now)
+
+
+async def _fetch(session: AsyncSession, client: httpx.AsyncClient, book: Book, now: datetime) -> Book:
     author = _first_author(book.author)
 
     def is_work(extract: str) -> bool:
@@ -114,24 +132,34 @@ async def ensure_info(
         return any(w in extract for w in WRITER_WORDS)
 
     try:
-        work, writer = await asyncio.gather(
-            _first_match(client, work_candidates(book), is_work),
-            _first_match(client, author_candidates(book), is_writer),
+        work, writer = await asyncio.wait_for(
+            asyncio.gather(
+                _first_match(client, work_candidates(book), is_work),
+                _first_match(client, author_candidates(book), is_writer),
+            ),
+            TOTAL_TIMEOUT,
+        )
+        description = work["extract"].strip()[:MAX_TEXT] if work is not None else None
+        bio = writer["extract"].strip()[:MAX_TEXT] if writer is not None else None
+        url = (_page_url(work) if work is not None else None) or (
+            _page_url(writer) if writer is not None else None
         )
     except (TimeoutError, httpx.HTTPError):
-        # 오프라인 · 시간 초과 — 캐시하지 않고 다음에 다시 시도한다
+        # 오프라인 · 시간 초과 — 저장하지 않고, 잠시 뒤에 다시 시도한다
+        _failed_at[book.id] = now
         return book
     except Exception:  # 응답 형식이 예상과 달라도 책 화면은 떠야 한다
         log.exception("wikipedia summary parse failed for book %s", book.id)
+        _failed_at[book.id] = now
         return book
 
-    if work is not None:
-        book.description = work["extract"].strip()[:MAX_TEXT]
-        book.wiki_url = _page_url(work)
-    if writer is not None:
-        book.author_bio = writer["extract"].strip()[:MAX_TEXT]
-        if book.wiki_url is None:
-            book.wiki_url = _page_url(writer)
+    _failed_at.pop(book.id, None)
+    if description is not None:
+        book.description = description
+    if bio is not None:
+        book.author_bio = bio
+    if url is not None and book.wiki_url is None:
+        book.wiki_url = url
     book.info_fetched_at = now
     await session.commit()
     return book

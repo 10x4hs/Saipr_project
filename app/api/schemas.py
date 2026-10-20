@@ -36,6 +36,8 @@ class BookCard(BaseModel):
     title: str
     author: str | None
     genre: str | None
+    source: str
+    external_id: str
     has_fulltext: bool
     total_chunks: int
     cover_url: str | None
@@ -93,6 +95,8 @@ def book_card(b: Book, readers: int) -> BookCard:
         title=b.title,
         author=b.author,
         genre=b.genre,
+        source=b.source,
+        external_id=b.external_id,
         has_fulltext=b.has_fulltext,
         total_chunks=b.total_chunks,
         cover_url=b.cover_url,

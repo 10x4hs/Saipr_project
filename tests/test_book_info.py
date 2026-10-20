@@ -7,6 +7,7 @@ import httpx
 from sqlalchemy import update
 
 from app import models
+from app.services import book_info
 from app.services.book_info import summary_url
 from app.services.catalog import COVER_COLORS, cover_color
 from tests.conftest import make_book, set_position, token_signup
@@ -102,6 +103,9 @@ async def test_info_offline_returns_nulls_and_retries_later(api, session_factory
         assert (await s.get(models.Book, book)).info_fetched_at is None  # 실패는 캐시하지 않는다
     async with api(wiki(PAGES)) as c:
         await token_signup(c, "온라인")
+        # 방금 실패했으면 잠시(10분)는 다시 묻지 않는다 — 책 화면이 매번 기다리지 않게
+        assert (await c.get(f"/api/v1/books/{book}/info")).json()["description"] is None
+        book_info._failed_at.clear()  # 10분이 지났다
         assert (await c.get(f"/api/v1/books/{book}/info")).json()["description"] is not None
 
 
@@ -141,6 +145,8 @@ async def test_list_books_sort_genre_and_readers(api, session_factory):
         assert [(x["id"], x["readers"]) for x in popular] == [(poem, 2), (novel, 1), (plain, 0)]
         assert set(popular[0]) == {
             "id",
+            "source",
+            "external_id",
             "title",
             "author",
             "genre",

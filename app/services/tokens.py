@@ -14,11 +14,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import aware, utcnow
 from app.models import ApiToken, User
+from app.realtime.broker import broker, user_channel
 
 TOKEN_TTL = timedelta(days=90)
 TOUCH_INTERVAL = timedelta(hours=1)
 # 원문 토큰 길이 상한. 터무니없이 긴 헤더로 해시 계산을 시키지 않는다
 MAX_TOKEN_LEN = 200
+REVOKED = "session.revoked"
 
 
 def hash_token(raw: str) -> str:
@@ -78,3 +80,5 @@ async def lookup(
 async def revoke(session: AsyncSession, token: ApiToken) -> None:
     await session.execute(delete(ApiToken).where(ApiToken.id == token.id))
     await session.commit()
+    # 이 토큰으로 열려 있던 WebSocket도 닫는다 (ws.py가 이 이벤트를 보고 1008로 끊는다)
+    broker.publish(user_channel(token.user_id), REVOKED, {"token_id": token.id})

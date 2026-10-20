@@ -236,3 +236,40 @@ def test_websocket_accepts_token_and_skips_origin_check(ws_db):
         for url in (f"/ws/rooms/{room['id']}?token=wrong", "/ws/me?token=wrong"):
             with pytest.raises(WebSocketDisconnect), c.websocket_connect(url) as ws:
                 ws.receive_json()
+
+
+def test_revoking_a_token_closes_its_open_sockets(ws_db):
+    """로그아웃하면 그 토큰으로 열린 소켓(내 채널 · 방)도 1008로 끊긴다. 다른 토큰의 소켓은 그대로다."""
+    with TestClient(app) as c, ThreadPoolExecutor(2) as pool:
+        token = _token(c, "폐기")
+        auth = {"Authorization": f"Bearer {token}"}
+        room = c.post("/api/v1/rooms", json={"book_id": ws_db, "name": "닫힐방"}, headers=auth).json()
+        with (
+            c.websocket_connect(f"/ws/me?token={token}") as me,
+            c.websocket_connect(f"/ws/rooms/{room['id']}?token={token}") as rs,
+        ):
+            rs.send_json({"type": "ping"})
+            assert pool.submit(rs.receive_json).result(timeout=3) == {"type": "pong"}
+            assert c.delete("/api/v1/auth/token", headers=auth).status_code == 204
+            for ws in (me, rs):
+                with pytest.raises(WebSocketDisconnect) as e:
+                    pool.submit(ws.receive_json).result(timeout=3)
+                assert e.value.code == 1008
+
+
+def test_access_logs_hide_tokens():
+    import logging
+
+    from app.main import RedactTokens
+
+    r = logging.LogRecord(
+        "uvicorn.error",
+        20,
+        "",
+        0,
+        '%s - "WebSocket %s" [accepted]',
+        ("1.2.3.4", "/ws/me?token=SECRET&x=1"),
+        None,
+    )
+    RedactTokens().filter(r)
+    assert "SECRET" not in r.getMessage() and "token=***&x=1" in r.getMessage()
