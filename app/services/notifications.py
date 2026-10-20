@@ -10,9 +10,10 @@ from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import KST, aware, kst_day_start, utcnow
-from app.db.session import defer_publish
+from app.db.session import defer_publish, defer_task
 from app.models import Notification
 from app.realtime.broker import user_channel
+from app.services import push
 
 DAILY_LIMIT = 5
 QUIET_START = time(22)
@@ -56,6 +57,13 @@ async def notify(
     )
     session.add(n)
     if n.deliver_after <= now:
+        # 앱을 닫아 둔 사람에게는 웹 푸시로 (구독한 브라우저가 있을 때만)
+        targets = await push.targets_of(session, user_id)
+        if targets:
+            # 세션이 자동 flush하므로 방금 만든 알림도 이미 세어진다
+            badge = await unread_count(session, user_id, now)
+            data = {"title": "함께읽기", "body": n.body, "url": link or "/", "badge": badge, "kind": kind}
+            defer_task(session, lambda: push.send(targets, data))
         defer_publish(
             session,
             user_channel(user_id),

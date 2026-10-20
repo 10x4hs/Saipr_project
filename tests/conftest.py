@@ -9,6 +9,7 @@ os.environ.setdefault("DATABASE_URL", f"sqlite+aiosqlite:///{_TMP}/app.db")
 os.environ["SCHEDULER_ENABLED"] = "false"
 os.environ["DB_DISABLE_POOL"] = "true"
 os.environ["SECRET_KEY"] = "test-secret"
+os.environ["VAPID_KEY_FILE"] = f"{_TMP}/vapid.pem"
 
 import httpx  # noqa: E402
 import pytest  # noqa: E402

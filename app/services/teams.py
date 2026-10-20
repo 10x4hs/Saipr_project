@@ -109,10 +109,12 @@ async def has_open_battle(session: AsyncSession, team_id: int) -> bool:
     """예정·진행 중이거나 아직 정산 전인 배틀이 있는가. 그동안은 팀원 구성을 고정한다."""
     return bool(
         await session.scalar(
-            select(Battle.id).where(
+            select(Battle.id)
+            .where(
                 (Battle.team_a_id == team_id) | (Battle.team_b_id == team_id),
                 Battle.status != BattleStatus.FINISHED,
-            ).limit(1)
+            )
+            .limit(1)
         )
     )
 

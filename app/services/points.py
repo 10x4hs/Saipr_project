@@ -165,6 +165,13 @@ async def _streak_days(session: AsyncSession, user_id: int, now: datetime) -> in
     return streak
 
 
+async def streak_days(session: AsyncSession, user_id: int, now: datetime | None = None) -> int:
+    """오늘(KST)까지 며칠 연속으로 한 청크 이상 읽었는가. 오늘 아직 안 읽었으면 어제까지로 센다."""
+    now = now or utcnow()
+    today = await _streak_days(session, user_id, now)
+    return today or await _streak_days(session, user_id, now - timedelta(days=1))
+
+
 async def _done_this_month(session: AsyncSession, user_id: int, now: datetime) -> int:
     d = kst_date(now)
     month_start = kst_day_start(now) - timedelta(days=d.day - 1)

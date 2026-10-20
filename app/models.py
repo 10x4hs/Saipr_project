@@ -160,8 +160,13 @@ class ReadingEvent(Base):
         # 한 청크는 사람마다 한 번만 verified.
         # 동시에 온 두 배치가 레이스 점수를 두 번 올리지 못하게 DB가 막는다
         Index(
-            "uq_reading_events_verified_once", "user_id", "book_id", "chunk_index", unique=True,
-            postgresql_where=text("verified"), sqlite_where=text("verified"),
+            "uq_reading_events_verified_once",
+            "user_id",
+            "book_id",
+            "chunk_index",
+            unique=True,
+            postgresql_where=text("verified"),
+            sqlite_where=text("verified"),
         ),
     )
 
@@ -290,8 +295,13 @@ class PointsLog(Base):
     __table_args__ = (
         # 같은 사유(완독·배틀 승리·챌린지 기간)로 두 번 적립되지 않도록 DB가 마지막으로 막는다
         Index(
-            "uq_points_log_ref", "user_id", "source", "ref_id", unique=True,
-            postgresql_where=text("ref_id IS NOT NULL"), sqlite_where=text("ref_id IS NOT NULL"),
+            "uq_points_log_ref",
+            "user_id",
+            "source",
+            "ref_id",
+            unique=True,
+            postgresql_where=text("ref_id IS NOT NULL"),
+            sqlite_where=text("ref_id IS NOT NULL"),
         ),
     )
 
@@ -317,4 +327,17 @@ class Notification(Base):
     # 방해 금지 시간(22~08시 KST)에 생긴 알림은 이 시각 이후에 보인다
     deliver_after: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = _now()
+
+
+class PushSubscription(Base):
+    """브라우저 웹 푸시 구독 (PRD NOTI-01). VAPID로 보내므로 Firebase 계정 없이 동작한다."""
+
+    __tablename__ = "push_subscriptions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    endpoint: Mapped[str] = mapped_column(String(1000), unique=True)
+    p256dh: Mapped[str] = mapped_column(String(200))
+    auth: Mapped[str] = mapped_column(String(100))
     created_at: Mapped[datetime] = _now()

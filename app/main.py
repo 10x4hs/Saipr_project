@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -13,7 +14,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
 from app import models  # noqa: F401  (메타데이터 등록)
-from app.api import auth, books, library, rooms, social, ws
+from app.api import auth, books, library, push, rooms, social, ws
 from app.core.config import get_settings
 from app.db.base import Base
 from app.db.session import SessionLocal, engine
@@ -27,6 +28,14 @@ from app.services.reading import ReadingError
 from app.services.rooms import RoomError
 from app.services.teams import TeamError
 from app.web import routes as web
+
+# 앱 로그(스케줄러 정산 · 웹 푸시 결과)를 uvicorn 로그와 같은 곳에 남긴다
+_app_log = logging.getLogger("app")
+if not _app_log.handlers:
+    _handler = logging.StreamHandler()
+    _handler.setFormatter(logging.Formatter("%(levelname)s:     %(name)s - %(message)s"))
+    _app_log.addHandler(_handler)
+    _app_log.setLevel(logging.INFO)
 
 
 def wants_html_page(request: Request) -> bool:
@@ -82,6 +91,7 @@ def create_app() -> FastAPI:
         books.router,
         library.router,
         rooms.router,
+        push.router,
         social.router,
         ws.router,
         web.router,

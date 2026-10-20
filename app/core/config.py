@@ -38,6 +38,13 @@ class Settings(BaseSettings):
     google_client_secret: str | None = None
     naver_login_enabled: bool = False
 
+    # 웹 푸시(VAPID). 키를 비워 두면 처음 실행할 때 vapid_key_file에 만들어 저장한다 (커밋 금지).
+    vapid_private_key: str | None = None
+    vapid_key_file: str = "./.vapid_private.pem"
+    # 푸시 서비스가 연락처로 보는 값. py_vapid는 mailto:만 받고,
+    # 애플은 localhost 메일을 거부하므로 실제 도메인을 쓴다.
+    vapid_subject: str = "mailto:saipr-demo@users.noreply.github.com"
+
     # 배틀 정산·주간 리셋 같은 주기 작업 (services/scheduler.py). 테스트에서는 끈다.
     scheduler_enabled: bool = True
     scheduler_interval_seconds: int = 60

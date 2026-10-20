@@ -16,6 +16,7 @@ dependencies = [
     "jinja2>=3.1",
     "itsdangerous>=2.2",
     "python-multipart>=0.0.9",
+    "pywebpush>=2.0",
 ]
 
 [project.optional-dependencies]
@@ -49,6 +50,7 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E501"]
+"tools/*" = ["E501"]  # 브라우저에서 실행할 JS 문자열
 
 [tool.ruff.lint.flake8-bugbear]
 # FastAPI 의존성 주입 관용구

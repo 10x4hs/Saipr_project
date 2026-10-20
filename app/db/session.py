@@ -1,4 +1,5 @@
-from collections.abc import AsyncIterator
+import asyncio
+from collections.abc import AsyncIterator, Awaitable, Callable
 from typing import Any
 
 from sqlalchemy import event
@@ -42,12 +43,37 @@ def defer_publish(session: AsyncSession, channel: str, type: str, data: dict[str
     sync.info.setdefault(_OUTBOX, []).append((channel, type, data))
 
 
+_TASKS = "after_commit_tasks"
+_background: set[asyncio.Task] = set()
+
+
+def defer_task(session: AsyncSession, factory: Callable[[], Awaitable[Any]]) -> None:
+    """커밋이 성공하면 백그라운드로 돌릴 작업(웹 푸시 전송 등). 롤백되면 버린다."""
+    sync = session.sync_session
+    if not sync.in_transaction():
+        sync.begin()
+    sync.info.setdefault(_TASKS, []).append(factory)
+
+
 @event.listens_for(Session, "after_commit")
 def _flush_outbox(session: Session) -> None:
     for channel, type, data in session.info.pop(_OUTBOX, []):
         broker.publish(channel, type, data)
+    factories = session.info.pop(_TASKS, [])
+    if not factories:
+        return
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        return
+    for factory in factories:
+        task = loop.create_task(factory())
+        # 참조를 들고 있어야 끝나기 전에 가비지 컬렉션되지 않는다
+        _background.add(task)
+        task.add_done_callback(_background.discard)
 
 
 @event.listens_for(Session, "after_rollback")
 def _drop_outbox(session: Session) -> None:
     session.info.pop(_OUTBOX, None)
+    session.info.pop(_TASKS, None)
