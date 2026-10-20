@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="csrf-token" content="{{ csrf }}">
+  <meta name="theme-color" content="#6f767f">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="같은 책을 각자의 속도로 — 친구의 진행률과 문단 반응이 실시간으로 겹쳐 보이는 소셜 독서">
+  <link rel="icon" href="/static/icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+  <title>{% block title %}함께읽기{% endblock %} · 함께읽기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/glass.css">
+</head>
+<body>
+{# 웹에는 하단 탭이 없다 — 나머지 화면은 모두 앱에 있다 #}
+<div class="screen no-tabs">
+  {{ BACKDROP_DAY }}
+  <div class="scroll">
+    <main class="content">
+      {% if flash %}<div class="glass flash {{ flash.kind }}" role="status">{{ flash.message }}</div>{% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}{{ status }}{% endblock %}
+{% block content %}
+<div class="col" style="gap:3px;margin-top:12px"><span class="cap muted">문제가 생겼어요 · {{ status }}</span><h1>길을 잃었어요</h1></div>
+<div class="glass card"><p class="quote">{{ detail }}</p><a class="solid btn" href="/" style="align-self:flex-start">홈으로</a></div>
+{% endblock %}

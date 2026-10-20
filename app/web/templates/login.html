@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}로그인{% endblock %}
+{% block content %}
+<div class="row" style="margin-top:12px">
+  <div class="col"><span class="muted" style="font-size:14px">{{ kst_today() }}</span><h1>오늘도<br>함께 읽어요</h1></div>
+  <div class="orb" aria-hidden="true"><div class="face"><i></i><i></i></div><div class="base"></div></div>
+</div>
+<form method="post" action="/login" class="glass frosted card form" style="margin-top:8px">
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <input type="hidden" name="next" value="{{ next }}">
+  <h2>로그인</h2>
+  {% if errors.form %}<p class="err" role="alert">{{ errors.form }}</p>{% endif %}
+  <label for="email">이메일</label>
+  <div class="glass pill field"><input id="email" name="email" type="email" autocomplete="email" required value="{{ form.email or '' }}" placeholder="you@example.com"></div>
+  <label for="password">비밀번호</label>
+  <div class="glass pill field"><input id="password" name="password" type="password" autocomplete="current-password" required placeholder="8자 이상"></div>
+  <button class="solid btn block" type="submit" style="margin-top:6px;background:var(--ink);color:#fff">로그인</button>
+  {% include "_social.html" %}
+</form>
+<p class="cap" style="text-align:center">처음이에요? <a class="link" href="/signup?next={{ next | urlencode }}">가입하기</a></p>
+{% endblock %}

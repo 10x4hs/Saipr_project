@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}가입{% endblock %}
+{% block content %}
+<div class="col" style="gap:4px;margin-top:12px">
+  <span class="muted" style="font-size:14px">같은 책을, 각자의 속도로</span>
+  <h1>함께읽기<br>시작하기</h1>
+</div>
+<form method="post" action="/signup" class="glass frosted card form" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <input type="hidden" name="next" value="{{ next }}">
+  <label for="nickname">닉네임</label>
+  <div class="glass pill field"><input id="nickname" name="nickname" required maxlength="40" value="{{ form.nickname or '' }}" autocomplete="nickname" placeholder="친구들에게 보일 이름"></div>
+  {% if errors.nickname %}<p class="err">{{ errors.nickname }}</p>{% endif %}
+  <label for="email">이메일</label>
+  <div class="glass pill field"><input id="email" name="email" type="email" required value="{{ form.email or '' }}" autocomplete="email" placeholder="you@example.com"></div>
+  {% if errors.email %}<p class="err">{{ errors.email }}</p>{% endif %}
+  <label for="password">비밀번호</label>
+  <div class="glass pill field"><input id="password" name="password" type="password" required minlength="8" autocomplete="new-password" placeholder="8자 이상"></div>
+  {% if errors.password %}<p class="err">{{ errors.password }}</p>{% endif %}
+  <label for="password_confirm">비밀번호 확인</label>
+  <div class="glass pill field"><input id="password_confirm" name="password_confirm" type="password" required autocomplete="new-password"></div>
+  {% if errors.password_confirm %}<p class="err">{{ errors.password_confirm }}</p>{% endif %}
+  <button class="solid btn block" type="submit" style="margin-top:6px;background:var(--ink);color:#fff">가입하고 시작하기</button>
+  {% include "_social.html" %}
+</form>
+<p class="cap" style="text-align:center">이미 계정이 있어요? <a class="link" href="/login?next={{ next | urlencode }}">로그인</a></p>
+{% endblock %}

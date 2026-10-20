@@ -9,9 +9,7 @@ from app.sources.base import BookSource, SourceError
 
 
 async def _find(session: AsyncSession, source: str, external_id: str) -> Book | None:
-    return await session.scalar(
-        select(Book).where(Book.source == source, Book.external_id == external_id)
-    )
+    return await session.scalar(select(Book).where(Book.source == source, Book.external_id == external_id))
 
 
 async def import_book(session: AsyncSession, source: BookSource, external_id: str) -> Book:
@@ -50,9 +48,7 @@ async def import_book(session: AsyncSession, source: BookSource, external_id: st
     return book
 
 
-async def get_chunk(
-    session: AsyncSession, book_id: int, chunk_index: int
-) -> tuple[Book, BookChunk] | None:
+async def get_chunk(session: AsyncSession, book_id: int, chunk_index: int) -> tuple[Book, BookChunk] | None:
     row = (
         await session.execute(
             select(Book, BookChunk)

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}같은 책을, 각자의 속도로{% endblock %}
+{% block content %}
+<div class="row" style="margin-top:12px">
+  <div class="col" style="gap:4px"><span class="muted" style="font-size:14px">같은 책을, 각자의 속도로</span><h1>함께읽기</h1></div>
+  <div class="orb" aria-hidden="true"><div class="face"><i></i><i></i></div><div class="base"></div></div>
+</div>
+<p class="quote">친구와 같은 책을 읽으며 서로의 진행률과 문단 반응을 실시간으로 나눠요.</p>
+<div class="glass card">
+  <h2>앱에서 열어 주세요</h2>
+  <p class="quote">읽기 · 읽기방 · 채팅 · 리그는 모두 안드로이드 앱(APK)에 있어요. 이 웹은 초대 링크 미리보기와 계정 만들기만 해요.</p>
+  <p class="cap muted">여기서 만든 계정으로 앱에 그대로 로그인할 수 있어요.</p>
+</div>
+{% if user %}
+<div class="glass frosted card">
+  <strong>로그인됨 · {{ user.nickname }}</strong>
+  <p class="cap">이제 앱을 열어 같은 이메일로 로그인하고 이어서 읽어 주세요.</p>
+  <form method="post" action="/logout"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="btn block pill" type="submit" style="border:1px solid rgb(29 29 31 / .15)">로그아웃</button></form>
+</div>
+{% else %}
+<a class="solid btn block" href="/login">로그인</a>
+<a class="btn block pill glass" href="/signup">회원가입</a>
+{% endif %}
+{% endblock %}
