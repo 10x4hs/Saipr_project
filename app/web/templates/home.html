@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}홈{% endblock %}
+{% block ticker %}
+{% if ticker %}
+<div class="ticker" aria-label="친구들의 진행률">
+  <div class="ticker-track">{% for _ in range(2) %}{% for t in ticker %}<span>● {{ t }}</span>{% endfor %}{% endfor %}</div>
+</div>
+{% endif %}
+{% endblock %}
+{% block content %}
+<h1 class="display">지금 읽는 중 <span class="count mono" style="font-size:.35em;vertical-align:middle">{{ '%02d' % reading|length }}</span></h1>
+
+<section class="section" style="border-top:0;padding-top:0">
+  {% if reading %}
+  <ul class="index">
+    {% for e, b in reading %}
+    <li><a class="row" href="{% if b.has_fulltext %}/books/{{ b.id }}/read{% else %}/books/{{ b.id }}{% endif %}">
+      <span class="no">{{ '%02d' % loop.index }}</span>
+      <span><span class="title">{{ b.title }}</span> <span class="muted">{{ b.author or '' }}</span>
+        <div class="bar mt" style="max-width:420px"><i style="width:{{ e.progress_pct }}%"></i></div></span>
+      <span class="meta">{{ e.progress_pct }}%<br>{{ '리더' if b.has_fulltext else '트래커' }}</span>
+    </a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">아직 읽는 책이 없어요. <a href="/search">책을 찾아볼까요?</a></p>
+  {% endif %}
+</section>
+
+<section class="section">
+  <div class="section-head"><h2 class="h2">내 읽기방 <span class="count mono">{{ rooms|length }}</span></h2></div>
+  {% if rooms %}
+  <div class="grid">
+    {% for room, book, ms in rooms %}
+    <a class="cell" href="/rooms/{{ room.id }}">
+      <p class="label">{{ '동시' if room.mode.value == 'sync' else '비동기' }} · 멤버 [{{ ms|length }}/8]</p>
+      <p class="h3">{{ room.name }}</p>
+      <p class="muted">{{ book.title }}</p>
+      {% for m in ms %}
+      <div class="hstack mono" style="font-size:12px;margin-top:6px"><span style="width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.nickname }}</span>
+        <div class="bar" style="flex:1"><i style="width:{{ m.progress_pct }}%"></i></div><span>{{ m.progress_pct }}%</span></div>
+      {% endfor %}
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">책 상세 화면에서 방을 만들거나, 친구에게 받은 초대 링크로 들어가 보세요.</p>
+  {% endif %}
+</section>
+
+<section class="section">
+  <div class="section-head"><h2 class="h2">이번 주 레이스 <span class="count mono">{{ battles|length }}</span></h2><a href="/teams" class="label">팀·리그 →</a></div>
+  {% if battles %}
+  <div class="grid">
+    {% for b, a, bb, book in battles %}
+    <a class="cell {% if a.average >= bb.average %}lime{% endif %}" href="/battles/{{ b.id }}">
+      <p class="label">{{ '페이지 레이스' if b.type.value == 'page_race' else '한줄평 배틀' }} · ~{{ b.ends_at | kst('%m.%d') }}</p>
+      <p class="h3">{{ book.title if book else '' }}</p>
+      <p class="mono">{{ a.name }} {{ a.average }} : {{ bb.average }} {{ bb.name }}</p>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">진행 중인 배틀이 없어요. 팀을 만들고 다른 팀에 도전해 보세요.</p>
+  {% endif %}
+</section>
+
+{% if others %}
+<section class="section">
+  <div class="section-head"><h2 class="h2">서재</h2><span class="label">포인트 {{ balance }}P</span></div>
+  <ul class="index">
+    {% for e, b in others %}
+    <li><a class="row" href="/books/{{ b.id }}"><span class="no">{{ SHELF_LABEL[e.shelf] }}</span>
+      <span class="title">{{ b.title }}</span><span class="meta">{{ e.progress_pct }}%</span></a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

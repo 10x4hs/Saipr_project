@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}배틀 #{{ battle.id }}{% endblock %}
+{% block content %}
+<p class="label mt">{{ '페이지 레이스' if battle.type.value == 'page_race' else '한줄평 배틀' }} · {{ status.value|upper }} · {{ battle.starts_at | kst }} ~ {{ battle.ends_at | kst }}</p>
+<h1 class="display">{{ book.title if book else '' }}</h1>
+
+<div class="split">
+  {% for side in (a, b) %}
+  <section class="{% if (winner and winner == side.team_id) or (not winner and status.value != 'finished' and side.average >= [a.average, b.average]|max and side.average > 0) %}cell lime{% endif %}">
+    <p class="label" style="color:#111">{{ side.name }}{% if winner == side.team_id %} · 🏆 승리{% endif %}</p>
+    <div class="big-num">{{ side.average }}</div>
+    <p class="mono">합계 {{ side.total }} · {{ side.members|length }}명</p>
+    <table class="table mt">{% for uid, nick, c in side.members|sort(attribute='2', reverse=True) %}<tr><td>{{ nick }}</td><td class="num">{{ c }}</td></tr>{% endfor %}</table>
+  </section>
+  {% endfor %}
+</div>
+{% if status.value == 'finished' and not winner %}<div class="flash">무승부로 끝났어요.</div>{% endif %}
+
+{% if battle.type.value == 'highlight_battle' %}
+<section class="section mt">
+  <div class="section-head"><h2 class="h2">밑줄 · 한줄평 <span class="count mono">{{ highlights|length }}</span></h2><span class="label">남은 투표 {{ votes_left }}/3</span></div>
+  {% if status.value == 'active' %}
+  <form method="post" action="/battles/{{ battle.id }}/highlights" class="stack"><input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <div class="inline">
+      <div style="flex:0 0 120px"><label for="hc">청크 번호</label><input id="hc" name="chunk_index" type="number" min="0" value="0"></div>
+      <div><label for="hq">밑줄 문장 (본문 그대로)</label><input id="hq" name="quote_text" required maxlength="500"></div>
+    </div>
+    <label for="hm">한줄평</label><input id="hm" name="comment" maxlength="280">
+    <button class="btn lime">올리기</button>
+  </form>
+  {% endif %}
+  <ul class="index mt">
+    {% for h in highlights %}
+    <li class="row" style="grid-template-columns:56px 1fr auto">
+      <span class="no" style="font:400 28px var(--display);color:var(--ink)">{{ h.votes }}</span>
+      <span><span style="font-family:var(--serif)">“{{ h.quote }}”</span><br><span class="muted">{{ h.comment or '' }}</span><br><span class="label">{{ h.nickname }} · CH{{ '%02d' % (h.chunk_index + 1) }}</span></span>
+      <span>{% if status.value == 'active' and h.user_id != user.id and not h.voted_by_me and votes_left > 0 %}
+        <form method="post" action="/battles/{{ battle.id }}/highlights/{{ h.id }}/vote"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="btn small pink">투표</button></form>
+        {% elif h.voted_by_me %}<span class="chip lime">투표함</span>{% endif %}</span>
+    </li>
+    {% else %}<li class="empty">아직 올라온 밑줄이 없어요.</li>{% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

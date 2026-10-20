@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }}{% endblock %}
+{% block content %}
+<p class="label mt">{{ book.source }} · {{ '전문 읽기' if book.has_fulltext else '트래커 모드 (본문 없음)' }}{% if book.has_fulltext %} · 청크 {{ book.total_chunks }}개{% endif %}</p>
+<h1 class="display">{{ book.title }}</h1>
+<p class="h3 muted">{{ book.author or '작자 미상' }}</p>
+
+<div class="split mt">
+  <div class="stack">
+    <p class="label">내 진행률</p>
+    <div class="big-num">{{ entry.progress_pct if entry else 0 }}<span style="font-size:.4em">%</span></div>
+    {% if book.has_fulltext %}
+      <a class="btn primary" href="/books/{{ book.id }}/read">{{ '이어 읽기' if entry and entry.verified_chunk >= 0 else '읽기 시작' }}</a>
+      {% if preview %}<p class="muted" style="font-family:var(--serif)">“{{ preview }}…”</p>{% endif %}
+    {% else %}
+      <form method="post" action="/library/{{ book.id }}/progress" class="stack">
+        <input type="hidden" name="csrf_token" value="{{ csrf }}">
+        <div class="inline">
+          <div><label for="pct">진행률 %</label><input id="pct" name="progress_pct" type="number" min="0" max="100" value="{{ entry.progress_pct if entry else 0 }}"></div>
+          <div><label for="cp">또는 현재 쪽</label><input id="cp" name="current_page" type="number" min="0"></div>
+          <div><label for="tp">전체 쪽</label><input id="tp" name="total_pages" type="number" min="1"></div>
+          <button class="btn primary">기록</button>
+        </div>
+        <p class="label">트래커 도서는 레이스 점수에서 빠져요 (검증할 수 없어서요).</p>
+      </form>
+    {% endif %}
+  </div>
+  <div class="stack">
+    <p class="label">서재</p>
+    <form method="post" action="/library/{{ book.id }}/shelf" class="hstack">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}">
+      {% for s, label in SHELF_LABEL.items() %}
+      <button class="btn small {% if entry and entry.shelf == s %}primary{% endif %}" name="shelf" value="{{ s.value }}">{{ label }}</button>
+      {% endfor %}
+    </form>
+    {% if entry and entry.progress_pct >= 100 and entry.shelf.value != 'done' %}
+      <div class="flash">다 읽었어요! ‘완독’으로 옮겨 주세요.{% if book.has_fulltext %} 앱에서 끝까지 읽은 책이라 +50P를 받아요.{% endif %}</div>
+    {% endif %}
+  </div>
+</div>
+
+<section class="section mt">
+  <div class="section-head"><h2 class="h2">이 책의 읽기방</h2></div>
+  {% if rooms %}
+  <ul class="index">{% for r in rooms %}<li><a class="row" href="/rooms/{{ r.id }}"><span class="no">{{ '%02d' % loop.index }}</span><span class="title">{{ r.name }}</span><span class="meta">{{ r.mode.value }}</span></a></li>{% endfor %}</ul>
+  {% endif %}
+  <form method="post" action="/rooms" class="mt">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="book_id" value="{{ book.id }}">
+    <div class="inline">
+      <div><label for="rn">새 방 이름</label><input id="rn" name="name" required maxlength="80" placeholder="{{ book.title }} 같이 읽기"></div>
+      <div><label for="mode">모드</label><select id="mode" name="mode"><option value="async">비동기 (각자 페이스)</option><option value="sync">동시 (지금 위치 공유)</option></select></div>
+      <div><label for="ends">목표 종료일</label><input id="ends" name="ends_on" type="date"></div>
+      <button class="btn lime">방 만들기</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

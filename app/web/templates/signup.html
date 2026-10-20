@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}가입{% endblock %}
+{% block content %}
+<h1 class="display">가입</h1>
+<div class="split">
+  <form method="post" action="/signup" class="stack" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <input type="hidden" name="next" value="{{ next }}">
+    <label for="nickname">닉네임</label>
+    <input id="nickname" name="nickname" required maxlength="40" value="{{ form.nickname or '' }}" autocomplete="nickname">
+    {% if errors.nickname %}<p class="field-error">{{ errors.nickname }}</p>{% endif %}
+    <label for="email">이메일</label>
+    <input id="email" name="email" type="email" required value="{{ form.email or '' }}" autocomplete="email">
+    {% if errors.email %}<p class="field-error">{{ errors.email }}</p>{% endif %}
+    <label for="password">비밀번호 (8자 이상)</label>
+    <input id="password" name="password" type="password" required minlength="8" autocomplete="new-password">
+    {% if errors.password %}<p class="field-error">{{ errors.password }}</p>{% endif %}
+    <label for="password_confirm">비밀번호 확인</label>
+    <input id="password_confirm" name="password_confirm" type="password" required autocomplete="new-password">
+    {% if errors.password_confirm %}<p class="field-error">{{ errors.password_confirm }}</p>{% endif %}
+    <button class="btn primary mt" type="submit" style="width:100%">가입하고 시작하기</button>
+    {% include "_auth_buttons.html" %}
+  </form>
+  <div>
+    <p class="label">[02] 약속</p>
+    <ul class="index">
+      <li class="row"><span class="no">01</span><span>퍼블릭 도메인 본문만 앱 안에서 읽어요.</span><span></span></li>
+      <li class="row"><span class="no">02</span><span>내가 아직 안 읽은 곳의 반응은 숨겨요(스포일러 가드).</span><span></span></li>
+      <li class="row"><span class="no">03</span><span>넘기기만 한 구간은 레이스 점수에 들어가지 않아요.</span><span></span></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ room.name }}{% endblock %}
+{% block content %}
+<div id="room-root" data-room="{{ room.id }}" data-total="{{ book.total_chunks }}" data-me="{{ user.id }}" data-fulltext="{{ 'y' if book.has_fulltext else '' }}">
+<p class="label mt">{{ '동시 모드' if room.mode.value == 'sync' else '비동기 모드' }} · 멤버 [{{ members|length }}/8]{% if room.ends_at %} · 목표 ~{{ room.ends_at | kst('%m.%d') }}{% endif %}</p>
+<h1 class="display">{{ room.name }}</h1>
+<p class="h3"><a href="/books/{{ book.id }}">{{ book.title }}</a> <span class="muted">{{ book.author or '' }}</span></p>
+
+<div class="hstack mt">
+  {% if book.has_fulltext %}<a class="btn primary" href="/books/{{ book.id }}/read?room={{ room.id }}">함께 읽기 →</a>
+  {% else %}<a class="btn primary" href="/books/{{ book.id }}">진행률 기록 →</a>{% endif %}
+</div>
+
+<section class="section mt">
+  <div class="section-head"><h2 class="h2">위치</h2><span class="label" id="live">● LIVE</span></div>
+  <div class="ruler" id="ruler">
+    {% for m in members %}
+    <div class="marker {% if m.user_id == user.id %}me{% endif %}" data-uid="{{ m.user_id }}" style="left:{{ [m.progress_pct, 2]|max if m.progress_pct < 98 else 98 }}%">
+      <b>{{ m.nickname[:1] }}</b><small>{{ m.nickname }} <span data-pct>{{ m.progress_pct }}</span>%</small>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="ruler-scale"><span>0</span><span>25</span><span>50</span><span>75</span><span>100%</span></div>
+</section>
+
+<div class="split mt">
+  <section>
+    <p class="label">[01] 방 안 레이스 — 검증된 청크</p>
+    <table class="table" id="race">
+      <tbody>
+      {% for m in race %}
+      <tr class="{% if loop.first and counts[m.user_id] > 0 %}first{% endif %}" data-uid="{{ m.user_id }}">
+        <td class="num" style="width:48px;font:400 28px var(--display)">{{ loop.index }}</td>
+        <td>{{ m.nickname }}{% if m.is_owner %} <span class="chip">방장</span>{% endif %}</td>
+        <td class="num" data-count>{{ counts[m.user_id] }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% if not book.has_fulltext %}<p class="label mt">트래커 도서라 레이스 점수는 없어요.</p>{% endif %}
+  </section>
+  <section>
+    <p class="label">[02] 활동 로그</p>
+    <ul class="rx-list mono" id="log" style="font-size:13px;margin:0">
+      {% for r in feed.visible|reverse %}{% if loop.index <= 8 %}
+      <li>{{ r.created_at | kst('%H:%M') }} · {{ r.nickname }} · {{ 'CH%02d ¶%d' % (r.chunk_index + 1, r.anchor + 1) if book.has_fulltext else '%d0%%대' % r.chunk_index }} · {{ r.body }}</li>
+      {% endif %}{% endfor %}
+      {% if feed.locked_total %}<li>🔒 앞에서 {{ feed.locked_total }}개의 반응이 기다리고 있어요</li>{% endif %}
+      {% if not feed.visible and not feed.locked_total %}<li class="muted">아직 조용해요.</li>{% endif %}
+    </ul>
+  </section>
+</div>
+
+<section class="section mt">
+  <p class="label">[03] 초대 링크 · 7일 동안 유효 (~{{ room.invite_expires_at | kst }})</p>
+  <div class="inline">
+    <input id="invite" readonly value="{{ invite_url }}" aria-label="초대 링크">
+    <button class="btn lime" type="button" id="copy">복사</button>
+  </div>
+  <div class="hstack mt">
+    {% if room.owner_id == user.id %}
+    <form method="post" action="/rooms/{{ room.id }}/invite"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="btn small">링크 다시 만들기</button></form>
+    {% endif %}
+    <form method="post" action="/rooms/{{ room.id }}/leave" onsubmit="return confirm('방에서 나갈까요?')"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="btn small">방 나가기</button></form>
+  </div>
+</section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/room.js" defer></script>{% endblock %}

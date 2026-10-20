@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}로그인{% endblock %}
+{% block content %}
+<h1 class="display">로그인</h1>
+<div class="split">
+  <form method="post" action="/login" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <input type="hidden" name="next" value="{{ next }}">
+    {% if errors.form %}<div class="flash error" role="alert">{{ errors.form }}</div>{% endif %}
+    <label for="email">이메일</label>
+    <input id="email" name="email" type="email" autocomplete="email" required value="{{ form.email or '' }}">
+    <label for="password">비밀번호</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+    <button class="btn primary mt" type="submit" style="width:100%">로그인</button>
+    {% include "_auth_buttons.html" %}
+  </form>
+  <div>
+    <p class="label">[01] 처음이세요?</p>
+    <p class="h3">같은 책을 각자의 속도로.<br>친구의 진행률과 문단 반응이 실시간으로 겹쳐 보여요.</p>
+    <a class="btn lime mt" href="/signup?next={{ next | urlencode }}">가입하기</a>
+  </div>
+</div>
+{% endblock %}

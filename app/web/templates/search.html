@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}검색{% endblock %}
+{% block content %}
+<form method="get" action="/search" role="search" class="mt">
+  <label for="q" class="sr-only">책 제목·저자</label>
+  <input id="q" name="q" class="search-xl" value="{{ q }}" placeholder="봄봄, 운수 좋은 날…" autofocus>
+  <p class="label mt">위키문헌·Gutendex = 앱에서 전문 읽기 · 카카오·네이버·Google = 메타데이터(트래커 모드)</p>
+</form>
+
+{% if local %}
+<section class="section">
+  <div class="section-head"><h2 class="h2">이미 있는 책 <span class="count mono">{{ local|length }}</span></h2></div>
+  <ul class="index">
+    {% for b in local %}
+    <li><a class="row" href="/books/{{ b.id }}"><span class="no">{{ '%02d' % loop.index }}</span>
+      <span class="title">{{ b.title }} <span class="muted">{{ b.author or '' }}</span></span>
+      <span class="meta">{{ '전문' if b.has_fulltext else '트래커' }}</span></a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if result %}
+<section class="section">
+  <div class="section-head"><h2 class="h2">검색 결과 <span class="count mono">{{ result.hits|length }}</span></h2>
+    {% if result.errors %}<span class="label">응답 없음: {{ result.errors.keys()|join(', ') }}</span>{% endif %}</div>
+  {% if result.hits %}
+  <div class="scroll-x"><table class="table">
+    <thead><tr><th>#</th><th>제목</th><th>저자</th><th>출처</th><th></th></tr></thead>
+    <tbody>
+    {% for h in result.hits %}{% set m = h.meta %}
+    <tr>
+      <td class="num">{{ '%02d' % loop.index }}</td>
+      <td><strong>{{ m.title }}</strong>{% if m.link %}<br><a href="{{ m.link }}" target="_blank" rel="noopener" class="label">원 출처 ↗</a>{% endif %}</td>
+      <td>{{ m.authors|join(', ') }}</td>
+      <td><span class="chip {% if m.has_fulltext %}lime{% endif %}">{{ m.source }}</span>{% for s in h.sources[1:] %} <span class="chip">{{ s }}</span>{% endfor %}</td>
+      <td>
+        {% if m.has_fulltext %}
+        <form method="post" action="/books/import"><input type="hidden" name="csrf_token" value="{{ csrf }}">
+          <input type="hidden" name="source" value="{{ m.source }}"><input type="hidden" name="external_id" value="{{ m.external_id }}">
+          <button class="btn lime small">전문 가져오기</button></form>
+        {% else %}
+        <form method="post" action="/books/track"><input type="hidden" name="csrf_token" value="{{ csrf }}">
+          <input type="hidden" name="source" value="{{ m.source }}"><input type="hidden" name="external_id" value="{{ m.external_id }}">
+          <input type="hidden" name="title" value="{{ m.title }}"><input type="hidden" name="authors" value="{{ m.authors|join(', ') }}">
+          <input type="hidden" name="isbn13" value="{{ m.isbn13 or '' }}"><input type="hidden" name="cover_url" value="{{ m.cover_url or '' }}">
+          <button class="btn small">트래커로 담기</button></form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+  <p class="empty">결과가 없어요. 다른 검색어로 찾아보세요.</p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

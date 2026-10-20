@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }}{% endblock %}
+{% block topbar %}{% endblock %}
+{% block main_class %}reader{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div id="reader-root"
+     data-book="{{ book.id }}" data-total="{{ book.total_chunks }}" data-start="{{ start }}"
+     data-verified="{{ entry.verified_chunk }}" data-room="{{ room.id if room else '' }}"
+     data-mode="{{ room.mode.value if room else '' }}" data-me="{{ user.id }}"
+     data-guard="{{ 'on' if user.spoiler_guard else 'off' }}">
+<header class="reader-top" id="reader-top">
+  <div class="wrap">
+    <a class="btn small" href="{{ '/rooms/%d' % room.id if room else '/books/%d' % book.id }}" aria-label="뒤로">←</a>
+    <span class="t">{{ book.title }}</span>
+    <span class="mono" id="pct" title="검증된 진행률">{{ entry.progress_pct }}%</span>
+    {% if rooms|length > 1 %}
+    <select id="room-pick" aria-label="함께 읽는 방" style="width:auto;min-height:36px;padding:4px 8px">
+      {% for r in rooms %}<option value="{{ r.id }}" {% if room and r.id == room.id %}selected{% endif %}>{{ r.name }}</option>{% endfor %}
+    </select>
+    {% endif %}
+    <button class="btn small" id="font-btn" aria-label="글자 크기">가</button>
+    <button class="btn small" id="theme-btn" aria-label="배경">◐</button>
+  </div>
+  <div class="reader-progress"><i id="pbar" style="width:{{ entry.progress_pct }}%"></i></div>
+</header>
+
+{% if members %}
+<div class="wrap mono" style="font-size:12px;padding-top:12px" id="who">
+  {{ room.name }} ·
+  {% for m in members %}<span class="chip {% if m.user_id == user.id %}lime{% endif %}" data-member="{{ m.user_id }}" data-nick="{{ m.nickname }}" data-chunk="{{ m.verified_chunk + 1 }}">{{ m.nickname }} <span data-pct>{{ m.progress_pct }}</span>%</span> {% endfor %}
+  · 스포일러 가드 {{ 'ON' if user.spoiler_guard else 'OFF' }}
+</div>
+{% endif %}
+
+<div class="page" id="page" aria-live="polite">
+  {% if start > 0 %}<p style="grid-column:1/-1;text-align:center"><button class="btn small" id="load-prev">↑ 앞 청크 불러오기</button></p>{% endif %}
+</div>
+<p style="text-align:center;padding-bottom:80px"><button class="btn" id="load-next" hidden>다음 청크 →</button></p>
+</div>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="문단 반응">
+  <div class="wrap">
+    <div class="hstack"><strong id="sheet-title">¶</strong><button class="btn small right" id="sheet-close">닫기</button></div>
+    <div class="emoji-row mt" id="emoji-row">
+      {% for e in EMOJIS %}<button type="button" data-emoji="{{ e }}" aria-label="{{ e }} 반응">{{ e }}</button>{% endfor %}
+    </div>
+    <form id="comment-form" class="mt">
+      <label for="comment">한줄평</label>
+      <div class="inline"><input id="comment" maxlength="280" placeholder="이 문단, 어땠어요?"><button class="btn primary">남기기</button></div>
+    </form>
+    <ul class="rx-list" id="sheet-list"></ul>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/reader.js" defer></script>{% endblock %}

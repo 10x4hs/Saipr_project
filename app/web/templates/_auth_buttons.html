@@ -1,0 +1,8 @@
+{% if providers %}
+<div class="stack mt">
+  <p class="label">또는 소셜 계정으로</p>
+  {% for name, p in providers.items() %}
+  <a class="btn {% if name == 'kakao' %}kakao{% endif %}" style="width:100%" href="/auth/{{ name }}/login?next={{ next | urlencode }}">{{ p.label }}로 계속하기</a>
+  {% endfor %}
+</div>
+{% endif %}

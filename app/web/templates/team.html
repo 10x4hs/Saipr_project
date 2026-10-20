@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ team.name }}{% endblock %}
+{% block content %}
+<div class="cell pink mt" style="border:1px solid var(--line)">
+  <p class="label" style="color:#111">TEAM · {{ members|length }}/6</p>
+  <h1 class="display" style="margin:8px 0">{{ team.name }}</h1>
+  {% if is_member %}<p class="mono">초대 코드 <strong>{{ team.invite_code }}</strong></p>{% endif %}
+</div>
+
+<div class="split mt">
+  <section>
+    <p class="label">[01] 팀원</p>
+    <ul class="index">{% for m in members %}<li class="row"><span class="no">{{ '%02d' % loop.index }}</span><span>{{ m.nickname }}</span><span></span></li>{% endfor %}</ul>
+    {% if is_member %}
+    <form method="post" action="/teams/{{ team.id }}/leave" class="mt" onsubmit="return confirm('팀에서 나갈까요?')"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="btn small">팀 나가기</button></form>
+    {% endif %}
+  </section>
+  <section>
+    <p class="label">[02] 이번 주 리그 순위</p>
+    <table class="table">
+      {% for s in league %}
+      <tr class="{% if s.team_id == team.id %}first{% endif %}"><td class="num" style="text-align:left;width:40px">{{ loop.index }}</td><td>{{ s.name }}</td><td class="num">{{ s.average }}</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+</div>
+
+{% if is_member %}
+<section class="section mt">
+  <div class="section-head"><h2 class="h2">배틀 신청</h2></div>
+  {% if rivals and books %}
+  <form method="post" action="/battles"><input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="team_a_id" value="{{ team.id }}">
+    <div class="inline">
+      <div><label for="bt">종류</label><select id="bt" name="type"><option value="page_race">페이지 레이스</option><option value="highlight_battle">한줄평 배틀</option></select></div>
+      <div><label for="bb">책</label><select id="bb" name="book_id">{% for b in books %}<option value="{{ b.id }}">{{ b.title }}{% if not b.has_fulltext %} (트래커){% endif %}</option>{% endfor %}</select></div>
+      <div><label for="br">상대 팀</label><select id="br" name="team_b_id">{% for r in rivals %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}</select></div>
+      <div><label for="bd">기간(일)</label><input id="bd" name="days" type="number" min="1" max="31" value="7"></div>
+      <button class="btn lime">도전!</button>
+    </div>
+    <p class="label mt">페이지 레이스는 앱 안에서 읽는 책만 가능해요. 점수 = 기간 안에 검증된 청크의 팀 평균.</p>
+  </form>
+  {% else %}<p class="empty">상대 팀과 서재에 담긴 책이 있어야 배틀을 신청할 수 있어요.</p>{% endif %}
+
+  {% if battles %}
+  <ul class="index mt">{% for b in battles %}<li><a class="row" href="/battles/{{ b.id }}"><span class="no">#{{ b.id }}</span><span class="title">{{ '페이지 레이스' if b.type.value == 'page_race' else '한줄평 배틀' }}</span><span class="meta">~{{ b.ends_at | kst('%m.%d') }}</span></a></li>{% endfor %}</ul>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}
