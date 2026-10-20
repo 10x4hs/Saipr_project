@@ -6,13 +6,13 @@ import json
 import httpx
 import pytest
 import websockets
+from test_core import FakePrefs  # 같은 tests 폴더 (pytest가 경로에 넣는다)
 
 from saipr.core.api import Api
 from saipr.core.reading import EventQueue
 from saipr.core.realtime import Channel
 from saipr.core.store import Store
 from saipr.core.sync import ReadingSync, SessionExpired
-from tests.test_core import FakePrefs
 
 
 def ev(i, at):
