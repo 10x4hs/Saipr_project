@@ -1,0 +1,26 @@
+# Render 블루프린트 — 저장소를 Render에 연결하면 웹 서비스 + Postgres를 한 번에 만든다.
+# (계정 연결이 필요해 이번 범위에서는 설정 파일만 준비했다. 실제 배포 절차는 README '배포' 참고)
+services:
+  - type: web
+    name: saipr
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: saipr-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: PUBLIC_BASE_URL
+        sync: false  # 배포 후 https://<서비스>.onrender.com 으로 설정
+      - key: SEED_DEMO
+        value: "false"  # 시연용 공개 데모라면 true (비밀번호 demo1234 계정 4개가 생긴다)
+
+databases:
+  - name: saipr-db
+    plan: free
+    databaseName: saipr
