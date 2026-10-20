@@ -83,6 +83,28 @@ Postgres로 돌리려면 `cp .env.example .env && docker compose up --build`를 
 
 처음 시안 HTML(A Glass · B Paper)은 [docs/mockups/archive/](docs/mockups/archive/)에 있어요.
 
+## 모션과 웹 기술
+
+조사 결과([docs/research/advanced-web-2026.md](docs/research/advanced-web-2026.md))를 바탕으로, 지원하는 브라우저에서는 켜지고 지원하지 않는 곳에서는 조용히 원래대로 동작하게 넣었어요(점진적 향상). 휴대폰의 '동작 줄이기' 설정을 켜면 움직임 대신 페이드만 남아요.
+
+| 무엇 | 어떻게 보이나 | 기술 |
+|---|---|---|
+| 앱처럼 넘어가는 화면 | 오른쪽 탭·상세로 가면 오른쪽에서 밀려 들어오고, 돌아가면 반대로. 탭의 흰 알약이 새 탭으로 미끄러지고, 책 제목·표지·방 이름이 다음 화면으로 이어져요 | 문서 간 View Transitions, `pageswap`/`pagereveal` |
+| 스프링 모션 | 카드·버튼을 누르면 살짝 눌렸다 튀어 오르고, 화면 내용이 차례로 떠올라요. 시트는 손잡이를 끌어내려 닫아요 | CSS `linear()` 스프링 곡선, `@starting-style`, 포인터 이벤트 |
+| 스크롤 반응 | 목록이 스크롤로 들어올 때 떠오르고, 리더 상단바에 지금 위치 선이 그려져요 | 스크롤 연동 애니메이션 (`animation-timeline`) |
+| Liquid Glass | 유리에 비친 빛이 마우스·휴대폰 기울기를 따라오고, Chrome에서는 탭 바가 뒤 배경을 굴절시켜요 | SVG `feDisplacementMap` + `backdrop-filter`, DeviceOrientation |
+| 바로 뜨는 화면 | 링크에 손을 올리면 다음 화면을 미리 그려 둬요 | Speculation Rules (Chromium) |
+| 앱 설치 · 오프라인 | 홈 화면에 설치하면 전체 화면 앱으로 열리고, 한 번 연 책은 인터넷이 끊겨도 다시 읽혀요. 읽은 기록은 모았다가 연결되면 보내요 | 웹 앱 매니페스트, 서비스 워커, `storage.persist()` |
+| 푸시 알림 | 앱을 닫아도 "준호님이 나를 앞질렀어요"가 와요. 앱 아이콘에 안 읽은 수 배지 | VAPID 웹 푸시(`pywebpush`, Firebase 계정 없음), Badging API |
+| 읽어 주기 | ▶︎를 누르면 한국어로 읽어 주고 읽는 문장에 형광펜이 따라가요 | Web Speech API |
+| 화면 꺼짐 방지 | 리더를 보는 동안 화면이 꺼지지 않아요 | Screen Wake Lock |
+| 정직한 시간 측정 | 같은 책을 창 두 개로 열어도 보고 있는 창 하나만 시간을 재요 | Web Locks |
+| 내 속도에 맞춘 남은 시간 | "이 쪽 약 2분 · 끝까지 약 17분" — 내가 실제로 읽는 속도를 배워서 계산 | 기기 저장소 + 지수 평균 |
+| 읽기 설정 | 글꼴(명조·바탕·고딕), 글자 크기 4단계, 줄·문단 간격, 아이보리·세피아·다크, 집중 모드 | CSS 변수 |
+| 축하 | 25·50·75·100%를 넘으면 색종이, 안드로이드는 진동 | Vibration API |
+
+**시연 팁:** 노트북 Chrome에서 가장 많은 기능이 켜져요. 리더의 `가`(읽기 설정) 맨 아래에 "이 기기에서 켜진 기능" 목록이 나와요. 푸시는 홈의 유리 구슬 → 내 정보 → 앱 · 알림에서 켜고 `테스트 알림 보내기`. 오프라인은 책을 한 번 연 뒤 서버를 끄거나 비행기 모드로 다시 열어 보세요. 휴대폰 설치·푸시는 HTTPS가 필요해서, 휴대폰 시연은 HTTPS 주소(예: 계정 없이 쓰는 `cloudflared tunnel --url http://localhost:8000`)로 열어야 해요.
+
 ## 기능
 
 | Phase | 기능 | 화면 · API |
@@ -92,14 +114,15 @@ Postgres로 돌리려면 `cp .env.example .env && docker compose up --build`를 
 | 3 | 읽기방(최대 8명, 비동기/동시 모드) · 8자리 초대 링크(7일, 재발급) · WebSocket 실시간 진행률·프레즌스 · 문단 반응 · 스포일러 가드 · 방장 위임 | `/rooms/{id}` `/r/{code}` |
 | 4 | 체류시간 검증 페이지 레이스 · 한줄평 배틀(1인 3표) · 포인트 원장 · 챌린지 4종. 배틀 중에는 팀원이 고정되고, 완독 포인트는 앱에서 끝까지 읽은 책만 | `/battles/{id}` `/me` |
 | 5 | 팀(최대 6명, 초대 코드) · 주간 리그(월 00:00 KST 기준, 10팀씩) | `/teams` |
-| 6 | 앱 내 알림함(추월·반응·배틀·입장) · 방해 금지 22~08시 · 하루 5건 · 배포 설정 | `/me` · `render.yaml` |
+| 6 | 앱 내 알림함 + **웹 푸시**(VAPID) · 앱 배지 · 방해 금지 22~08시 · 하루 5건 · **PWA 설치·오프라인** · 배포 설정 | `/me` · `/sw.js` · `render.yaml` |
 
 JSON API 전체는 서버 실행 후 <http://localhost:8000/docs> 에서 볼 수 있어요. 구조와 설계 결정은 [아키텍처](docs/architecture.md).
 
 ## 테스트
 
 ```bash
-pytest -q        # 100개 — 외부 네트워크 없이 실행 (httpx.MockTransport + SQLite)
+pytest -q        # 110개 — 외부 네트워크 없이 실행 (httpx.MockTransport + SQLite)
+python tools/browser_check.py   # 실제 브라우저(Chromium·WebKit)로 폰 화면 점검 — 서버를 켠 뒤, Playwright 필요
 ruff check .
 ```
 
@@ -112,6 +135,7 @@ GOAL의 검증 항목과 테스트의 대응:
 | 7 · 검증 위치 뒤 반응은 개수만 | `tests/test_rooms.py::test_spoiler_guard_hides_reactions_ahead` |
 | 8 · 화이트리스트 밖 소스는 전문 불가 | `tests/test_rooms.py::test_copyright_guard` |
 | 점수·포인트 우회 경로 (코드 리뷰) | `tests/test_integrity.py` |
+| PWA · 웹 푸시(VAPID 서명 · 커밋 후 전송 · 만료 구독 정리) | `tests/test_pwa_push.py` |
 
 CI(GitHub Actions)는 SQLite 테스트와 함께, 실제 Postgres에서 마이그레이션 왕복 · `alembic check` · 시드 · 실시간 E2E를 돌립니다.
 
@@ -127,6 +151,7 @@ CI(GitHub Actions)는 SQLite 테스트와 함께, 실제 Postgres에서 마이�
 | `PUBLIC_BASE_URL` | 초대 링크·OAuth 콜백 주소 |
 | `KAKAO_REST_API_KEY` · `NAVER_CLIENT_ID/SECRET` · `GOOGLE_BOOKS_API_KEY` | 도서 검색 소스 |
 | `KAKAO_LOGIN_ENABLED` · `GOOGLE_CLIENT_ID/SECRET` · `NAVER_LOGIN_ENABLED` | 소셜 로그인 버튼 켜기. 콜백: `{PUBLIC_BASE_URL}/auth/{provider}/callback` |
+| `VAPID_PRIVATE_KEY` · `VAPID_SUBJECT` | 웹 푸시 서명 키(비우면 처음 실행 때 `.vapid_private.pem`을 만들어요)와 연락처(`mailto:`) |
 | `SEED_DEMO` | Docker 시작 시 데모 데이터 넣기 (Dockerfile 기본 `true`, `render.yaml`은 `false` — 공개 시연용이면 켜기) |
 
 ## 배포
@@ -145,6 +170,6 @@ CI(GitHub Actions)는 SQLite 테스트와 함께, 실제 Postgres에서 마이�
 
 ## 범위 밖 (다음 단계)
 
-FCM 푸시 · 실제 배포 · 카카오톡 공유 SDK · Redis 다중 인스턴스 · 위키문헌 목차 문서 병합(PRD EXC-07) · 탈퇴·개인정보 파기 흐름. 근거는 [GOAL.md](GOAL.md)와 [결정 로그](.grill/phase2-6-python-build.md)에 있어요.
+실제 배포 · 카카오톡 공유 SDK · Redis 다중 인스턴스 · 위키문헌 목차 문서 병합(PRD EXC-07) · 탈퇴·개인정보 파기 흐름. 근거는 [GOAL.md](GOAL.md)와 [결정 로그](.grill/phase2-6-python-build.md)에 있어요.
 
 > Phase 1까지 함께 있던 Spring Boot 인증 서버(PR #1)는 같은 기능(이메일 가입·로그인, 비밀번호 해시, 세션 교체, CSRF, 중복 이메일 차단)을 FastAPI로 옮기고 삭제했어요. 원래 코드는 git 기록(`dc3a321`)에 남아 있습니다.

@@ -3,10 +3,12 @@
   "use strict";
   const csrf = document.querySelector('meta[name="csrf-token"]')?.content || "";
 
-  async function api(method, url, body) {
+  async function api(method, url, body, opts = {}) {
     const res = await fetch(url, {
       method,
       credentials: "same-origin",
+      // keepalive: 화면을 떠나는 순간 보낸 요청(읽은 기록)도 끝까지 전달되게
+      keepalive: !!opts.keepalive,
       headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf },
       body: body === undefined ? undefined : JSON.stringify(body),
     });

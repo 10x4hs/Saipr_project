@@ -3,6 +3,7 @@
 화면 구성은 PRD 9장 정보 구조를 따른다: 홈 · 검색/상세 · 리더 · 읽기방 · 배틀 · 리더보드(팀) · 내 정보.
 """
 
+import json
 import secrets
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -146,6 +147,71 @@ async def need_user(request: Request, user: User | None = Depends(optional_user)
 def login_redirect(request: Request) -> RedirectResponse:
     nxt = request.url.path + (f"?{request.url.query}" if request.url.query else "")
     return redirect(f"/login?next={quote(nxt)}")
+
+
+# ── PWA: 서비스 워커 · 매니페스트 · 오프라인 화면 ──────────────────
+
+STATIC = Path(__file__).parent / "static"
+
+MANIFEST = {
+    "name": "함께읽기",
+    "short_name": "함께읽기",
+    "description": "같은 책을 각자의 속도로 — 친구의 진행률과 반응이 겹쳐 보이는 소셜 독서",
+    "lang": "ko",
+    "start_url": "/?source=pwa",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#9ea3a9",
+    "theme_color": "#6f767f",
+    "icons": [
+        {"src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+        {"src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+        {
+            "src": "/static/icons/maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable",
+        },
+    ],
+    "shortcuts": [
+        {
+            "name": "이어 읽기",
+            "url": "/?source=shortcut",
+            "icons": [{"src": "/static/icons/icon-192.png", "sizes": "192x192"}],
+        },
+        {
+            "name": "읽기방",
+            "url": "/rooms",
+            "icons": [{"src": "/static/icons/icon-192.png", "sizes": "192x192"}],
+        },
+        {
+            "name": "이번 주 리그",
+            "url": "/teams",
+            "icons": [{"src": "/static/icons/icon-192.png", "sizes": "192x192"}],
+        },
+    ],
+}
+
+
+@router.get("/sw.js")
+async def service_worker() -> Response:
+    # 사이트 루트에서 제공해야 모든 화면을 맡을 수 있다. 새 버전을 바로 받도록 캐시하지 않는다.
+    return Response(
+        (STATIC / "sw.js").read_text(encoding="utf-8"),
+        media_type="text/javascript",
+        headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"},
+    )
+
+
+@router.get("/manifest.webmanifest")
+async def manifest() -> Response:
+    return Response(json.dumps(MANIFEST, ensure_ascii=False), media_type="application/manifest+json")
+
+
+@router.get("/offline")
+async def offline_page(request: Request, session: AsyncSession = Depends(get_session)):
+    return await render(request, "offline.html", None, session)
 
 
 # ── 인증 ──────────────────────────────────────────────────
@@ -323,6 +389,7 @@ async def home(
         user,
         session,
         current=current,
+        streak=await point_service.streak_days(session, user.id),
         rooms=await room_cards(session, user.id, 3),
         races=races[:2],
         tab="home",

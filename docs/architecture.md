@@ -33,10 +33,15 @@ app/
     battles.py         페이지 레이스 · 한줄평 배틀 · 정산 · 종료 알림(tick)
     teams.py           팀 · 주간 리그
     points.py          포인트 원장 · 챌린지
-    notifications.py   알림함 · 방해 금지 · 일 5건
+    notifications.py   알림함 · 방해 금지 · 일 5건 → 커밋 후 웹 푸시
+    push.py            VAPID 키 · 구독 · pywebpush 전송(스레드) · 만료 구독 정리
     scheduler.py       60초마다 battles.tick
   api/                 /api/v1/* JSON API + /ws/* WebSocket
-  web/                 HTML 화면 (routes.py · templates/ · static/)
+  web/                 HTML 화면 (routes.py · view.py · templates/ · static/)
+    static/sw.js       서비스 워커: 앱 셸 · 읽은 쪽 오프라인 · 푸시 표시 · 배지
+    static/css/        glass.css(시안 재현) · motion.css(전환·스프링·Liquid Glass)
+    static/js/         common · motion · liquid · pwa · reader · room · me
+tools/                 make_icons.py(앱 아이콘을 순수 Python으로 그림) · browser_check.py(Chromium·WebKit 점검)
 migrations/            Alembic (Postgres용). SQLite는 시작할 때 create_all
 ```
 
@@ -56,6 +61,8 @@ migrations/            Alembic (Postgres용). SQLite는 시작할 때 create_all
 | **인메모리 브로커** (Redis 대신) | 단일 인스턴스 MVP. 같은 인터페이스로 Redis Pub/Sub 구현을 끼울 수 있다 |
 | **리셋 없는 기간 집계** — 챌린지·리그는 기간 시작 시각으로 계산, 지급은 `ref_id`(기간 키)로 중복 방지 | 스케줄러가 멈춰도 결과가 틀리지 않는다 |
 | **포인트는 append-only 원장** | 감사 추적, 잔액 = SUM |
+| **웹 푸시도 커밋 후에만** (`defer_task`) | 롤백된 알림이 폰에 뜨지 않게. 전송은 백그라운드 스레드라 요청을 늦추지 않는다 |
+| **VAPID 키를 서버가 직접 만든다** | Firebase·Apple 계정 없이 Chrome·Firefox·iOS(홈 화면 앱) 푸시 서비스에 보낼 수 있다 |
 | **세션 쿠키 + CSRF 토큰** | HttpOnly·SameSite=Lax 쿠키, 상태를 바꾸는 요청은 헤더/폼 토큰 확인, 로그인 시 세션 교체 |
 | **소셜 계정을 같은 이메일 계정에 자동 연결하지 않음** | 제공자가 이메일 소유를 확인하지 않았으면 계정 탈취가 가능하다 |
 | **테스트는 네트워크 0** | 외부 API는 `httpx.MockTransport`, DB는 SQLite. 실시간 E2E는 CI에서 Postgres로도 돈다 |
@@ -74,6 +81,8 @@ migrations/            Alembic (Postgres용). SQLite는 시작할 때 create_all
 | 팀 · 리그 | `POST /api/v1/teams` · `GET /teams` · `POST /teams/join/{code}` · `POST /teams/{id}/leave` · `GET /leagues/{team}` |
 | 배틀 (두 팀 팀원만) | `POST /api/v1/battles` · `GET /battles` · `GET /battles/{id}` · `GET·POST /battles/{id}/highlights` · `POST /battles/{id}/highlights/{h}/vote` |
 | 포인트 · 알림 | `GET /api/v1/points` · `GET /notifications` · `POST /notifications/read` |
+| 웹 푸시 | `GET /api/v1/push/key` · `POST /push/subscribe` · `POST /push/unsubscribe` · `POST /push/test` |
+| PWA | `GET /sw.js` · `GET /manifest.webmanifest` · `GET /offline` |
 | 실시간 | `WS /ws/rooms/{id}?last_event_id=` (`progress.updated` `reaction.created` `member.joined` `presence.changed`) · `WS /ws/me` (`notification.created`) |
 
 ## 규칙 요약 (숫자)

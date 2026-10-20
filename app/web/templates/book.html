@@ -3,10 +3,10 @@
 {% block content %}
 <a class="cap muted" href="/search">‹ 검색</a>
 <div class="row start" style="gap:18px;align-items:flex-end">
-  <div class="cover lg" style="background-color:{{ book.id | cover }}">{{ book.title[:8] }}</div>
+  <div class="cover lg" style="background-color:{{ book.id | cover }};view-transition-name:cover-{{ book.id }}">{{ book.title[:8] }}</div>
   <div class="col" style="gap:4px;min-width:0">
     <span class="cap muted">{{ book.author or '작자 미상' }} · {{ '위키문헌' if book.source == 'wikisource' else book.source }}</span>
-    <h1 style="font-size:28px">{{ book.title }}</h1>
+    <h1 style="font-size:28px;view-transition-name:title-{{ book.id }}">{{ book.title }}</h1>
     <span class="badge {{ 'solid' if book.has_fulltext else 'glass thin' }}">{{ '전문 읽기 가능' if book.has_fulltext else '진행률 기록' }}</span>
   </div>
 </div>

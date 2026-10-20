@@ -2,18 +2,18 @@
 {% block title %}홈{% endblock %}
 {% block content %}
 <div class="row">
-  <div class="col"><span class="muted" style="font-size:14px">{{ kst_today() }}</span><h1>오늘도<br>함께 읽어요</h1></div>
+  <div class="col"><span class="muted" style="font-size:14px">{{ kst_today() }}{% if streak %} · 🔥 {{ streak }}일 연속{% endif %}</span><h1>오늘도<br>함께 읽어요</h1></div>
   <a class="orb" href="/me" aria-label="내 정보{% if unread %} · 새 알림 {{ unread }}개{% endif %}"><div class="face"><i></i><i></i></div><div class="base"></div>{% if unread %}<span class="dot"></span>{% endif %}</a>
 </div>
 
 {% if current %}{% set e, b = current %}
 <div class="glass card" style="padding:22px">
   <span class="cap muted">{{ '이어 읽기' if e.progress_pct else '읽기 시작' }}</span>
-  <strong style="font-size:30px;letter-spacing:-.8px">{{ b.title }}</strong>
+  <strong style="font-size:30px;letter-spacing:-.8px;view-transition-name:title-{{ b.id }}">{{ b.title }}</strong>
   <span class="cap muted">{{ b.author or '작자 미상' }} · {{ '위키문헌' if b.source == 'wikisource' else b.source }} · {{ '전문 읽기' if b.has_fulltext else '진행률 기록' }}</span>
   <div class="bar"><b style="width:{{ e.progress_pct }}%"></b></div>
   <div class="row">
-    <span class="cap">{{ e.progress_pct }}%{% if b.has_fulltext %} · 청크 {{ e.verified_chunk + 1 }} / {{ b.total_chunks }}{% endif %}</span>
+    <span class="cap"><span data-count-up="{{ e.progress_pct }}">{{ e.progress_pct }}</span>%{% if b.has_fulltext %} · 청크 {{ e.verified_chunk + 1 }} / {{ b.total_chunks }}{% endif %}</span>
     <a class="solid btn" href="{{ '/books/%d/read' % b.id if b.has_fulltext else '/books/%d' % b.id }}">{{ '이어 읽기' if e.progress_pct else '읽기 시작' }}</a>
   </div>
 </div>

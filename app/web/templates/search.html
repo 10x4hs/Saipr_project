@@ -2,8 +2,8 @@
 {% block title %}검색{% endblock %}
 {% macro row_book(b, label) %}
 <a class="result" href="/books/{{ b.id }}">
-  <div class="cover" style="background-color:{{ b.id | cover }}">{{ b.title[:6] }}</div>
-  <div class="col" style="gap:5px;flex:1;min-width:0"><strong>{{ b.title }}</strong><span class="cap muted tiny">{{ b.author or '작자 미상' }}{% if label %} · {{ label }}{% endif %}</span>
+  <div class="cover" style="background-color:{{ b.id | cover }};view-transition-name:cover-{{ b.id }}">{{ b.title[:6] }}</div>
+  <div class="col" style="gap:5px;flex:1;min-width:0"><strong style="view-transition-name:title-{{ b.id }}">{{ b.title }}</strong><span class="cap muted tiny">{{ b.author or '작자 미상' }}{% if label %} · {{ label }}{% endif %}</span>
     <span class="badge {{ 'solid' if b.has_fulltext else 'glass thin' }}">{{ '전문 읽기 가능' if b.has_fulltext else '진행률 기록' }}</span></div>
 </a>
 {% endmacro %}

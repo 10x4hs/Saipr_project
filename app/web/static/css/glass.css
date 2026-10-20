@@ -204,19 +204,24 @@ select.plain option { color: var(--ink); }
   background: linear-gradient(135deg, rgb(255 255 255 / .3), rgb(255 255 255 / 0)), rgb(var(--paper) / var(--a));
   --fs: 16.5px;
 }
-.book[data-theme="white"] { --paper: 255 255 255; --a: .95; }
-.book[data-theme="night"] { --paper: 34 31 28; --a: .92; --paper-ink: #ece5d8; --paper-soft: #c2b59f; --paper-faint: #9a8f7d; }
+/* 배경 3종 — 아이보리(기본) · 세피아 · 다크(순백 글씨가 아닌 따뜻한 회백색, Kindle·리디 패턴) */
+.book[data-theme="sepia"] { --paper: 241 231 208; --a: .95; --paper-ink: #3b2f22; --paper-soft: #6e5a40; --paper-faint: #9a8466; }
+.book[data-theme="dark"] { --paper: 28 27 25; --a: .94; --paper-ink: #d8d2c4; --paper-soft: #b3ab9c; --paper-faint: #8c857a; }
+.book { --book-font: 'Noto Serif KR', 'Nanum Myeongjo', serif; --lh: 1.9; --pgap: 10px; }
+.book[data-font="batang"] { --book-font: 'Gowun Batang', 'Noto Serif KR', serif; }
+.book[data-font="sans"] { --book-font: 'Noto Sans KR', system-ui, sans-serif; }
 .book .run { text-align: center; font-size: 11px; letter-spacing: 3px; color: var(--paper-faint); padding-bottom: 14px; border-bottom: 1px solid rgb(160 147 127 / .25); margin-bottom: 18px; }
 .book p.para {
-  font-family: 'Noto Serif KR', 'Nanum Myeongjo', serif; font-size: var(--fs); line-height: 1.9; text-indent: 1em;
-  word-break: keep-all; letter-spacing: -.2px; margin-bottom: 10px; cursor: pointer; border-radius: 6px; transition: background .2s;
+  font-family: var(--book-font); font-size: var(--fs); line-height: var(--lh); text-indent: 1em;
+  word-break: keep-all; letter-spacing: -.2px; margin-bottom: var(--pgap); cursor: pointer; border-radius: 6px; transition: background .2s, opacity .35s;
 }
 .book p.para:hover { background: rgb(255 205 90 / .14); }
 .book p.para.active { background: rgb(255 205 90 / .28); }
 /* 드롭캡(float)이 다음 문단까지 밀고 들어가지 않도록 첫 문단 안에 가둔다 */
 .book p.first { text-indent: 0; display: flow-root; }
 .book .dc { float: left; font-size: 46px; line-height: .9; font-weight: 700; margin: 6px 8px 0 0; color: #3a3129; }
-.book[data-theme="night"] .dc { color: #ece5d8; }
+.book[data-theme="dark"] .dc { color: #d8d2c4; }
+.book[data-theme="dark"] p.para:hover { background: rgb(255 205 90 / .08); }
 .book .note { display: flex; gap: 9px; align-items: flex-start; margin: 2px 0 14px; padding-left: 12px; border-left: 2px solid #d9c6a0; font-family: 'Noto Serif KR', serif; font-size: 13px; line-height: 1.55; color: var(--paper-soft); cursor: pointer; }
 .book .note .av { width: 20px; height: 20px; font-size: 9px; margin-top: 1px; border-width: 1px; }
 .book .note .meta { opacity: .6; }
@@ -264,3 +269,7 @@ select.plain option { color: var(--ink); }
   .frosted { background: rgb(244 244 246); }
   .book { background: rgb(var(--paper)); }
 }
+
+/* Safari: 줄 안의 입력칸이 기본 너비(size=20)를 고집해 화면 밖으로 밀리지 않게 */
+.field { min-width: 0; }
+.field input { width: 100%; }

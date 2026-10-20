@@ -9,9 +9,14 @@
      data-guard="{{ 'on' if user.spoiler_guard else 'off' }}">
   <header class="glass reader-top" id="reader-top">
     <div class="row">
-      <a href="{{ '/rooms/%d' % room.id if room else '/books/%d' % book.id }}"><strong style="font-weight:500">‹&nbsp; {{ book.title }}</strong></a>
-      <span class="ctl"><button type="button" id="settings-btn" aria-label="읽기 설정" aria-haspopup="dialog">가</button><span class="cap" id="pct">{{ entry.progress_pct }}%</span></span>
+      <a href="{{ '/rooms/%d' % room.id if room else '/books/%d' % book.id }}" style="min-width:0"><strong style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block">‹&nbsp; <span style="view-transition-name:title-{{ book.id }}">{{ book.title }}</span></strong></a>
+      <span class="ctl">
+        <button type="button" id="tts-btn" aria-label="읽어 주기" aria-pressed="false" title="읽어 주기">▶︎</button>
+        <button type="button" id="settings-btn" aria-label="읽기 설정" aria-haspopup="dialog" title="읽기 설정">가</button>
+        <span class="cap" id="pct">{{ entry.progress_pct }}%</span>
+      </span>
     </div>
+    <span class="tiny muted" id="eta" aria-live="off"></span>
     <div class="bar"><b id="pbar" style="width:{{ entry.progress_pct }}%"></b></div>
   </header>
   <article class="glass book" id="book">
@@ -43,12 +48,20 @@
   <div class="row"><h2 id="set-title">읽기 설정</h2><button class="tiny" type="button" data-close>닫기</button></div>
   <span class="tiny">글자 크기</span>
   <div class="seg" id="size-seg"><button type="button" data-size="0">작게</button><button type="button" data-size="1">보통</button><button type="button" data-size="2">크게</button><button type="button" data-size="3">아주 크게</button></div>
+  <span class="tiny">글꼴</span>
+  <div class="seg" id="font-seg"><button type="button" data-font="serif" style="font-family:'Noto Serif KR',serif">명조</button><button type="button" data-font="batang" style="font-family:'Gowun Batang',serif">바탕</button><button type="button" data-font="sans" style="font-family:'Noto Sans KR',sans-serif">고딕</button></div>
+  <span class="tiny">줄 간격 · 문단 간격</span>
+  <div class="seg" id="lh-seg"><button type="button" data-lh="0">촘촘</button><button type="button" data-lh="1">보통</button><button type="button" data-lh="2">여유</button></div>
   <span class="tiny">배경</span>
-  <div class="seg" id="theme-seg"><button type="button" data-theme="paper">종이</button><button type="button" data-theme="white">흰색</button><button type="button" data-theme="night">밤</button></div>
+  <div class="seg" id="theme-seg"><button type="button" data-theme="paper">아이보리</button><button type="button" data-theme="sepia">세피아</button><button type="button" data-theme="dark">다크</button></div>
+  <span class="tiny">읽어 주기 속도</span>
+  <div class="seg" id="rate-seg"><button type="button" data-rate="0.8">0.8×</button><button type="button" data-rate="1">1×</button><button type="button" data-rate="1.25">1.25×</button><button type="button" data-rate="1.5">1.5×</button></div>
+  <button type="button" class="solid btn block" id="focus-btn" style="background:var(--ink);color:#fff">집중 모드로 읽기</button>
   {% if rooms|length > 1 %}
   <span class="tiny">함께 읽는 방</span>
   <div class="glass pill field"><select id="room-pick" class="plain" aria-label="함께 읽는 방">{% for r in rooms %}<option value="{{ r.id }}" {% if room and r.id == room.id %}selected{% endif %}>{{ r.name }}</option>{% endfor %}</select></div>
   {% endif %}
+  <span class="tiny" style="opacity:.7" id="tech-note"></span>
   <span class="tiny" style="opacity:.7">스포일러 가드 {{ '켜짐 — 아직 안 읽은 곳의 반응은 숨겨요' if user.spoiler_guard else '꺼짐' }} · 내 정보에서 바꿀 수 있어요</span>
 </section>
 {% endblock %}

@@ -8,7 +8,7 @@
 </div>
 <div class="glass card" style="padding:22px">
   <span class="cap muted">내 포인트</span>
-  <strong style="font-size:40px;letter-spacing:-1px">{{ '{:,}'.format(balance) }}<span style="font-size:20px">P</span></strong>
+  <strong style="font-size:40px;letter-spacing:-1px"><span data-count-up="{{ balance }}">{{ '{:,}'.format(balance) }}</span><span style="font-size:20px">P</span></strong>
   <span class="cap muted">청크를 끝까지 읽으면 1P · 완독 50P · 배틀 승리 100P</span>
 </div>
 <div class="glass card" style="--a:.13;border-radius:26px;gap:14px">
@@ -24,9 +24,20 @@
   <a class="row" href="{{ n.link or '#' }}" style="font-size:14px;gap:10px"><span>{% if not n.read_at %}<b style="color:#ffd60a">●</b> {% endif %}{{ n.body }}</span><span class="tiny muted" style="flex:none">{{ n.created_at | kst('%H:%M') }}</span></a>
   {% else %}<span class="cap muted">새 알림이 없어요. 밤 10시~아침 8시에는 알림을 모아 뒀다가 보내요.</span>{% endfor %}
 </div>
+<div class="glass card" style="--a:.13;border-radius:26px;gap:12px" id="app-card">
+  <h2>앱 · 알림</h2>
+  <div class="row"><div class="col"><strong style="font-size:14px">푸시 알림</strong><span class="tiny muted" id="push-state">확인하는 중…</span></div>
+    <button class="switch" type="button" role="switch" aria-checked="false" aria-label="푸시 알림" id="push-switch" disabled></button></div>
+  <button class="glass pill thin chip" type="button" id="push-test" hidden style="align-self:flex-start">테스트 알림 보내기</button>
+  <button class="solid btn" type="button" data-install hidden style="align-self:flex-start">홈 화면에 앱 설치</button>
+  <span class="tiny muted" data-ios-install hidden>아이폰: 공유 버튼 → ‘홈 화면에 추가’로 설치하면 푸시 알림도 받을 수 있어요.</span>
+  <div class="row" id="tilt-row" hidden><div class="col"><strong style="font-size:14px">기울이면 반짝이는 유리</strong><span class="tiny muted">휴대폰을 기울이면 유리에 비친 빛이 따라 움직여요</span></div>
+    <button class="switch" type="button" role="switch" aria-checked="false" aria-label="기울기 반짝임" id="tilt-switch"></button></div>
+</div>
 <form method="post" action="/me/settings" class="glass card compact row"><input type="hidden" name="csrf_token" value="{{ csrf }}">
   <div class="col"><strong>스포일러 가드</strong><span class="tiny muted">{{ '아직 안 읽은 곳의 반응은 숨겨요' if user.spoiler_guard else '앞선 반응도 모두 보여요' }}</span></div>
   <button class="switch" role="switch" aria-checked="{{ 'true' if user.spoiler_guard else 'false' }}" aria-label="스포일러 가드" name="spoiler_guard" value="{{ 'off' if user.spoiler_guard else 'on' }}"></button>
 </form>
 <form method="post" action="/logout" style="text-align:center"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="tiny muted link">로그아웃</button></form>
 {% endblock %}
+{% block scripts %}<script src="/static/js/me.js" defer></script>{% endblock %}

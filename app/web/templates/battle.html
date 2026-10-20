@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}배틀{% endblock %}
 {% block screen_class %}night no-tabs{% endblock %}
+{% block theme_color %}#0b1020{% endblock %}
 {% block tabs %}{% endblock %}
 {% block content %}
 {% set mine_is_a = a.members|selectattr(0, 'equalto', user.id)|list|length > 0 %}
@@ -12,10 +13,11 @@
 
 {% if battle.type.value == 'page_race' %}
 <div class="glass row" style="--a:.08;border-radius:30px;padding:24px 22px">
-  <div class="col"><span class="cap" style="color:#8fd0ff;font-weight:500">우리 팀 · {{ mine.name }}</span><span class="score" style="text-shadow:0 0 24px #5ab4ff8c">{{ mine.average|num }}</span><span class="muted" style="font-size:11px">팀 평균 청크</span></div>
+  <div class="col"><span class="cap" style="color:#8fd0ff;font-weight:500">우리 팀 · {{ mine.name }}</span><span class="score" style="text-shadow:0 0 24px #5ab4ff8c" data-count-up="{{ mine.average|num }}">{{ mine.average|num }}</span><span class="muted" style="font-size:11px">팀 평균 청크</span></div>
   <span style="opacity:.5;font-size:15px">vs</span>
-  <div class="col" style="align-items:flex-end"><span class="cap muted">{{ theirs.name }}</span><span class="score" style="opacity:.6">{{ theirs.average|num }}</span><span class="muted" style="font-size:11px">팀 평균 청크</span></div>
+  <div class="col" style="align-items:flex-end"><span class="cap muted">{{ theirs.name }}</span><span class="score" style="opacity:.6" data-count-up="{{ theirs.average|num }}">{{ theirs.average|num }}</span><span class="muted" style="font-size:11px">팀 평균 청크</span></div>
 </div>
+<p class="cap" style="text-align:center">우리 팀이 함께 <strong data-count-up="{{ mine.total }}">{{ mine.total }}</strong>청크를 읽었어요</p>
 <div class="tug" aria-label="우리 팀 비율"><b style="width:{{ (mine.average / total * 100)|round }}%"></b></div>
 <div class="glass card" style="--a:.08;border-radius:26px;gap:14px">
   <h2>팀 기여</h2>
@@ -53,5 +55,10 @@
 {% else %}
 <div class="glass card compact" style="--a:.08"><span class="cap">아직 올라온 밑줄이 없어요.</span></div>
 {% endfor %}
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% if status.value == 'finished' and winner == mine.team_id %}
+<script>addEventListener("load", () => setTimeout(() => { window.motion?.confetti(60); window.motion?.haptic([30, 60, 30]); }, 450));</script>
 {% endif %}
 {% endblock %}

@@ -1,0 +1,174 @@
+/* 함께읽기 — 모션 레이어
+   원칙(docs/research/advanced-web-2026.md): transform·opacity만 움직이고, 스프링 곡선(linear())을 쓰고,
+   지원하지 않는 브라우저에서는 그냥 원래대로 보인다. 움직임 줄이기 설정이면 페이드만 남긴다. */
+
+:root {
+  /* 감쇠 스프링을 계산해 만든 곡선 — smooth: 넘침 없음(시트·페이지), ios: 1% 넘침(기본), bouncy: 12% 넘침(배지·탭) */
+  --spring-smooth: linear(0, .109, .309, .501, .656, .77, .849, .903, .938, .961, .976, .985, .991, .994, .997, .998, 1);
+  --spring-ios: linear(0, .074, .232, .411, .577, .714, .819, .895, .946, .978, .997, 1.007, 1.01, 1.011, 1.01, 1.008, 1.006, 1.004, 1.003, 1.002, 1);
+  --spring-bouncy: linear(0, .068, .231, .433, .636, .813, .951, 1.046, 1.101, 1.124, 1.123, 1.107, 1.083, 1.057, 1.033, 1.013, .999, .99, .985, .984, .985, .988, .991, .995, .997, .999, 1.001, 1.002, 1);
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+}
+@supports not (transition-timing-function: linear(0, 1)) {
+  :root { --spring-smooth: cubic-bezier(.2, .8, .2, 1); --spring-ios: cubic-bezier(.2, .9, .25, 1.02); --spring-bouncy: cubic-bezier(.3, 1.4, .5, 1); }
+}
+
+/* ── 1. 페이지 전환 (문서 간 View Transitions) ───────────────── */
+@view-transition { navigation: auto; }
+
+/* 움직이는 건 화면 내용(.scroll = page)뿐이다. 폰 프레임·배경·탭 바는 root에 남아 제자리에서 살짝 교차된다.
+   (유리 요소에 이름을 따로 붙이면 스냅샷에서 흐림이 빠져 흰 상자처럼 보여서 붙이지 않는다) */
+.scroll { view-transition-name: page; }
+.tab-pill { view-transition-name: tabpill; }
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(*) { animation-duration: .42s; animation-timing-function: var(--spring-ios); }
+  ::view-transition-old(root) { animation: .22s var(--ease-out) both vt-fade-out; }
+  ::view-transition-new(root) { animation: .22s var(--ease-out) both vt-fade-in; }
+  ::view-transition-group(tabpill) { animation-duration: .5s; animation-timing-function: var(--spring-bouncy); }
+
+  /* 기본: 살짝 뒤로 물러나며 사라지고 새 화면이 떠오른다 */
+  ::view-transition-old(page) { animation: .24s var(--ease-out) both vt-fade-out; }
+  ::view-transition-new(page) { animation: .42s var(--spring-ios) both vt-rise; }
+  /* 앞으로(오른쪽 탭·상세 화면): 오른쪽에서 밀려 들어옴 / 뒤로: 왼쪽에서 */
+  html:active-view-transition-type(forward)::view-transition-old(page) { animation: .3s var(--ease-out) both vt-out-left; }
+  html:active-view-transition-type(forward)::view-transition-new(page) { animation: .46s var(--spring-ios) both vt-in-right; }
+  html:active-view-transition-type(back)::view-transition-old(page) { animation: .3s var(--ease-out) both vt-out-right; }
+  html:active-view-transition-type(back)::view-transition-new(page) { animation: .46s var(--spring-ios) both vt-in-left; }
+  /* 화면 내용은 프레임 밖으로 삐져나오지 않게 */
+  ::view-transition-group(page) { overflow: clip; }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation-duration: .18s !important; animation-name: vt-fade-in; }
+  ::view-transition-old(*) { animation-name: vt-fade-out; }
+}
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
+@keyframes vt-rise { from { opacity: 0; transform: translateY(14px) scale(.985); } }
+@keyframes vt-out-left { to { opacity: 0; transform: translateX(-14%); } }
+@keyframes vt-in-right { from { opacity: 0; transform: translateX(22%); } }
+@keyframes vt-out-right { to { opacity: 0; transform: translateX(14%); } }
+@keyframes vt-in-left { from { opacity: 0; transform: translateX(-22%); } }
+
+/* 탭의 흰 알약 (위치는 켜진 탭) */
+.tabs a { isolation: isolate; }
+.tabs a[aria-current="page"] { background: transparent; box-shadow: none; }
+.tab-pill {
+  position: absolute; inset: 0; z-index: -1; border-radius: 9999px;
+  background: rgb(255 255 255 / .32); box-shadow: inset 0 1px 0 rgb(255 255 255 / .6);
+}
+
+/* ── 2. 첫 등장: 위에서부터 차례로 떠오른다 ─────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .content > * { animation: rise .52s var(--spring-ios) both; animation-delay: calc(var(--i, 0) * 45ms + 40ms); }
+  .content > :nth-child(1) { --i: 0; } .content > :nth-child(2) { --i: 1; } .content > :nth-child(3) { --i: 2; }
+  .content > :nth-child(4) { --i: 3; } .content > :nth-child(5) { --i: 4; } .content > :nth-child(6) { --i: 5; }
+  .content > :nth-child(7) { --i: 6; } .content > :nth-child(n+8) { --i: 7; }
+  .orb { animation: orb-in .9s var(--spring-bouncy) both .1s, orb-float 6s ease-in-out 1s infinite; }
+}
+@keyframes rise { from { opacity: 0; transform: translateY(16px) scale(.985); } }
+@keyframes orb-in { from { opacity: 0; transform: scale(.6) rotate(-12deg); } }
+@keyframes orb-float { 50% { transform: translateY(-5px) rotate(2deg); } }
+
+/* 긴 목록은 스크롤로 들어올 때 떠오른다 (스크롤 연동 애니메이션 지원 브라우저만) */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .list > *, .book section, .rx-list > * {
+      animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 55%;
+    }
+  }
+}
+@keyframes reveal { from { opacity: 0; transform: translateY(22px) scale(.98); } }
+
+/* ── 3. 누르는 손맛 ───────────────────────────────────────── */
+a.card, a.glass, .btn, .solid, .chip, .tabs a, .result, .kakao, .emoji-row button, .seg button, .orb, .switch, .rank, .reader-top .ctl button {
+  transition: transform .32s var(--spring-ios), background-color .2s, opacity .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) {
+  a.card:hover, a.glass:hover, .rank:hover { transform: translateY(-2px); }
+}
+a.card:active, a.glass:active, .rank:active { transform: scale(.975); transition-duration: .08s; }
+.btn:active, .solid:active, .chip:active, .kakao:active, .result:active, .seg button:active, .orb:active { transform: scale(.95); transition-duration: .08s; }
+.tabs a:active { transform: scale(.9); transition-duration: .08s; }
+.emoji-row button:active { transform: scale(1.25) rotate(-6deg); transition: transform .5s var(--spring-bouncy); }
+
+/* 진행 막대는 0에서 차오른다 */
+.bar > b, .tug b { transition: width .9s var(--spring-smooth); }
+@starting-style { .bar > b, .tug b { width: 0 !important; } }
+
+/* ── 4. 떠오르는 것들: 토스트 · 잠금 알약 · 시트 ─────────────── */
+.toast, .guard { transition: opacity .3s, transform .5s var(--spring-ios), display .3s allow-discrete; }
+@starting-style {
+  .toast:not([hidden]), .guard:not([hidden]) { opacity: 0; transform: translate(-50%, 18px) scale(.92); }
+}
+.sheet { transition: transform .5s var(--spring-ios); will-change: auto; overscroll-behavior: contain; }
+.sheet.dragging { transition: none; }
+.sheet.closing { transform: translateY(110%); transition: transform .32s var(--ease-out); }
+@starting-style { .sheet:not([hidden]) { transform: translateY(100%); } }
+.sheet-bg { transition: opacity .3s; }
+.sheet-bg.closing { opacity: 0; }
+@starting-style { .sheet-bg:not([hidden]) { opacity: 0; } }
+.sheet .grab { touch-action: none; cursor: grab; padding: 8px 0; margin: -14px auto -6px; background-clip: content-box; height: 21px; }
+
+/* 상세 열기(details): 내용이 부드럽게 펼쳐진다 */
+details > summary::-webkit-details-marker { display: none; }
+details[open] > :not(summary) { animation: rise .45s var(--spring-ios) both; }
+
+/* 숫자가 바뀔 때 살짝 튄다 */
+.bump { animation: bump .5s var(--spring-bouncy); }
+@keyframes bump { 40% { transform: scale(1.18); } }
+
+/* 리더 상단바 아래 얇은 선: 지금 스크롤 위치 (검증 진행률과 별개) */
+.reader-top { overflow: hidden; }
+@supports (animation-timeline: scroll()) {
+  .reader-top::after {
+    content: ''; position: absolute; left: 18px; right: 18px; bottom: 4px; height: 2px; border-radius: 2px;
+    background: rgb(255 255 255 / .55); transform-origin: left; transform: scaleX(0);
+    animation: scroll-line linear both; animation-timeline: scroll(nearest block);
+  }
+}
+@keyframes scroll-line { to { transform: scaleX(1); } }
+
+/* 실시간으로 진행률이 바뀐 친구 줄이 잠깐 빛난다 */
+.flash-row { animation: flash-row 1.2s var(--ease-out); border-radius: 14px; }
+@keyframes flash-row { 0% { background: rgb(255 255 255 / .35); } 100% { background: transparent; } }
+
+/* 이정표 축하 (25·50·75·100%) */
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 60; overflow: hidden; }
+.confetti i { position: absolute; top: -12px; width: 8px; height: 12px; border-radius: 2px; opacity: .9; animation: fall 1.6s var(--ease-out) forwards; }
+@keyframes fall { to { transform: translate(var(--dx), 105vh) rotate(var(--rot)); opacity: 0; } }
+@media (min-width: 520px) { .confetti { position: absolute; } }
+
+/* 긴 본문은 화면 밖 부분의 렌더링을 미룬다 */
+.book section { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+
+/* ── 5. Liquid Glass: 빛 반사가 손가락·기울기를 따라온다 ──────── */
+:where(.glass) { position: relative; }
+.glass::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+  background: radial-gradient(140px 120px at var(--lx, 30%) var(--ly, 0%), rgb(255 255 255 / .28), transparent 70%);
+  mix-blend-mode: soft-light; opacity: var(--shine, .9); transition: opacity .4s;
+}
+.frosted::after, .book::after { opacity: .35; }
+/* 테두리 렌즈: 위쪽은 밝고 아래쪽은 은은하게 */
+.glass { box-shadow: inset 0 1px 0 rgb(255 255 255 / .55), inset 0 -1px 0 rgb(255 255 255 / .12), inset 0 0 0 .5px rgb(255 255 255 / .25), 0 18px 40px rgb(0 0 0 / .14); }
+.glass > * { position: relative; z-index: 1; }
+/* 진짜 굴절은 Chromium에서만, 표면 두 곳(탭 바 · 리더 상단바)만 — 성능 때문 */
+html.lg-refract .tabs, html.lg-refract .reader-top {
+  backdrop-filter: url(#liquid-refract) blur(16px) saturate(170%);
+}
+
+/* 집중 모드: 장식을 숨기고 지금 문단만 또렷하게 */
+.focus-mode .reader-top, .focus-mode .guard { opacity: 0; pointer-events: none; transform: translateY(-8px); transition: opacity .35s, transform .45s var(--spring-ios); }
+.focus-mode .book p.para { opacity: .32; transition: opacity .35s; }
+.focus-mode .book p.para.current { opacity: 1; }
+.focus-mode .book .note, .focus-mode .book .emo { opacity: .25; }
+
+/* 읽어 주기: 지금 읽는 문장 */
+.book .s.speaking { background: linear-gradient(transparent 55%, rgb(255 205 90 / .55) 55%); border-radius: 2px; transition: background .2s; }
+
+/* 움직임 줄이기: 모든 움직임을 거의 즉시로 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

@@ -1,7 +1,7 @@
 {# 읽기방 카드 — 시안 홈의 '내 읽기방' #}
 <a class="glass card compact" href="/rooms/{{ c.room.id }}">
   <div class="row">
-    <div class="col"><strong>{{ c.room.name }}</strong>
+    <div class="col"><strong style="view-transition-name:room-{{ c.room.id }}">{{ c.room.name }}</strong>
       <span class="muted tiny">{{ '동시' if c.room.mode.value == 'sync' else '비동기' }} · {{ c.book.title }}{% if c.room.ends_at %} · {{ c.room.ends_at | left }}{% endif %}</span></div>
     <div class="avs">{% for m in c.members[:4] %}<span class="av" style="background:{{ m.user_id | av }}">{{ m.nickname | initial }}</span>{% endfor %}</div>
   </div>

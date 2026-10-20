@@ -29,13 +29,13 @@
 - [x] **Phase 3** — 읽기방 · 초대 코드 · WebSocket 브로커 · 반응 · 스포일러 가드 (검증 5·7)
 - [x] **Phase 4** — 페이지 레이스(체류시간) · 한줄평 배틀 · 포인트 원장 · 챌린지 (검증 6)
 - [x] **Phase 5** — 팀 · 주간 리그 · 리더보드
-- [x] **Phase 6** — 앱 내 알림함(WebSocket 실시간, 방해 금지·일 5건) · 배포 설정(`Dockerfile`, `render.yaml`). FCM·실제 배포는 계정이 필요해 제외
+- [x] **Phase 6** — 앱 내 알림함(WebSocket 실시간, 방해 금지·일 5건) + VAPID 웹 푸시(FCM 계정 없이) · PWA 설치·오프라인 · 배포 설정(`Dockerfile`, `render.yaml`). 실제 배포는 계정이 필요해 제외
 
 ### 2026-10-20 검증 결과 (로컬)
 
 | # | 결과 |
 |---|---|
-| 1 | `pytest -q` 100개 통과 |
+| 1 | `pytest -q` 110개 통과 · `tools/browser_check.py` Chromium(Pixel 7)·WebKit(iPhone 15) PASS |
 | 2 | `ruff check .` 오류 0 |
 | 3 | PR CI에서 확인 |
 | 4 | Docker가 없는 환경이라 임베디드 Postgres 16(`pgserver`)으로 `upgrade → downgrade → upgrade` + `alembic check` 통과 |
@@ -55,7 +55,7 @@
 ## Scope
 
 - In: 웹 MVP 백엔드(FastAPI) + Jinja2 서버 렌더링 웹 화면(Reflex 대신 — 설치가 가볍고 WebSocket 연동이 단순), 퍼블릭 도메인 전문, 상용 도서 메타데이터·수동 진행률.
-- Out: 퀴즈, 상용 본문, 네이티브 앱, 결제, 알라딘 API (PRD 7장), FCM 푸시, Redis(인메모리로 대체).
+- Out: 퀴즈, 상용 본문, 네이티브 앱(대신 PWA), 결제, 알라딘 API (PRD 7장), Redis(인메모리로 대체).
 
 ## Stop and ask when
 

@@ -37,11 +37,15 @@
     if (ev.type === "progress.updated" || ev.type === "member.joined") {
       const r = row(d.user_id, d.nickname);
       r.querySelector("[data-pct]").textContent = d.progress_pct;
+      // 바뀐 친구 줄이 잠깐 빛나고 숫자가 튄다
+      r.classList.remove("flash-row"); void r.offsetWidth; r.classList.add("flash-row");
+      window.motion?.bump(r.querySelector("[data-pct]"));
       r.querySelector(".bar > b").style.width = d.progress_pct + "%";
       const cnt = r.querySelector("[data-count]");
       if (cnt && d.new_chunks) cnt.textContent = String(Number(cnt.textContent) + d.new_chunks);
       if (d.user_id !== ME) {
         toast(ev.type === "member.joined" ? `${d.nickname}님이 들어왔어요` : `${d.nickname}님이 ${d.progress_pct}%까지 읽었어요`);
+        window.motion?.haptic(ev.type === "member.joined" ? [15, 40, 15] : 10);
       }
     } else if (ev.type === "reaction.created" && d.user_id !== ME) {
       // 내용은 싣지 않는다 — 스포일러 가드를 거치도록 리더에서 확인

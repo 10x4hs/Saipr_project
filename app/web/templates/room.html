@@ -4,7 +4,7 @@
 <div id="room-root" data-room="{{ room.id }}" data-total="{{ book.total_chunks }}" data-me="{{ user.id }}" data-fulltext="{{ 'y' if book.has_fulltext else '' }}" style="display:contents">
 <div class="col" style="gap:3px">
   <span class="cap muted">{{ book.title }} · {{ book.author or '작자 미상' }} · {{ '동시' if room.mode.value == 'sync' else '비동기' }} 모드</span>
-  <h1 style="font-size:28px">{{ room.name }}</h1>
+  <h1 style="font-size:28px;view-transition-name:room-{{ room.id }}">{{ room.name }}</h1>
   {% if room.ends_at %}<span class="cap">목표 {{ room.ends_at | datelabel }} 완독 · {{ room.ends_at | dday }}</span>{% endif %}
 </div>
 <button class="pill kakao" type="button" id="share" data-url="{{ invite_url }}" data-title="{{ room.name }}">카카오톡으로 친구 초대</button>
