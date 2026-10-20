@@ -28,7 +28,7 @@ from app.api.deps import (
 from app.core.clock import KST, aware, utcnow
 from app.core.config import Settings, get_settings
 from app.db.session import get_session
-from app.models import Battle, BattleType, Book, BookChunk, ReadingEvent, Room, RoomMode, Shelf, Team, User
+from app.models import Battle, BattleType, Book, BookChunk, Room, RoomMode, Shelf, Team, User
 from app.services import auth as auth_service
 from app.services import battles as battle_service
 from app.services import books as book_service
@@ -42,11 +42,13 @@ from app.services import teams as team_service
 from app.services.pace import min_dwell_ms
 from app.services.search import FULLTEXT_SOURCES, search_all
 from app.sources.base import BookMeta, BookSource, SourceError
+from app.web import view
 
 TEMPLATES = Jinja2Templates(directory=Path(__file__).parent / "templates")
 router = APIRouter(include_in_schema=False, dependencies=[Depends(verify_csrf)])
 
 SHELF_LABEL = {Shelf.WANT: "읽고 싶은", Shelf.READING: "읽는 중", Shelf.DONE: "완독"}
+LEAGUE_TIERS = ("브론즈", "실버", "골드", "다이아")
 
 
 def _kst(dt: datetime | None, fmt: str = "%m.%d %H:%M") -> str:
@@ -56,6 +58,7 @@ def _kst(dt: datetime | None, fmt: str = "%m.%d %H:%M") -> str:
 TEMPLATES.env.filters["kst"] = _kst
 TEMPLATES.env.globals["SHELF_LABEL"] = SHELF_LABEL
 TEMPLATES.env.globals["EMOJIS"] = reaction_service.EMOJIS
+view.register(TEMPLATES.env)
 
 
 class LoginRequired(Exception):
@@ -107,15 +110,31 @@ async def render(
     request: Request, name: str, user: User | None, session: AsyncSession, **ctx: Any
 ) -> HTMLResponse:
     settings = get_settings()
+    path = request.url.path
+    ctx.setdefault("tab", _tab_for(path))
     ctx.update(
         user=user,
         csrf=csrf_token(request),
         flash=request.session.pop("flash", None),
         unread=await noti.unread_count(session, user.id) if user else 0,
         providers=oauth.enabled_providers(settings),
-        path=request.url.path,
+        path=path,
+        clock=view.clock(),
     )
     return TEMPLATES.TemplateResponse(request, name, ctx)
+
+
+def _tab_for(path: str) -> str | None:
+    """하단 탭바에서 켜 둘 탭. 책·읽기방·팀 상세는 그 화면을 연 탭에 속한다."""
+    if path == "/":
+        return "home"
+    if path.startswith(("/search", "/books")):
+        return "search"
+    if path.startswith(("/rooms", "/r/")):
+        return "rooms"
+    if path.startswith(("/teams", "/battles")):
+        return "league"
+    return None
 
 
 async def need_user(request: Request, user: User | None = Depends(optional_user)) -> User:
@@ -250,39 +269,86 @@ async def oauth_callback(
 # ── 홈 · 서재 ──────────────────────────────────────────────
 
 
+def _friend_line(ms: list, me: int) -> str:
+    """읽기방 카드의 한 줄 소식: 가장 앞선 친구를 알려 준다."""
+    friends = [m for m in ms if m.user_id != me]
+    if not friends:
+        return "친구를 초대해서 같이 읽어요"
+    lead = max(friends, key=lambda m: (m.progress_pct, -m.user_id))
+    if lead.progress_pct == 0:
+        return f"{lead.nickname}님과 함께 읽는 중이에요"
+    return f"{lead.nickname}님이 {lead.progress_pct}%까지 읽었어요"
+
+
+async def _race_card(session: AsyncSession, battle: Battle, user_id: int) -> dict:
+    a, b = await battle_service.sides(session, battle)
+    mine, theirs = (a, b) if any(u == user_id for u, _, _ in a.members) else (b, a)
+    gap = round(mine.average - theirs.average, 1)
+    if gap > 0:
+        line = f"우리 팀이 {gap:g}청크 앞서는 중"
+    elif gap < 0:
+        line = f"우리 팀이 {-gap:g}청크 뒤지는 중"
+    else:
+        line = "막상막하예요"
+    book = await session.get(Book, battle.book_id)
+    return {"battle": battle, "mine": mine, "theirs": theirs, "line": line, "book": book}
+
+
+async def room_cards(session: AsyncSession, user_id: int, limit: int | None = None) -> list[dict]:
+    cards = []
+    for room, book in (await room_service.rooms_of(session, user_id))[:limit]:
+        ms = await room_service.members(session, room)
+        cards.append({"room": room, "book": book, "members": ms, "line": _friend_line(ms, user_id)})
+    return cards
+
+
 @router.get("/")
 async def home(
     request: Request, user: User = Depends(need_user), session: AsyncSession = Depends(get_session)
 ):
     entries = await lib.list_entries(session, user.id)
-    my_rooms = await room_service.rooms_of(session, user.id)
-    ticker: list[str] = []
-    room_cards = []
-    for room, book in my_rooms[:6]:
-        ms = await room_service.members(session, room)
-        room_cards.append((room, book, ms))
-        ticker += [f"{m.nickname} · {book.title} {m.progress_pct}%" for m in ms if m.user_id != user.id]
+    # 이어 읽기: 가장 최근에 읽던 책 (읽는 중 → 읽고 싶은 순)
+    current = next(((e, b) for e, b in entries if e.shelf is Shelf.READING), None) or next(
+        ((e, b) for e, b in entries if e.shelf is Shelf.WANT), None
+    )
     now = utcnow()
-    active = [
-        b
+    races = [
+        await _race_card(session, b, user.id)
         for b in await battle_service.battles_of(session, user.id)
         if battle_service.status_at(b, now).value != "finished"
-    ]
-    battle_cards = [
-        (b, *await battle_service.sides(session, b), await session.get(Book, b.book_id)) for b in active[:4]
     ]
     return await render(
         request,
         "home.html",
         user,
         session,
-        reading=[(e, b) for e, b in entries if e.shelf is Shelf.READING],
-        others=[(e, b) for e, b in entries if e.shelf is not Shelf.READING],
-        rooms=room_cards,
-        battles=battle_cards,
-        ticker=ticker,
-        balance=await point_service.balance(session, user.id),
+        current=current,
+        rooms=await room_cards(session, user.id, 3),
+        races=races[:2],
+        tab="home",
     )
+
+
+@router.get("/rooms")
+async def rooms_page(
+    request: Request, user: User = Depends(need_user), session: AsyncSession = Depends(get_session)
+):
+    return await render(
+        request, "rooms.html", user, session, rooms=await room_cards(session, user.id), tab="rooms"
+    )
+
+
+@router.post("/rooms/join")
+async def join_by_link(
+    request: Request,
+    link: str = Form(""),
+    user: User = Depends(need_user),
+    session: AsyncSession = Depends(get_session),
+):
+    """초대 링크(또는 코드)를 붙여 넣어 입장."""
+    code = link.strip().rstrip("/").rsplit("/", 1)[-1]
+    room = await room_service.join(session, code, user)
+    return redirect(f"/rooms/{room.id}")
 
 
 @router.post("/library/{book_id}/shelf")
@@ -332,21 +398,46 @@ async def set_progress(
 async def search_page(
     request: Request,
     q: str = "",
+    f: str = "all",
     user: User = Depends(need_user),
     session: AsyncSession = Depends(get_session),
     sources: dict[str, BookSource] = Depends(get_sources),
     settings: Settings = Depends(get_settings),
 ):
+    """검색어가 없으면 내 서재, 있으면 통합 검색. f=full(전문 읽기) · track(진행률 기록)으로 거른다."""
     q = q.strip()[:100]
-    result = await search_all(list(sources.values()), q, 10, settings.http_timeout_seconds) if q else None
-    local = []
+    hits, errors, local = [], {}, []
     if q:
+        result = await search_all(list(sources.values()), q, 10, settings.http_timeout_seconds)
+        errors = result.errors
         local = list(
             await session.scalars(
-                select(Book).where(Book.title.contains(q) | Book.author.contains(q)).limit(10)
+                select(Book).where(Book.title.contains(q) | Book.author.contains(q)).limit(5)
             )
         )
-    return await render(request, "search.html", user, session, q=q, result=result, local=local)
+        known = {(b.source, b.external_id) for b in local}
+        hits = [h for h in result.hits if (h.meta.source, h.meta.external_id) not in known]
+        if f == "full":
+            hits, local = [h for h in hits if h.meta.has_fulltext], [b for b in local if b.has_fulltext]
+        elif f == "track":
+            hits, local = (
+                [h for h in hits if not h.meta.has_fulltext],
+                [b for b in local if not b.has_fulltext],
+            )
+    shelf = [] if q else await lib.list_entries(session, user.id)
+    return await render(
+        request,
+        "search.html",
+        user,
+        session,
+        q=q,
+        f=f,
+        hits=hits,
+        errors=errors,
+        local=local,
+        shelf=shelf,
+        tab="search",
+    )
 
 
 @router.post("/books/import")
@@ -623,9 +714,31 @@ async def teams_page(
     request: Request, user: User = Depends(need_user), session: AsyncSession = Depends(get_session)
 ):
     mine = await team_service.teams_of(session, user.id)
-    leagues = team_service.build_leagues(await team_service.weekly_scores(session))
     my_ids = {t.id for t in mine}
-    return await render(request, "teams.html", user, session, teams=mine, leagues=leagues, my_ids=my_ids)
+    leagues = team_service.build_leagues(await team_service.weekly_scores(session))
+    # 내 팀이 있는 리그를 보여 준다. 리그 이름은 인원이 많은 리그일수록 높은 등급 (화면용)
+    idx = next((i for i, lg in enumerate(leagues) if any(t.team_id in my_ids for t in lg)), None)
+    league = leagues[idx] if idx is not None else (leagues[0] if leagues else [])
+    tier = LEAGUE_TIERS[(len(leagues) - 1 - (idx or 0)) % len(LEAGUE_TIERS)] if leagues else ""
+    team_cards = [(t, await team_service.members(session, t.id)) for t in mine]
+    now = utcnow()
+    races = [
+        await _race_card(session, b, user.id)
+        for b in await battle_service.battles_of(session, user.id)
+        if battle_service.status_at(b, now).value != "finished"
+    ]
+    return await render(
+        request,
+        "teams.html",
+        user,
+        session,
+        league=league,
+        tier=tier,
+        my_ids=my_ids,
+        teams=team_cards,
+        races=races,
+        tab="league",
+    )
 
 
 @router.post("/teams")
@@ -800,7 +913,6 @@ async def me_page(
     ]
     inbox = await noti.inbox(session, user.id, now)
     await noti.mark_all_read(session, user.id, now)
-    weeks = await _week_archive(session, user.id, now)
     return await render(
         request,
         "me.html",
@@ -810,24 +922,8 @@ async def me_page(
         history=await point_service.history(session, user.id),
         challenges=challenges,
         inbox=inbox,
-        weeks=weeks,
         teams=await team_service.teams_of(session, user.id),
     )
-
-
-async def _week_archive(session: AsyncSession, user_id: int, now: datetime) -> list[int]:
-    """올해 1~52주차별 검증 청크 수 (프로필의 주차 아카이브 그리드)."""
-    year = now.astimezone(KST).year
-    rows = await session.scalars(
-        select(ReadingEvent.occurred_at).where(ReadingEvent.user_id == user_id, ReadingEvent.verified)
-    )
-    weeks = [0] * 53
-    for t in rows:
-        local = aware(t).astimezone(KST)
-        y, w, _ = local.isocalendar()
-        if y == year:
-            weeks[w - 1] += 1
-    return weeks[:52]
 
 
 @router.post("/me/settings")

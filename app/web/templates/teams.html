@@ -1,37 +1,34 @@
 {% extends "base.html" %}
-{% block title %}팀·리그{% endblock %}
+{% block title %}리그{% endblock %}
 {% block content %}
-<h1 class="display">팀·리그</h1>
-<div class="split">
-  <form method="post" action="/teams"><input type="hidden" name="csrf_token" value="{{ csrf }}">
-    <label for="tn">새 팀 이름</label><div class="inline"><input id="tn" name="name" required maxlength="40"><button class="btn lime">팀 만들기</button></div></form>
-  <form method="post" action="/teams/join"><input type="hidden" name="csrf_token" value="{{ csrf }}">
-    <label for="tc">팀 초대 코드</label><div class="inline"><input id="tc" name="code" required maxlength="16"><button class="btn">들어가기</button></div></form>
+<div class="col" style="gap:3px"><span class="cap muted">{% if tier %}{{ tier }} 리그 · {% endif %}월요일 00:00 리셋</span><h1 style="font-size:34px">이번 주 리그</h1></div>
+{% if league %}
+<span class="glass pill" style="--a:.14;align-self:flex-start;padding:7px 14px;font-size:12px;font-weight:500">상위 3팀 &nbsp;다음 주 승급</span>
+<div class="glass" style="--a:.13;padding:8px;display:flex;flex-direction:column;gap:2px">
+  {% for s in league %}
+  {% if loop.index == 4 %}<div class="promo"></div>{% endif %}
+  <a class="rank {{ 'me' if s.team_id in my_ids }}" href="/teams/{{ s.team_id }}">
+    <span class="n {{ 'top' if loop.index <= 3 and s.team_id not in my_ids else ('rest' if loop.index > 3 and s.team_id not in my_ids else '') }}">{{ loop.index }}</span>
+    <span style="flex:1">{{ s.name }}{% if s.team_id in my_ids %} · 우리 팀{% endif %}</span>
+    <span class="cap {{ '' if s.team_id in my_ids else 'muted' }}" style="{% if s.team_id in my_ids %}opacity:.7;font-weight:400{% endif %}">평균 {{ s.average|num }}청크</span>
+  </a>
+  {% endfor %}
 </div>
+{% else %}
+<div class="glass card compact"><span class="cap">아직 리그에 팀이 없어요. 첫 팀을 만들어 보세요.</span></div>
+{% endif %}
+{% for r in races %}{% include "_race_card.html" %}{% endfor %}
 
-<section class="section mt">
-  <div class="section-head"><h2 class="h2">내 팀 <span class="count mono">{{ teams|length }}</span></h2></div>
-  {% if teams %}
-  <ul class="index">{% for t in teams %}<li><a class="row" href="/teams/{{ t.id }}"><span class="no">{{ '%02d' % loop.index }}</span><span class="title">{{ t.name }}</span><span class="meta">→</span></a></li>{% endfor %}</ul>
-  {% else %}<p class="empty">아직 팀이 없어요. 2~6명이 모이면 다른 팀에 레이스를 걸 수 있어요.</p>{% endif %}
-</section>
-
-<section class="section">
-  <div class="section-head"><h2 class="h2">이번 주 리그</h2><span class="label">월요일 00:00 KST 리셋 · 팀 평균 검증 청크</span></div>
-  {% for league in leagues %}
-  <p class="label mt">LEAGUE {{ '%02d' % loop.index }}</p>
-  <div class="scroll-x"><table class="table">
-    <thead><tr><th>순위</th><th>팀</th><th>인원</th><th style="text-align:right">합계</th><th style="text-align:right">평균</th></tr></thead>
-    <tbody>
-    {% for s in league %}
-    <tr class="{% if loop.first and s.total > 0 %}first{% endif %}">
-      <td class="num" style="text-align:left;font:400 32px var(--display)">{{ loop.index }}</td>
-      <td>{{ s.name }}{% if s.team_id in my_ids %} <span class="chip pink">내 팀</span>{% endif %}</td>
-      <td class="num">{{ s.members }}</td><td class="num">{{ s.total }}</td><td class="num">{{ s.average }}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-  </table></div>
-  {% else %}<p class="empty">아직 팀이 없어요.</p>{% endfor %}
-</section>
+<h2 class="h-sec">내 팀</h2>
+{% for t, ms in teams %}
+<a class="glass card compact" href="/teams/{{ t.id }}"><div class="row"><strong>{{ t.name }}</strong>
+  <div class="avs">{% for m in ms[:5] %}<span class="av" style="background:{{ m.id | av }}">{{ m.nickname | initial }}</span>{% endfor %}</div></div></a>
+{% endfor %}
+<details class="glass card" {% if not teams %}open{% endif %}>
+  <summary style="cursor:pointer;font-weight:700;list-style:none">＋ 팀 만들기 · 초대 코드로 참여</summary>
+  <form method="post" action="/teams" class="row" style="gap:8px;margin-top:12px"><input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <div class="glass pill field" style="flex:1"><input name="name" required maxlength="40" placeholder="새 팀 이름" aria-label="새 팀 이름"></div><button class="solid btn">만들기</button></form>
+  <form method="post" action="/teams/join" class="row" style="gap:8px"><input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <div class="glass pill field" style="flex:1"><input name="code" required maxlength="16" placeholder="팀 초대 코드" aria-label="팀 초대 코드"></div><button class="solid btn">참여</button></form>
+</details>
 {% endblock %}

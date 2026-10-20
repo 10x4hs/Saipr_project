@@ -62,7 +62,7 @@ async def test_full_web_flow(api, session_factory):
     await web_signup(owner, "서연")
 
     home = await owner.get("/", headers=HTML)
-    assert home.status_code == 200 and "지금 읽는 중" in home.text
+    assert home.status_code == 200 and "오늘도" in home.text
     token = csrf_of(home.text)
 
     detail = await owner.get(f"/books/{book}", headers=HTML)
@@ -86,7 +86,7 @@ async def test_full_web_flow(api, session_factory):
     r = await friend.post(f"/r/{code}/join", data={"csrf_token": csrf_of(preview.text)})
     assert r.status_code == 303 and r.headers["location"] == room_url
     room_page = await friend.get(room_url, headers=HTML)
-    assert "준호" in room_page.text and "서연" in room_page.text
+    assert "서연" in room_page.text and ">나<" in room_page.text  # 내 줄은 시안처럼 "나"
 
     reader = await friend.get(f"/books/{book}/read", headers=HTML)
     assert reader.status_code == 200 and 'id="reader-root"' in reader.text
@@ -121,7 +121,7 @@ async def test_team_and_battle_pages(api, session_factory):
     page = await a.get(f"/books/{book}", headers=HTML)
     await a.post(f"/library/{book}/shelf", data={"shelf": "reading", "csrf_token": csrf_of(page.text)})
     page = await a.get(team_a, headers=HTML)
-    assert "배틀 신청" in page.text
+    assert "다른 팀에 도전하기" in page.text
     r = await a.post(
         "/battles",
         data={

@@ -1,59 +1,57 @@
 {% extends "base.html" %}
 {% block title %}검색{% endblock %}
+{% macro row_book(b, label) %}
+<a class="result" href="/books/{{ b.id }}">
+  <div class="cover" style="background-color:{{ b.id | cover }}">{{ b.title[:6] }}</div>
+  <div class="col" style="gap:5px;flex:1;min-width:0"><strong>{{ b.title }}</strong><span class="cap muted tiny">{{ b.author or '작자 미상' }}{% if label %} · {{ label }}{% endif %}</span>
+    <span class="badge {{ 'solid' if b.has_fulltext else 'glass thin' }}">{{ '전문 읽기 가능' if b.has_fulltext else '진행률 기록' }}</span></div>
+</a>
+{% endmacro %}
 {% block content %}
-<form method="get" action="/search" role="search" class="mt">
-  <label for="q" class="sr-only">책 제목·저자</label>
-  <input id="q" name="q" class="search-xl" value="{{ q }}" placeholder="봄봄, 운수 좋은 날…" autofocus>
-  <p class="label mt">위키문헌·Gutendex = 앱에서 전문 읽기 · 카카오·네이버·Google = 메타데이터(트래커 모드)</p>
+<h1 style="font-size:34px">검색</h1>
+<form method="get" action="/search" role="search">
+  <div class="glass pill field"><span class="muted" aria-hidden="true">⌕</span>
+    <input name="q" value="{{ q }}" placeholder="책 제목이나 작가" aria-label="책 제목이나 작가" {% if not q %}autofocus{% endif %}>
+    {% if q %}<a class="muted" href="/search" aria-label="지우기" style="font-size:13px">✕</a>{% endif %}
+    <input type="hidden" name="f" value="{{ f }}"></div>
 </form>
-
-{% if local %}
-<section class="section">
-  <div class="section-head"><h2 class="h2">이미 있는 책 <span class="count mono">{{ local|length }}</span></h2></div>
-  <ul class="index">
-    {% for b in local %}
-    <li><a class="row" href="/books/{{ b.id }}"><span class="no">{{ '%02d' % loop.index }}</span>
-      <span class="title">{{ b.title }} <span class="muted">{{ b.author or '' }}</span></span>
-      <span class="meta">{{ '전문' if b.has_fulltext else '트래커' }}</span></a></li>
-    {% endfor %}
-  </ul>
-</section>
+{% if q %}
+<div class="chips">
+  {% for key, label in (('all','전체'),('full','전문 읽기'),('track','진행률 기록')) %}
+  <a class="chip {{ 'solid' if f == key else 'glass pill thin' }}" href="/search?q={{ q | urlencode }}&f={{ key }}">{{ label }}</a>
+  {% endfor %}
+</div>
+{% if local or hits %}
+<div class="glass list" style="--a:.14;border-radius:26px;padding:6px 16px">
+  {% for b in local %}{{ row_book(b, '') }}{% endfor %}
+  {% for h in hits %}{% set m = h.meta %}
+  <form method="post" action="{{ '/books/import' if m.has_fulltext else '/books/track' }}" class="result-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <input type="hidden" name="source" value="{{ m.source }}"><input type="hidden" name="external_id" value="{{ m.external_id }}">
+    {% if not m.has_fulltext %}<input type="hidden" name="title" value="{{ m.title }}"><input type="hidden" name="authors" value="{{ m.authors|join(', ') }}">
+    <input type="hidden" name="isbn13" value="{{ m.isbn13 or '' }}"><input type="hidden" name="cover_url" value="{{ m.cover_url or '' }}">{% endif %}
+    <button class="result" type="submit">
+      <div class="cover" style="background-color:{{ (m.source ~ m.external_id) | cover }}">{{ m.title[:6] }}</div>
+      <div class="col" style="gap:5px;flex:1;min-width:0"><strong>{{ m.title }}</strong>
+        <span class="cap muted tiny">{{ (m.authors|join(', ')) or '작자 미상' }} · {{ {'wikisource':'위키문헌','gutendex':'Gutendex','kakao':'카카오','naver':'네이버','google_books':'Google Books'}.get(m.source, m.source) }}</span>
+        <span class="badge {{ 'solid' if m.has_fulltext else 'glass thin' }}">{{ '전문 읽기 가능' if m.has_fulltext else '진행률 기록' }}</span></div>
+    </button>
+  </form>
+  {% endfor %}
+</div>
+{% else %}
+<div class="glass card compact"><span class="cap">"{{ q }}" 결과가 없어요. 다른 검색어로 찾아볼까요?</span></div>
 {% endif %}
-
-{% if result %}
-<section class="section">
-  <div class="section-head"><h2 class="h2">검색 결과 <span class="count mono">{{ result.hits|length }}</span></h2>
-    {% if result.errors %}<span class="label">응답 없음: {{ result.errors.keys()|join(', ') }}</span>{% endif %}</div>
-  {% if result.hits %}
-  <div class="scroll-x"><table class="table">
-    <thead><tr><th>#</th><th>제목</th><th>저자</th><th>출처</th><th></th></tr></thead>
-    <tbody>
-    {% for h in result.hits %}{% set m = h.meta %}
-    <tr>
-      <td class="num">{{ '%02d' % loop.index }}</td>
-      <td><strong>{{ m.title }}</strong>{% if m.link %}<br><a href="{{ m.link }}" target="_blank" rel="noopener" class="label">원 출처 ↗</a>{% endif %}</td>
-      <td>{{ m.authors|join(', ') }}</td>
-      <td><span class="chip {% if m.has_fulltext %}lime{% endif %}">{{ m.source }}</span>{% for s in h.sources[1:] %} <span class="chip">{{ s }}</span>{% endfor %}</td>
-      <td>
-        {% if m.has_fulltext %}
-        <form method="post" action="/books/import"><input type="hidden" name="csrf_token" value="{{ csrf }}">
-          <input type="hidden" name="source" value="{{ m.source }}"><input type="hidden" name="external_id" value="{{ m.external_id }}">
-          <button class="btn lime small">전문 가져오기</button></form>
-        {% else %}
-        <form method="post" action="/books/track"><input type="hidden" name="csrf_token" value="{{ csrf }}">
-          <input type="hidden" name="source" value="{{ m.source }}"><input type="hidden" name="external_id" value="{{ m.external_id }}">
-          <input type="hidden" name="title" value="{{ m.title }}"><input type="hidden" name="authors" value="{{ m.authors|join(', ') }}">
-          <input type="hidden" name="isbn13" value="{{ m.isbn13 or '' }}"><input type="hidden" name="cover_url" value="{{ m.cover_url or '' }}">
-          <button class="btn small">트래커로 담기</button></form>
-        {% endif %}
-      </td>
-    </tr>
-    {% endfor %}
-    </tbody>
-  </table></div>
-  {% else %}
-  <p class="empty">결과가 없어요. 다른 검색어로 찾아보세요.</p>
-  {% endif %}
-</section>
+{% if errors %}<p class="tiny muted" style="padding:0 6px">지금 응답하지 않는 곳: {{ errors.keys()|join(', ') }}</p>{% endif %}
+<div class="glass thin" style="border-radius:18px;padding:11px 16px;font-size:12px">상용 도서는 본문 대신 진행률을 기록해 공유해요. 레이스 점수에는 전문 읽기 도서만 반영돼요.</div>
+{% else %}
+<h2 class="h-sec">내 서재</h2>
+{% if shelf %}
+<div class="glass list" style="--a:.14;border-radius:26px;padding:6px 16px">
+  {% for e, b in shelf %}{{ row_book(b, SHELF_LABEL[e.shelf] ~ ' · ' ~ e.progress_pct ~ '%') }}{% endfor %}
+</div>
+{% else %}
+<div class="glass card compact"><span class="cap">아직 담은 책이 없어요. 「봄봄」을 검색해 보세요.</span></div>
+{% endif %}
 {% endif %}
 {% endblock %}

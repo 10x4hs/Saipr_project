@@ -1,57 +1,55 @@
 {% extends "base.html" %}
 {% block title %}{{ book.title }}{% endblock %}
 {% block content %}
-<p class="label mt">{{ book.source }} · {{ '전문 읽기' if book.has_fulltext else '트래커 모드 (본문 없음)' }}{% if book.has_fulltext %} · 청크 {{ book.total_chunks }}개{% endif %}</p>
-<h1 class="display">{{ book.title }}</h1>
-<p class="h3 muted">{{ book.author or '작자 미상' }}</p>
-
-<div class="split mt">
-  <div class="stack">
-    <p class="label">내 진행률</p>
-    <div class="big-num">{{ entry.progress_pct if entry else 0 }}<span style="font-size:.4em">%</span></div>
-    {% if book.has_fulltext %}
-      <a class="btn primary" href="/books/{{ book.id }}/read">{{ '이어 읽기' if entry and entry.verified_chunk >= 0 else '읽기 시작' }}</a>
-      {% if preview %}<p class="muted" style="font-family:var(--serif)">“{{ preview }}…”</p>{% endif %}
-    {% else %}
-      <form method="post" action="/library/{{ book.id }}/progress" class="stack">
-        <input type="hidden" name="csrf_token" value="{{ csrf }}">
-        <div class="inline">
-          <div><label for="pct">진행률 %</label><input id="pct" name="progress_pct" type="number" min="0" max="100" value="{{ entry.progress_pct if entry else 0 }}"></div>
-          <div><label for="cp">또는 현재 쪽</label><input id="cp" name="current_page" type="number" min="0"></div>
-          <div><label for="tp">전체 쪽</label><input id="tp" name="total_pages" type="number" min="1"></div>
-          <button class="btn primary">기록</button>
-        </div>
-        <p class="label">트래커 도서는 레이스 점수에서 빠져요 (검증할 수 없어서요).</p>
-      </form>
-    {% endif %}
-  </div>
-  <div class="stack">
-    <p class="label">서재</p>
-    <form method="post" action="/library/{{ book.id }}/shelf" class="hstack">
-      <input type="hidden" name="csrf_token" value="{{ csrf }}">
-      {% for s, label in SHELF_LABEL.items() %}
-      <button class="btn small {% if entry and entry.shelf == s %}primary{% endif %}" name="shelf" value="{{ s.value }}">{{ label }}</button>
-      {% endfor %}
-    </form>
-    {% if entry and entry.progress_pct >= 100 and entry.shelf.value != 'done' %}
-      <div class="flash">다 읽었어요! ‘완독’으로 옮겨 주세요.{% if book.has_fulltext %} 앱에서 끝까지 읽은 책이라 +50P를 받아요.{% endif %}</div>
-    {% endif %}
+<a class="cap muted" href="/search">‹ 검색</a>
+<div class="row start" style="gap:18px;align-items:flex-end">
+  <div class="cover lg" style="background-color:{{ book.id | cover }}">{{ book.title[:8] }}</div>
+  <div class="col" style="gap:4px;min-width:0">
+    <span class="cap muted">{{ book.author or '작자 미상' }} · {{ '위키문헌' if book.source == 'wikisource' else book.source }}</span>
+    <h1 style="font-size:28px">{{ book.title }}</h1>
+    <span class="badge {{ 'solid' if book.has_fulltext else 'glass thin' }}">{{ '전문 읽기 가능' if book.has_fulltext else '진행률 기록' }}</span>
   </div>
 </div>
 
-<section class="section mt">
-  <div class="section-head"><h2 class="h2">이 책의 읽기방</h2></div>
-  {% if rooms %}
-  <ul class="index">{% for r in rooms %}<li><a class="row" href="/rooms/{{ r.id }}"><span class="no">{{ '%02d' % loop.index }}</span><span class="title">{{ r.name }}</span><span class="meta">{{ r.mode.value }}</span></a></li>{% endfor %}</ul>
+<div class="glass card">
+  <div class="row"><span class="cap muted">내 진행률</span><span class="cap">{{ entry.progress_pct if entry else 0 }}%</span></div>
+  <div class="bar"><b style="width:{{ entry.progress_pct if entry else 0 }}%"></b></div>
+  {% if book.has_fulltext %}
+    {% if preview %}<p class="quote muted" style="font-family:'Noto Serif KR',serif">“{{ preview }}…”</p>{% endif %}
+    <a class="solid btn block" href="/books/{{ book.id }}/read">{{ '이어 읽기' if entry and entry.verified_chunk >= 0 else '읽기 시작' }}</a>
+  {% else %}
+    <form method="post" action="/library/{{ book.id }}/progress" class="form">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}">
+      <div class="row" style="gap:8px">
+        <div class="glass pill field" style="flex:1"><input name="progress_pct" type="number" min="0" max="100" inputmode="numeric" value="{{ entry.progress_pct if entry else 0 }}" aria-label="진행률 퍼센트"><span class="muted">%</span></div>
+        <button class="solid btn">기록</button>
+      </div>
+      <span class="tiny muted">본문이 없는 책이라 직접 기록해요. 레이스 점수에는 들어가지 않아요.</span>
+    </form>
   {% endif %}
-  <form method="post" action="/rooms" class="mt">
-    <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="book_id" value="{{ book.id }}">
-    <div class="inline">
-      <div><label for="rn">새 방 이름</label><input id="rn" name="name" required maxlength="80" placeholder="{{ book.title }} 같이 읽기"></div>
-      <div><label for="mode">모드</label><select id="mode" name="mode"><option value="async">비동기 (각자 페이스)</option><option value="sync">동시 (지금 위치 공유)</option></select></div>
-      <div><label for="ends">목표 종료일</label><input id="ends" name="ends_on" type="date"></div>
-      <button class="btn lime">방 만들기</button>
-    </div>
+  {% if entry and entry.progress_pct >= 100 and entry.shelf.value != 'done' %}
+    <span class="cap">다 읽었어요! 아래에서 ‘완독’으로 옮겨 주세요.{% if book.has_fulltext %} (+50P){% endif %}</span>
+  {% endif %}
+  <form method="post" action="/library/{{ book.id }}/shelf" class="chips">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    {% for s, label in SHELF_LABEL.items() %}
+    <button class="chip {{ 'solid' if entry and entry.shelf == s else 'glass pill thin' }}" name="shelf" value="{{ s.value }}">{{ label }}</button>
+    {% endfor %}
   </form>
-</section>
+</div>
+
+<h2 class="h-sec">이 책으로 같이 읽기</h2>
+{% for r in rooms %}
+<a class="glass card compact" href="/rooms/{{ r.id }}"><div class="row"><strong>{{ r.name }}</strong><span class="cap muted">{{ '동시' if r.mode.value == 'sync' else '비동기' }} ›</span></div></a>
+{% endfor %}
+<details class="glass card" {% if not rooms %}open{% endif %}>
+  <summary style="cursor:pointer;font-weight:700;list-style:none">＋ 새 읽기방 만들기</summary>
+  <form method="post" action="/rooms" class="form" style="margin-top:12px">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}"><input type="hidden" name="book_id" value="{{ book.id }}">
+    <div class="glass pill field"><input name="name" required maxlength="80" placeholder="{{ book.title }} 같이 읽기" aria-label="방 이름"></div>
+    <div class="glass pill field"><select name="mode" class="plain" aria-label="모드"><option value="async">비동기 · 각자 편할 때</option><option value="sync">동시 · 지금 위치 공유</option></select></div>
+    <div class="glass pill field"><span class="cap muted">목표일</span><input name="ends_on" type="date" aria-label="목표 완독일"></div>
+    <button class="solid btn block">방 만들고 친구 초대하기</button>
+  </form>
+</details>
 {% endblock %}

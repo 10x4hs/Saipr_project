@@ -9,7 +9,7 @@
 
  **[PRD](docs/PRD.md)** · [디자인 시스템](docs/design-system.md) · [아키텍처](docs/architecture.md) · [GOAL](GOAL.md) · [Figma](https://www.figma.com/design/mp2nKNmBdJ7Dg2rc2p9rht)
 
-<img src="docs/images/index-01-home.png" width="260" alt="홈"> <img src="docs/images/index-03-reader.png" width="260" alt="리더"> <img src="docs/images/index-04-room.png" width="260" alt="읽기방">
+<img src="docs/images/glass-01-home.png" width="260" alt="홈"> <img src="docs/images/glass-03-reader.png" width="260" alt="리더"> <img src="docs/images/glass-04-room.png" width="260" alt="읽기방">
 
 </div>
 
@@ -61,27 +61,27 @@ Postgres로 돌리려면 `cp .env.example .env && docker compose up --build`를 
 
 브라우저 창 두 개를 띄웁니다. 하나는 일반 창, 하나는 시크릿 창이에요.
 
-1. **창 A — 서연 로그인** → 홈. 상단 라임 띠에 친구 진행률이 흐르고, `지금 읽는 중`·`내 읽기방`·`이번 주 레이스`가 보여요.
-2. **창 A — 「봄봄 같이 읽기」 방 열기** → 아래쪽 `[03] 초대 링크`를 복사합니다.
-3. **창 B — 초대 링크 붙여넣기** → 로그인 전에도 방 미리보기(책·멤버·진행률)가 보여요 → `처음이면 가입하기` → 가입하면 같은 초대 화면으로 돌아와요 → `참여하기`.
-4. **창 A의 방 화면** — 새 멤버가 눈금자에 나타나고 활동 로그에 `○○님이 들어왔어요`가 새로고침 없이 찍혀요.
-5. **창 B — `함께 읽기 →`(리더)** → 한 청크를 1분 정도 읽고 다음 청크로 스크롤합니다(10초마다 서버로 전송). 청크 머리가 `✓ 검증됨`으로 바뀌고 `+1P` 토스트가 떠요.
-   - 빨리 넘기기만 하면 검증되지 않고 "천천히 읽어도 괜찮아요"가 떠요.
-6. **창 A의 방 화면** — B의 마커가 오른쪽으로 움직이고, 방 안 레이스 순위가 바뀌어요.
-7. **창 B — 문단 탭** → 이모지·한줄평 남기기. **창 A의 리더**에서는 아직 그 위치를 안 읽었으니 `🔒 앞에서 1개의 반응이 기다리고 있어요`로만 보여요(스포일러 가드). `내 정보 → 스포일러 가드 끄기`를 누르면 보여요.
-8. **팀·리그 → 봄봄단 → 배틀 신청**으로 레이스·한줄평 배틀, **내 정보**에서 포인트·챌린지·52주 아카이브·알림함을 보여 줍니다.
+1. **창 A — 서연 로그인** → 홈. "오늘도 함께 읽어요", 이어 읽기 카드, 내 읽기방, 진행 중인 레이스가 보여요.
+2. **창 A — 「봄봄 같이 읽기」 방 열기** → 노란 `카카오톡으로 친구 초대`를 누릅니다. 휴대폰이면 공유 시트(카카오톡 포함)가 뜨고, PC면 초대 링크가 복사돼요.
+3. **창 B — 초대 링크 붙여넣기** → 로그인 전에도 방 미리보기(책·멤버·진행률)가 보여요 → `가입하고 참여하기` → 가입하면 같은 초대 화면으로 돌아와요 → `참여하기`.
+4. **창 A의 방 화면** — 새로고침하지 않아도 멤버 진행률에 새 친구가 나타나고 "○○님이 들어왔어요" 알림이 떠요.
+5. **창 B — `함께 읽기`(리더)** → 첫 쪽을 1분 정도 읽어요(10초마다 서버로 전송). 쪽번호 옆에 `✓ 읽음`이 붙고 `+1P` 알림이 떠요.
+   - 빨리 넘기기만 하면 인정되지 않고 "천천히 읽어도 괜찮아요"가 떠요.
+6. **창 A의 방 화면** — B의 진행률 막대가 늘어나요. 창 A의 리더에는 "○○님이 이 쪽을 함께 읽고 있어요"가 보여요.
+7. **창 B — 문단을 탭** → 이모지·한줄평 남기기. **창 A의 리더**에서는 아직 그 위치를 안 읽었으니 아래에 `잠김 앞에서 1개의 반응이 기다리고 있어요`로만 보여요(스포일러 가드). 홈의 유리 구슬 → 내 정보 → 스포일러 가드를 끄면 보여요.
+8. **리그 탭** → 이번 주 리그 순위와 「봄봄단 vs 동백꽃파」 레이스(밤 화면). **봄봄단 → 다른 팀에 도전하기**로 레이스·한줄평 배틀을 만들 수 있어요. 유리 구슬을 누르면 포인트·챌린지·알림함이 있어요.
 
 ## 화면
 
-디자인은 refs.gallery Experimental 카테고리를 조사해 정한 **Index(색인)** 방향입니다. 흑백 헤어라인 위에 라임·핑크를 채움으로만 쓰고, 리더 본문은 장식 없이 Noto Serif KR 18px로 둡니다. 근거와 토큰은 [디자인 시스템](docs/design-system.md)에 있어요.
+디자인은 처음 만든 시안 **Glass v2**를 그대로 옮겼어요. 흐린 사진 같은 배경 위에 유리 카드가 떠 있고, 흰 알약 버튼과 떠 있는 유리 탭바, 친구마다 색이 다른 동그라미 아바타를 써요. 리더는 유리 상단바 아래 아이보리 종이 시트에 명조로 읽고, 레이스는 밤하늘 화면으로 바뀌어요. 휴대폰에서는 화면 전체, PC에서는 가운데 폰 크기 화면으로 보여요. 재질·토큰은 [디자인 시스템](docs/design-system.md)에 있어요.
 
 | 홈 | 검색 | 리더 |
 |---|---|---|
-| <img src="docs/images/index-01-home.png" width="260"> | <img src="docs/images/index-02-search.png" width="260"> | <img src="docs/images/index-03-reader.png" width="260"> |
+| <img src="docs/images/glass-01-home.png" width="260"> | <img src="docs/images/glass-02-search.png" width="260"> | <img src="docs/images/glass-03-reader.png" width="260"> |
 | **읽기방** | **레이스** | **팀·리그** |
-| <img src="docs/images/index-04-room.png" width="260"> | <img src="docs/images/index-05-race.png" width="260"> | <img src="docs/images/index-06-league.png" width="260"> |
+| <img src="docs/images/glass-04-room.png" width="260"> | <img src="docs/images/glass-05-race.png" width="260"> | <img src="docs/images/glass-06-league.png" width="260"> |
 
-이전 시안 A(Glass)·B(Paper)는 [docs/mockups/archive/](docs/mockups/archive/)에 보관했어요.
+처음 시안 HTML(A Glass · B Paper)은 [docs/mockups/archive/](docs/mockups/archive/)에 있어요.
 
 ## 기능
 

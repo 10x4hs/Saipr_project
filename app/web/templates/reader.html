@@ -1,56 +1,55 @@
 {% extends "base.html" %}
 {% block title %}{{ book.title }}{% endblock %}
-{% block topbar %}{% endblock %}
-{% block main_class %}reader{% endblock %}
-{% block footer %}{% endblock %}
-{% block content %}
-<div id="reader-root"
-     data-book="{{ book.id }}" data-total="{{ book.total_chunks }}" data-start="{{ start }}"
+{% block screen_class %}no-tabs{% endblock %}
+{% block tabs %}{% endblock %}
+{% block body %}
+<div id="reader-root" data-book="{{ book.id }}" data-total="{{ book.total_chunks }}" data-start="{{ start }}"
      data-verified="{{ entry.verified_chunk }}" data-room="{{ room.id if room else '' }}"
      data-mode="{{ room.mode.value if room else '' }}" data-me="{{ user.id }}"
      data-guard="{{ 'on' if user.spoiler_guard else 'off' }}">
-<header class="reader-top" id="reader-top">
-  <div class="wrap">
-    <a class="btn small" href="{{ '/rooms/%d' % room.id if room else '/books/%d' % book.id }}" aria-label="뒤로">←</a>
-    <span class="t">{{ book.title }}</span>
-    <span class="mono" id="pct" title="검증된 진행률">{{ entry.progress_pct }}%</span>
-    {% if rooms|length > 1 %}
-    <select id="room-pick" aria-label="함께 읽는 방" style="width:auto;min-height:36px;padding:4px 8px">
-      {% for r in rooms %}<option value="{{ r.id }}" {% if room and r.id == room.id %}selected{% endif %}>{{ r.name }}</option>{% endfor %}
-    </select>
-    {% endif %}
-    <button class="btn small" id="font-btn" aria-label="글자 크기">가</button>
-    <button class="btn small" id="theme-btn" aria-label="배경">◐</button>
-  </div>
-  <div class="reader-progress"><i id="pbar" style="width:{{ entry.progress_pct }}%"></i></div>
-</header>
-
-{% if members %}
-<div class="wrap mono" style="font-size:12px;padding-top:12px" id="who">
-  {{ room.name }} ·
-  {% for m in members %}<span class="chip {% if m.user_id == user.id %}lime{% endif %}" data-member="{{ m.user_id }}" data-nick="{{ m.nickname }}" data-chunk="{{ m.verified_chunk + 1 }}">{{ m.nickname }} <span data-pct>{{ m.progress_pct }}</span>%</span> {% endfor %}
-  · 스포일러 가드 {{ 'ON' if user.spoiler_guard else 'OFF' }}
-</div>
-{% endif %}
-
-<div class="page" id="page" aria-live="polite">
-  {% if start > 0 %}<p style="grid-column:1/-1;text-align:center"><button class="btn small" id="load-prev">↑ 앞 청크 불러오기</button></p>{% endif %}
-</div>
-<p style="text-align:center;padding-bottom:80px"><button class="btn" id="load-next" hidden>다음 청크 →</button></p>
-</div>
-
-<div class="sheet" id="sheet" hidden role="dialog" aria-label="문단 반응">
-  <div class="wrap">
-    <div class="hstack"><strong id="sheet-title">¶</strong><button class="btn small right" id="sheet-close">닫기</button></div>
-    <div class="emoji-row mt" id="emoji-row">
-      {% for e in EMOJIS %}<button type="button" data-emoji="{{ e }}" aria-label="{{ e }} 반응">{{ e }}</button>{% endfor %}
+  <header class="glass reader-top" id="reader-top">
+    <div class="row">
+      <a href="{{ '/rooms/%d' % room.id if room else '/books/%d' % book.id }}"><strong style="font-weight:500">‹&nbsp; {{ book.title }}</strong></a>
+      <span class="ctl"><button type="button" id="settings-btn" aria-label="읽기 설정" aria-haspopup="dialog">가</button><span class="cap" id="pct">{{ entry.progress_pct }}%</span></span>
     </div>
-    <form id="comment-form" class="mt">
-      <label for="comment">한줄평</label>
-      <div class="inline"><input id="comment" maxlength="280" placeholder="이 문단, 어땠어요?"><button class="btn primary">남기기</button></div>
-    </form>
-    <ul class="rx-list" id="sheet-list"></ul>
-  </div>
+    <div class="bar"><b id="pbar" style="width:{{ entry.progress_pct }}%"></b></div>
+  </header>
+  <article class="glass book" id="book">
+    <div class="run">{{ book.title|list|join(' ') }} · {{ (book.author or '작자 미상')|list|join(' ') }}</div>
+    {% if start > 0 %}<button class="more" type="button" id="load-prev" style="margin-bottom:18px">앞 쪽 보기</button>{% endif %}
+    <div id="page" aria-live="polite"></div>
+    <button class="more" type="button" id="load-next" hidden>다음 쪽</button>
+  </article>
+  {% for m in members %}{% if m.user_id != user.id %}<span hidden data-member="{{ m.user_id }}" data-nick="{{ m.nickname }}" data-chunk="{{ m.verified_chunk + 1 }}"></span>{% endif %}{% endfor %}
 </div>
+{% endblock %}
+{% block overlay %}
+<div class="guard" id="guard" hidden><small>잠김</small><span id="guard-text"></span></div>
+
+<div class="sheet-bg" id="sheet-bg" hidden></div>
+<section class="glass frosted sheet" id="rx-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="rx-title">
+  <div class="grab"></div>
+  <div class="row"><h2 id="rx-title">이 문단</h2><button class="tiny" type="button" data-close>닫기</button></div>
+  <div class="emoji-row" id="emoji-row">{% for e in EMOJIS %}<button type="button" data-emoji="{{ e }}" aria-label="{{ e }} 반응">{{ e }}</button>{% endfor %}</div>
+  <form id="comment-form" class="row" style="gap:8px">
+    <div class="glass pill field" style="flex:1"><input id="comment" maxlength="280" placeholder="이 문단, 어땠어요?" aria-label="한줄평"></div>
+    <button class="solid btn" style="background:var(--ink);color:#fff">남기기</button>
+  </form>
+  <div class="rx-list" id="rx-list"></div>
+</section>
+
+<section class="glass frosted sheet" id="set-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="set-title">
+  <div class="grab"></div>
+  <div class="row"><h2 id="set-title">읽기 설정</h2><button class="tiny" type="button" data-close>닫기</button></div>
+  <span class="tiny">글자 크기</span>
+  <div class="seg" id="size-seg"><button type="button" data-size="0">작게</button><button type="button" data-size="1">보통</button><button type="button" data-size="2">크게</button><button type="button" data-size="3">아주 크게</button></div>
+  <span class="tiny">배경</span>
+  <div class="seg" id="theme-seg"><button type="button" data-theme="paper">종이</button><button type="button" data-theme="white">흰색</button><button type="button" data-theme="night">밤</button></div>
+  {% if rooms|length > 1 %}
+  <span class="tiny">함께 읽는 방</span>
+  <div class="glass pill field"><select id="room-pick" class="plain" aria-label="함께 읽는 방">{% for r in rooms %}<option value="{{ r.id }}" {% if room and r.id == room.id %}selected{% endif %}>{{ r.name }}</option>{% endfor %}</select></div>
+  {% endif %}
+  <span class="tiny" style="opacity:.7">스포일러 가드 {{ '켜짐 — 아직 안 읽은 곳의 반응은 숨겨요' if user.spoiler_guard else '꺼짐' }} · 내 정보에서 바꿀 수 있어요</span>
+</section>
 {% endblock %}
 {% block scripts %}<script src="/static/js/reader.js" defer></script>{% endblock %}

@@ -61,16 +61,17 @@
   socket("/ws/me", (ev) => {
     if (ev.type !== "notification.created") return;
     toast("🔔 " + ev.data.body, 5000);
-    let badge = document.getElementById("unread");
-    if (!badge) {
-      const me = document.querySelector('.nav a[href="/me"]');
-      if (!me) return;
-      badge = document.createElement("span");
-      badge.id = "unread";
-      badge.className = "badge count";
-      badge.textContent = "0";
-      me.appendChild(badge);
+    // 홈 탭과 홈의 유리 구슬에 빨간 점
+    for (const host of document.querySelectorAll('.tabs a[href="/"], a.orb')) {
+      if (!host.querySelector(".dot")) host.insertAdjacentHTML("beforeend", '<span class="dot"></span>');
     }
-    badge.textContent = String(Number(badge.textContent || 0) + 1);
+  });
+
+  // 복사 버튼 (팀 초대 코드 등)
+  document.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-copy]");
+    if (!b) return;
+    try { await navigator.clipboard.writeText(b.dataset.copy); toast("복사했어요"); }
+    catch (_) { toast(b.dataset.copy); }
   });
 })();

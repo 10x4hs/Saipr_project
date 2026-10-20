@@ -1,24 +1,20 @@
 {% extends "base.html" %}
 {% block title %}{{ room.name }} 초대{% endblock %}
+{% block screen_class %}{% if not user %}no-tabs{% endif %}{% endblock %}
 {% block content %}
-<p class="label mt">[INVITE] 함께 읽자는 초대가 왔어요</p>
-<h1 class="display">{{ room.name }}</h1>
-<p class="h3">{{ book.title }} <span class="muted">{{ book.author or '' }}</span></p>
-<ul class="index mt">
-  {% for m in members %}
-  <li class="row"><span class="no">{{ '%02d' % loop.index }}</span>
-    <span>{{ m.nickname }}{% if m.is_owner %} <span class="chip">방장</span>{% endif %}<div class="bar mt"><i style="width:{{ m.progress_pct }}%"></i></div></span>
-    <span class="meta">{{ m.progress_pct }}%</span></li>
-  {% endfor %}
-</ul>
-<div class="mt">
-  {% if expired %}
-    <div class="flash error">초대 링크가 만료됐어요. 방장에게 새 링크를 받아 주세요.</div>
-  {% elif user %}
-    <form method="post" action="/r/{{ code }}/join"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="btn primary" style="width:100%">참여하기</button></form>
-  {% else %}
-    <a class="btn primary" style="width:100%" href="/login?next={{ ('/r/' ~ code)|urlencode }}">로그인하고 참여하기</a>
-    <p class="mt"><a href="/signup?next={{ ('/r/' ~ code)|urlencode }}">처음이면 가입하기 →</a></p>
-  {% endif %}
-</div>
+<div class="col" style="gap:3px;margin-top:8px"><span class="cap muted">함께 읽자는 초대가 왔어요</span><h1 style="font-size:28px">{{ room.name }}</h1></div>
+<div class="glass card"><div class="row start" style="gap:14px">
+  <div class="cover" style="background-color:{{ book.id | cover }}">{{ book.title[:6] }}</div>
+  <div class="col" style="gap:4px"><strong>{{ book.title }}</strong><span class="cap muted">{{ book.author or '작자 미상' }} · {{ '동시' if room.mode.value == 'sync' else '비동기' }}{% if room.ends_at %} · {{ room.ends_at | dday }}{% endif %}</span>
+    <div class="avs">{% for m in members[:6] %}<span class="av" style="background:{{ m.user_id | av }}">{{ m.nickname | initial }}</span>{% endfor %}</div></div>
+</div></div>
+{% include "_members.html" %}
+{% if expired %}
+<div class="glass flash error">초대 링크가 만료됐어요. 방장에게 새 링크를 받아 주세요.</div>
+{% elif user %}
+<form method="post" action="/r/{{ code }}/join"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="solid btn block">참여하기</button></form>
+{% else %}
+<a class="solid btn block" href="/login?next={{ ('/r/' ~ code)|urlencode }}">로그인하고 참여하기</a>
+<p class="cap" style="text-align:center">처음이에요? <a class="link" href="/signup?next={{ ('/r/' ~ code)|urlencode }}">가입하고 참여하기</a></p>
+{% endif %}
 {% endblock %}

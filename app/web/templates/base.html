@@ -2,43 +2,40 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="csrf-token" content="{{ csrf }}">
+  <meta name="theme-color" content="#6f767f">
   <title>{% block title %}함께읽기{% endblock %} · 함께읽기</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/index.css">
-  {% block head %}{% endblock %}
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/glass.css">
 </head>
-<body {% block body_attrs %}{% endblock %}>
-{% block topbar %}
-<header class="top">
-  <div class="wrap">
-    <a class="mark" href="/">함께읽기<sup>v0.2</sup></a>
-    {% if user %}
-    <nav class="nav" aria-label="주요 메뉴">
-      <a href="/" {% if path == '/' %}aria-current="page"{% endif %}>홈</a>
-      <a href="/search" {% if path.startswith('/search') %}aria-current="page"{% endif %}>검색</a>
-      <a href="/teams" {% if path.startswith('/teams') %}aria-current="page"{% endif %}>팀·리그</a>
-      <a href="/me" {% if path == '/me' %}aria-current="page"{% endif %}>{{ user.nickname }}{% if unread %}<span class="badge count" id="unread">{{ unread }}</span>{% endif %}</a>
-      <form method="post" action="/logout"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button type="submit">로그아웃</button></form>
-    </nav>
-    {% else %}
-    <nav class="nav"><a href="/login">로그인</a><a href="/signup">가입</a></nav>
-    {% endif %}
+<body>
+<div class="screen {% block screen_class %}{% endblock %}">
+  {{ BACKDROP_NIGHT if 'night' in self.screen_class() else BACKDROP_DAY }}
+  <div class="status" aria-hidden="true"><span>{{ clock }}</span><span>5G 100%</span></div>
+  <div class="scroll" id="scroll">
+    {% block body %}
+    <main class="content">
+      {% if flash %}<div class="glass flash {{ flash.kind }}" role="status">{{ flash.message }}</div>{% endif %}
+      {% block content %}{% endblock %}
+    </main>
+    {% endblock %}
   </div>
-</header>
-{% endblock %}
-{% block ticker %}{% endblock %}
-<main class="{% block main_class %}wrap{% endblock %}">
-  {% if flash %}<div class="flash {{ flash.kind }}" role="status">{{ flash.message }}</div>{% endif %}
-  {% block content %}{% endblock %}
-</main>
-{% block footer %}
-<footer class="wrap foot">함께읽기 — 본문은 퍼블릭 도메인(위키문헌·Gutendex)만 제공해요. 외부 검색 결과는 원 출처로 연결돼요.</footer>
-{% endblock %}
-<div class="toast" id="toast" role="status" hidden></div>
+  {% block tabs %}
+  {% if user %}
+  <nav class="glass pill tabs" aria-label="주요 메뉴">
+    <a href="/" {% if tab == 'home' %}aria-current="page"{% endif %}><b>⌂</b>홈{% if unread %}<span class="dot" aria-label="새 알림 {{ unread }}개"></span>{% endif %}</a>
+    <a href="/search" {% if tab == 'search' %}aria-current="page"{% endif %}><b>⌕</b>검색</a>
+    <a href="/rooms" {% if tab == 'rooms' %}aria-current="page"{% endif %}><b>◎</b>읽기방</a>
+    <a href="/teams" {% if tab == 'league' %}aria-current="page"{% endif %}><b>▲</b>리그</a>
+  </nav>
+  {% endif %}
+  {% endblock %}
+  <div class="toast" id="toast" role="status" hidden></div>
+  {% block overlay %}{% endblock %}
+</div>
 {% if user %}<script src="/static/js/common.js" defer></script>{% endif %}
 {% block scripts %}{% endblock %}
 </body>

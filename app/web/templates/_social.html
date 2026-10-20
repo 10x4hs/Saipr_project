@@ -1,0 +1,6 @@
+{% if providers %}
+<div class="or">또는</div>
+{% for name, p in providers.items() %}
+<a class="btn block pill {{ name }}" href="/auth/{{ name }}/login?next={{ next | urlencode }}">{{ p.label }}로 계속하기</a>
+{% endfor %}
+{% endif %}

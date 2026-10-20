@@ -1,0 +1,8 @@
+<a class="glass card compact" href="/battles/{{ r.battle.id }}">
+  <div class="row">
+    <div class="col"><strong>{{ r.mine.name }} vs {{ r.theirs.name }}</strong>
+      <span class="muted tiny">{{ '페이지 레이스' if r.battle.type.value == 'page_race' else '한줄평 배틀' }} · {{ r.book.title if r.book else '' }}</span></div>
+    <div class="avs">{% for uid, nick, _ in r.mine.members[:3] %}<span class="av" style="background:{{ uid | av }}">{{ nick | initial }}</span>{% endfor %}</div>
+  </div>
+  <span class="cap">{{ r.line }}</span>
+</a>

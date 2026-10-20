@@ -1,0 +1,14 @@
+{# 멤버 진행률 카드 — 시안 읽기방 #}
+<div class="glass card" style="border-radius:26px;gap:15px" id="members">
+  <h2>멤버 진행률</h2>
+  {% for m in members %}{% set me = user and m.user_id == user.id %}
+  <div class="row" data-uid="{{ m.user_id }}">
+    <span class="av lg" style="background:{{ '#1d1d1f' if me else (m.user_id | av) }}">{{ '나' if me else (m.nickname | initial) }}</span>
+    <div class="col" style="flex:1;gap:6px;min-width:0">
+      <div class="row"><span style="font-size:14px;{% if me %}font-weight:700{% endif %}">{{ '나' if me else m.nickname }}{% if m.is_owner %} (방장){% endif %}</span>
+        <span class="muted tiny"><span data-pct>{{ m.progress_pct }}</span>%{% if counts is defined and book.has_fulltext %} · 검증 <span data-count>{{ counts[m.user_id] }}</span>청크{% endif %}</span></div>
+      <div class="bar {{ '' if me else 'soft' }}"><b style="width:{{ m.progress_pct }}%"></b></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>

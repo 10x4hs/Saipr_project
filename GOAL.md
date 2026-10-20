@@ -48,9 +48,9 @@
 
 ## Design decision (결정됨)
 
-A(Glass v2)·B(종이 서재) 둘 다 채택하지 않고, refs.gallery Experimental 카테고리 조사로 **Index(색인)** 방향을 정했다.
-기준은 [docs/design-system.md](docs/design-system.md), 두 시안은 `docs/mockups/archive/`로 옮겼다.
-리더 가독성 기준(본문 16px 이상 · 대비 AA)은 리더 기본 18px · 본문 대비 16.8:1로 통과.
+처음 시안 **A(Glass v2)**를 앱 전체에 그대로 재현했다(리더는 유리 틀 + 종이색 본문, 레이스는 밤 배경). 기준은 [docs/design-system.md](docs/design-system.md), 결정 과정은 [.grill/ui-rebuild-glass.md](.grill/ui-rebuild-glass.md).
+중간에 시도한 Index(색인) 방향은 "웹페이지 같고 삭막하다"는 피드백으로 폐기했다.
+리더 가독성 기준(본문 16px 이상 · 대비 AA)은 종이 시트 위 잉크색 #2a251f(대비 AAA) · 기본 16.5px(4단계 조절)로 통과.
 
 ## Scope
 

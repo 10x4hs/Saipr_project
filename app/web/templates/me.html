@@ -1,47 +1,32 @@
 {% extends "base.html" %}
 {% block title %}내 정보{% endblock %}
 {% block content %}
-<p class="label mt">{{ user.email or '소셜 계정' }}</p>
-<h1 class="display">{{ user.nickname }}</h1>
-
-<div class="split">
-  <section>
-    <p class="label">[01] 포인트</p>
-    <div class="big-num">{{ balance }}<span style="font-size:.35em">P</span></div>
-    <table class="table mt">{% for p in history %}<tr><td class="mono">{{ p.created_at | kst }}</td><td>{{ {'chunk':'청크 검증','complete':'완독','battle_win':'배틀 승리','challenge':'챌린지'}.get(p.source, p.source) }}</td><td class="num">+{{ p.amount }}</td></tr>{% endfor %}</table>
-  </section>
-  <section>
-    <p class="label">[02] 챌린지</p>
-    <ul class="index">
-      {% for c, prog, goal in challenges %}
-      <li class="row"><span class="no">{{ '%02d' % loop.index }}</span>
-        <span>{{ c.title }} <span class="muted">+{{ c.reward_points }}P</span><div class="bar mt"><i style="width:{{ [100, (prog * 100 // goal)]|min }}%"></i></div></span>
-        <span class="meta">{{ [prog, goal]|min }}/{{ goal }}</span></li>
-      {% endfor %}
-    </ul>
-  </section>
+<a class="cap muted" href="/">‹ 홈</a>
+<div class="row start" style="gap:16px">
+  <span class="av xl" style="background:{{ user.id | av }}">{{ user.nickname | initial }}</span>
+  <div class="col" style="gap:2px"><h1 style="font-size:28px">{{ user.nickname }}</h1><span class="cap muted">{{ user.email or '소셜 계정' }}</span></div>
 </div>
-
-<section class="section mt">
-  <div class="section-head"><h2 class="h2">올해의 주차 아카이브</h2><span class="label">주마다 검증한 청크</span></div>
-  <div class="weeks">{% for n in weeks %}<span class="{% if n >= 20 %}hot{% elif n > 0 %}on{% endif %}" title="{{ loop.index }}주차 · {{ n }}청크">{{ '%02d' % loop.index }}</span>{% endfor %}</div>
-</section>
-
-<section class="section">
-  <div class="section-head"><h2 class="h2">알림 <span class="count mono">{{ inbox|length }}</span></h2><span class="label">22~08시 방해 금지 · 하루 5건</span></div>
-  <ul class="index">
-    {% for n in inbox %}
-    <li><a class="row" href="{{ n.link or '#' }}"><span class="no">{% if not n.read_at %}●{% endif %}</span><span>{{ n.body }}</span><span class="meta">{{ n.created_at | kst }}</span></a></li>
-    {% else %}<li class="empty">알림이 없어요.</li>{% endfor %}
-  </ul>
-</section>
-
-<section class="section">
-  <div class="section-head"><h2 class="h2">설정</h2></div>
-  <form method="post" action="/me/settings" class="hstack"><input type="hidden" name="csrf_token" value="{{ csrf }}">
-    <span>스포일러 가드 <strong>{{ 'ON' if user.spoiler_guard else 'OFF' }}</strong></span>
-    <button class="btn small" name="spoiler_guard" value="{{ 'off' if user.spoiler_guard else 'on' }}">{{ '끄기' if user.spoiler_guard else '켜기' }}</button>
-  </form>
-  <p class="label mt">끄면 내가 아직 읽지 않은 위치의 반응도 모두 보여요.</p>
-</section>
+<div class="glass card" style="padding:22px">
+  <span class="cap muted">내 포인트</span>
+  <strong style="font-size:40px;letter-spacing:-1px">{{ '{:,}'.format(balance) }}<span style="font-size:20px">P</span></strong>
+  <span class="cap muted">청크를 끝까지 읽으면 1P · 완독 50P · 배틀 승리 100P</span>
+</div>
+<div class="glass card" style="--a:.13;border-radius:26px;gap:14px">
+  <h2>챌린지</h2>
+  {% for c, prog, goal in challenges %}
+  <div class="col" style="gap:6px"><div class="row"><span style="font-size:14px">{{ c.title }}</span><span class="muted tiny">{{ [prog, goal]|min }}/{{ goal }} · +{{ c.reward_points }}P</span></div>
+    <div class="bar {{ '' if prog >= goal else 'soft' }}"><b style="width:{{ [100, (prog * 100 // goal)]|min }}%"></b></div></div>
+  {% endfor %}
+</div>
+<div class="glass card" style="--a:.13;border-radius:26px;gap:10px">
+  <h2>알림</h2>
+  {% for n in inbox[:8] %}
+  <a class="row" href="{{ n.link or '#' }}" style="font-size:14px;gap:10px"><span>{% if not n.read_at %}<b style="color:#ffd60a">●</b> {% endif %}{{ n.body }}</span><span class="tiny muted" style="flex:none">{{ n.created_at | kst('%H:%M') }}</span></a>
+  {% else %}<span class="cap muted">새 알림이 없어요. 밤 10시~아침 8시에는 알림을 모아 뒀다가 보내요.</span>{% endfor %}
+</div>
+<form method="post" action="/me/settings" class="glass card compact row"><input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <div class="col"><strong>스포일러 가드</strong><span class="tiny muted">{{ '아직 안 읽은 곳의 반응은 숨겨요' if user.spoiler_guard else '앞선 반응도 모두 보여요' }}</span></div>
+  <button class="switch" role="switch" aria-checked="{{ 'true' if user.spoiler_guard else 'false' }}" aria-label="스포일러 가드" name="spoiler_guard" value="{{ 'off' if user.spoiler_guard else 'on' }}"></button>
+</form>
+<form method="post" action="/logout" style="text-align:center"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="tiny muted link">로그아웃</button></form>
 {% endblock %}
