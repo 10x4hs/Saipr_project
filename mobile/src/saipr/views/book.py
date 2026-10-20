@@ -5,7 +5,7 @@ from __future__ import annotations
 import flet as ft
 
 from saipr.app import gather_safe
-from saipr.core.api import ApiError
+from saipr.core.api import ApiError, Offline
 from saipr.ui import widgets as w
 from saipr.views.base import Screen
 
@@ -149,7 +149,7 @@ class BookScreen(Screen):
         async def create(e):
             try:
                 room = await self.api.post("/rooms", {"book_id": self.book_id, "name": name.value or "", "mode": list(mode.selected)[0]})
-            except ApiError as err:
+            except (ApiError, Offline) as err:
                 self.app.toast(err.message)
                 return
             self.app.close_dialog()

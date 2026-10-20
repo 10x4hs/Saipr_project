@@ -59,6 +59,10 @@ class UserScreen(Screen):
         if hs:
             out.append(d.section("공개한 밑줄"))
             for h in hs:
+                if h.get("locked") or h.get("quote") is None:  # 내가 아직 안 읽은 곳 — 스포일러 가드
+                    out.append(w.pill(d, f"잠김 · 「{(h.get('book') or {}).get('title', '')}」 {(h.get('chunk_index') or 0) + 1}쪽 — 거기까지 읽으면 보여요",
+                                      icon=ft.Icons.LOCK_OUTLINE))
+                    continue
                 out.append(d.card(ft.Column([
                     ft.Text(f"“{h['quote']}”", size=15, font_family="Gowun Batang", color=d.p.fg),
                     *([d.text(h["note"], 13, muted=True)] if h.get("note") else []),

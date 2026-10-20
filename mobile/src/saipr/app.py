@@ -18,6 +18,7 @@ import flet as ft
 from saipr.core.api import Api, ApiError, Offline
 from saipr.core.realtime import Realtime
 from saipr.core.store import Store
+from saipr.core.sync import ReadingSync, SessionExpired
 from saipr.ui.theme import Design, alpha
 
 log = logging.getLogger(__name__)
@@ -39,7 +40,8 @@ class App:
         self.user: dict | None = None
         self.unread = 0
         self.stack: list = []
-        self.realtime = Realtime(lambda path: self.api.ws_url(path))
+        self.realtime = Realtime(lambda path: self.api.ws_url(path), self._realtime_rejected)
+        self.sync = ReadingSync(self.api, self.store, lambda: (self.user or {}).get("id"))
         self.me_channel_handler = None
         self._tasks: set[asyncio.Task] = set()
 
@@ -136,6 +138,17 @@ class App:
         self.me_channel_handler = on_me
         ch.subscribe(on_me)
         self.run(self._refresh_unread())
+        self.run(self._send_pending())
+
+    def _realtime_rejected(self, path: str) -> None:
+        if path == "/ws/me" and self.user:  # 내 채널이 거절됐다 = 토큰이 더 이상 유효하지 않다
+            self.run(self.session_expired())
+
+    async def _send_pending(self) -> None:
+        try:
+            await self.sync.send_pending()
+        except SessionExpired:
+            await self.session_expired()
 
     async def _refresh_unread(self) -> None:
         try:
@@ -153,14 +166,19 @@ class App:
         self.go_tab(0)
 
     async def logout(self) -> None:
-        await self.api.logout()
-        self.realtime.close_all()
+        # 실시간 채널 안(이벤트 처리 중)에서 불려도 끝까지 가도록: 상태를 먼저 지우고, 채널은 맨 마지막에 닫는다.
+        # 아직 못 보낸 읽은 기록은 계정별로 기기에 남겨 두었다가 그 계정으로 다시 로그인하면 보낸다.
         for k in ("token", "user"):
             await self.store.remove(k)
+        try:
+            await self.api.logout()
+        except Exception:
+            self.api.token = None
         self.user, self.unread = None, 0
         from saipr.views.start import StartScreen
 
         self.set_stack([StartScreen(self, "/start", server=self.api.base_url)])
+        self.realtime.close_all()
 
     async def session_expired(self) -> None:
         self.toast("로그인이 만료됐어요. 다시 로그인해 주세요.")

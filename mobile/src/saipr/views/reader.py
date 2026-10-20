@@ -15,6 +15,7 @@ from saipr.app import gather_safe
 from saipr.core import fmt
 from saipr.core.api import ApiError, Offline
 from saipr.core.reading import MILESTONES, DwellTracker, EventQueue, SpeedModel, crossed_milestone
+from saipr.core.sync import SessionExpired
 from saipr.ui import widgets as w
 from saipr.ui.theme import HIGHLIGHT_COLORS, alpha
 from saipr.views.base import Screen
@@ -75,7 +76,7 @@ class ReaderScreen(Screen):
 
     async def load(self):
         self.pref.update(await self.app.store.get("reader", {}) or {})
-        self.queue.items = await self.app.store.get(f"queue.{self.book_id}", []) or []
+        self.queue = await self.app.sync.load(self.book_id)
         self.speed.cpm = await self.app.store.get("cpm", self.speed.cpm)
         try:
             info, library, rooms = await gather_safe(
@@ -383,22 +384,13 @@ class ReaderScreen(Screen):
             await self.flush()
 
     async def flush(self) -> None:
-        if not len(self.queue):
-            return
-        batch = self.queue.batch()
-        await self.app.store.set(f"queue.{self.book_id}", self.queue.items)
         try:
-            r = await self.api.post(f"/books/{self.book_id}/events", {"events": batch})
-        except Offline:
-            return  # 기기에 남겨 두고 다음에
-        except ApiError as e:
-            if e.status < 500:
-                self.queue.ack(len(batch))  # 다시 보내도 같은 결과
-            await self.app.store.set(f"queue.{self.book_id}", self.queue.items)
+            r = await self.app.sync.send(self.book_id, self.queue)
+        except SessionExpired:
+            self.app.run(self.app.session_expired())  # 기록은 기기에 남는다 — 다시 로그인하면 보낸다
             return
-        self.queue.ack(len(batch))
-        await self.app.store.set(f"queue.{self.book_id}", self.queue.items)
-        await self._on_progress(r)
+        if r:
+            await self._on_progress(r)
 
     async def _on_progress(self, r: dict) -> None:
         before = self.entry.get("progress_pct", 0)
@@ -519,7 +511,7 @@ class ReaderScreen(Screen):
                 self.app.toast("밑줄을 그었어요 · 서재 → 밑줄에서 모아 볼 수 있어요")
                 await self._load_social()
 
-        vis = ft.CupertinoSlidingSegmentedButton(controls=[ft.Text("친구에게 공개", font_family="Pretendard"), ft.Text("나만 보기", font_family="Pretendard")],
+        vis = ft.CupertinoSlidingSegmentedButton(controls=[ft.Text("팔로워에게 공개", font_family="Pretendard"), ft.Text("나만 보기", font_family="Pretendard")],
                                                  selected_index=0, on_change=lambda e: visibility.update(v="friends" if int(e.control.selected_index) == 0 else "private"))
         draw()
         self.app.sheet(ft.Column([

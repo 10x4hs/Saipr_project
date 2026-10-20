@@ -6,6 +6,7 @@ import flet as ft
 
 from saipr.app import gather_safe
 from saipr.core import fmt
+from saipr.core.api import ApiError, Offline
 from saipr.ui import widgets as w
 from saipr.ui.theme import alpha
 from saipr.views.base import Screen
@@ -318,7 +319,11 @@ class BattleScreen(Screen):
         self.battle_id = battle_id
 
     async def load(self):
-        b, hs = await gather_safe(self.api.get(f"/battles/{self.battle_id}"), self.api.get(f"/battles/{self.battle_id}/highlights"))
+        b = await self.api.get(f"/battles/{self.battle_id}")  # 없거나 권한이 없으면 오류 화면
+        try:
+            hs = await self.api.get(f"/battles/{self.battle_id}/highlights")
+        except (ApiError, Offline):
+            hs = None
         self.data = {"battle": b, "highlights": hs or []}
 
     def content(self):

@@ -88,7 +88,7 @@ class LibraryScreen(Screen):
                    spacing=12, vertical_alignment=ft.CrossAxisAlignment.START),
             *([d.text(h["note"], 14, muted=True)] if h.get("note") else []),
             ft.Row([
-                d.caption(f"{(h.get('chunk_index') or 0) + 1}쪽 · {fmt.ago(h.get('created_at'))} · {'친구 공개' if h.get('visibility') == 'friends' else '나만 보기'}", size=12),
+                d.caption(f"{(h.get('chunk_index') or 0) + 1}쪽 · {fmt.ago(h.get('created_at'))} · {'팔로워 공개' if h.get('visibility') == 'friends' else '나만 보기'}", size=12),
                 ft.Row([d.icon_button(ft.Icons.IOS_SHARE, lambda e: self.app.run(self.share(h, book)), "공유"),
                         d.icon_button(ft.Icons.DELETE_OUTLINE_ROUNDED, lambda e: self.app.run(self.delete(h)), "지우기")], spacing=0),
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
@@ -97,17 +97,17 @@ class LibraryScreen(Screen):
             content=card, dismiss_direction=ft.DismissDirection.END_TO_START,
             background=ft.Container(ft.Icon(ft.Icons.DELETE_OUTLINE, color="#ffffff"), bgcolor=alpha("#ff3b30", 0.85),
                                     border_radius=22, alignment=ft.Alignment.CENTER_RIGHT, padding=ft.Padding.only(right=24)),
-            on_dismiss=lambda e: self.app.run(self.delete(h, refresh=False)),
+            on_dismiss=lambda e: self.app.run(self.delete(h, dismissed=True)),
         )
 
     async def share(self, h: dict, book: dict) -> None:
         text = f"“{h['quote']}”\n— {book.get('title', '')}" + (f"\n\n{h['note']}" if h.get("note") else "") + "\n\n#함께읽기"
         await self.app.share_text(text)
 
-    async def delete(self, h: dict, refresh: bool = True) -> None:
+    async def delete(self, h: dict, dismissed: bool = False) -> None:
         ok = await self.app.guard(self.api.delete(f"/highlights/{h['id']}"))
         if ok:
             self.data["highlights"] = [x for x in self.data["highlights"] if x["id"] != h["id"]]
             self.app.toast("밑줄을 지웠어요")
-            if refresh:
-                self.refresh()
+        if ok or dismissed:  # 밀어서 없앤 카드는 실패해도 다시 그려서 트리에서 뺀다(실패면 되살아난다)
+            self.refresh()

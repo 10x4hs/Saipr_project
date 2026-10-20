@@ -165,9 +165,22 @@ class RoomScreen(Screen):
         elif t in ("progress.updated", "member.joined", "member.left"):
             if data.get("user_id") != me and t == "member.joined":
                 self.app.toast(f"{data.get('nickname')}님이 들어왔어요")
-            await self.reload()
+            self._reload_keep_draft()
         elif t == "reaction.created":
+            self._reload_keep_draft()
+
+    def _reload_keep_draft(self) -> None:
+        """다시 그려도 쓰던 메시지는 남긴다."""
+        draft = self.input.value if self.input is not None else ""
+
+        async def go():
             await self.reload()
+            if draft and self.input is not None and not self.input.value:
+                self.input.value = draft
+                if w.mounted(self.input):
+                    self.input.update()
+
+        self.app.run(go())
 
     def read(self) -> None:
         room = self.data["room"]
