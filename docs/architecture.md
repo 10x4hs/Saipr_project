@@ -1,19 +1,21 @@
-# 아키텍처 (Phase 0–6)
+# 아키텍처
 
-서버는 **FastAPI 하나**입니다. 화면은 같은 서버가 Jinja2로 그리고, 실시간이 필요한 리더·읽기방만 작은 JS가 WebSocket을 씁니다.
+화면은 **Flet(Python) 네이티브 앱**(`mobile/`)이 그리고, 서버는 **FastAPI 하나**입니다. 앱은 JSON API(`/api/v1`, Bearer 토큰)와 WebSocket(`/ws/*?token=`)만 씁니다.
+서버가 그리는 웹 화면은 초대 링크 미리보기(`/r/{코드}`)와 로그인·가입(소셜 로그인 콜백 포함)만 남겼습니다.
 (Phase 1까지 있던 Spring Boot 인증 서버는 `app/services/auth.py`로 옮기고 삭제했습니다.)
 
 ```
-브라우저 ──HTTP(폼·JSON)──▶ FastAPI ──SQLAlchemy(async)──▶ SQLite(로컬) / Postgres(Docker·배포)
-   ▲                         │
-   └──────WebSocket──────────┘  ◀── 커밋 후 아웃박스 → 인메모리 브로커(방·사용자 채널, 최근 100건 버퍼)
+안드로이드 앱(Flet) ──HTTPS JSON(Bearer)──▶ FastAPI ──SQLAlchemy(async)──▶ SQLite(로컬) / Postgres(Docker·배포)
+   ▲                                          │
+   └──────────WebSocket(?token=)──────────────┘  ◀── 커밋 후 아웃박스 → 인메모리 브로커(방·사용자 채널, 최근 100건 버퍼)
+브라우저 ──── /r/{코드} 미리보기 · /login · /signup (세션 쿠키 + CSRF)
 ```
 
 ```
 app/
   main.py              앱 조립: 세션 미들웨어 · 라우터 · 예외 → JSON/HTML · lifespan(테이블 생성·챌린지·스케줄러)
   seed.py              시연 데이터 (python -m app.seed)
-  data/                퍼블릭 도메인 샘플 도서 3권 (위키문헌 원문)
+  data/                퍼블릭 도메인 샘플 도서 16권 (위키문헌 원문 · 소설/시/수필, 위키백과 요약 포함)
   core/
     config.py          환경변수 (.env)
     security.py        scrypt 비밀번호 해시 · 입력 검증 · CSRF 토큰
@@ -33,15 +35,17 @@ app/
     battles.py         페이지 레이스 · 한줄평 배틀 · 정산 · 종료 알림(tick)
     teams.py           팀 · 주간 리그
     points.py          포인트 원장 · 챌린지
-    notifications.py   알림함 · 방해 금지 · 일 5건 → 커밋 후 웹 푸시
+    notifications.py   알림함 · 방해 금지 · 일 5건 → /ws/me 실시간 (+ 예전 웹 푸시 구독이 있으면 전송)
     push.py            VAPID 키 · 구독 · pywebpush 전송(스레드) · 만료 구독 정리
     scheduler.py       60초마다 battles.tick
   api/                 /api/v1/* JSON API + /ws/* WebSocket
-  web/                 HTML 화면 (routes.py · view.py · templates/ · static/)
-    static/sw.js       서비스 워커: 앱 셸 · 읽은 쪽 오프라인 · 푸시 표시 · 배지
-    static/css/        glass.css(시안 재현) · motion.css(전환·스프링·Liquid Glass)
-    static/js/         common · motion · liquid · pwa · reader · room · me
-tools/                 make_icons.py(앱 아이콘을 순수 Python으로 그림) · browser_check.py(Chromium·WebKit 점검)
+  web/                 남은 웹 화면: 첫 화면 · 로그인 · 가입 · 초대 미리보기 (routes.py · view.py · templates/ · static/css/glass.css)
+mobile/                Flet 앱 — 자세한 구조는 mobile/README.md
+  src/saipr/app.py     앱 상태 · 화면 스택 · 로그인 · /ws/me 알림 · 알림 링크 → 화면
+  src/saipr/core/      api(Bearer 클라이언트) · realtime(재연결 채널) · reading(체류시간·큐·속도) · store · fmt
+  src/saipr/ui/        theme.py(Glass · Material 3 · Cupertino × 라이트/다크) · widgets.py
+  src/saipr/views/     start · home · explore · book · reader · library · together · room · profile · me
+tools/                 make_icons.py(앱 아이콘을 순수 Python으로 그림)
 migrations/            Alembic (Postgres용). SQLite는 시작할 때 create_all
 ```
 
@@ -49,7 +53,9 @@ migrations/            Alembic (Postgres용). SQLite는 시작할 때 create_all
 
 | 결정 | 이유 |
 |---|---|
-| **서비스 계층 공유** — JSON API와 HTML 화면이 같은 `services/*` 함수를 부른다 | 규칙(스포일러 가드, 체류시간)이 한 곳에만 있어 화면과 API가 어긋나지 않는다 |
+| **화면은 앱, 규칙은 서버** — 앱은 JSON API만 부르고, 남은 웹 화면도 같은 `services/*` 함수를 쓴다 | 규칙(스포일러 가드, 체류시간)이 서버 한 곳에만 있어 앱을 바꿔도 어긋나지 않는다 |
+| **Flet(Python)으로 네이티브 앱** | 웹 화면은 "앱 느낌이 없다"는 피드백. 팀이 아는 Python 하나로 안드로이드 APK까지 만들고, Material·Cupertino 위젯을 그대로 쓴다 |
+| **앱은 Bearer 토큰, 웹은 세션 쿠키** | 앱에는 쿠키·CSRF가 어울리지 않는다. 토큰은 해시로만 저장하고 로그아웃 시 폐기 |
 | **체류시간은 서버가 다시 계산** — `min(보낸 값, 직전 이벤트와의 간격, 최소×10)` | 클라이언트 값을 그대로 믿으면 "60초 읽었다"고 거짓말할 수 있다 |
 | **서버 시계 예산** — 한 배치의 인정 시간 합 ≤ 직전 배치 수신 뒤 실제로 흐른 시간, 지난 동기화보다 앞선 시각은 0 | `occurred_at`도 클라이언트가 정하는 값이라, 쉬었다가 "지난 하루 동안 읽었다"고 꾸밀 수 있다 (코드 리뷰에서 발견) |
 | **한 청크는 한 번만 verified** (DB 조건부 UNIQUE) | 레이스 점수 = verified 이벤트 수. 재방문·동시 탭으로 점수가 부풀지 않는다 |
@@ -62,14 +68,13 @@ migrations/            Alembic (Postgres용). SQLite는 시작할 때 create_all
 | **리셋 없는 기간 집계** — 챌린지·리그는 기간 시작 시각으로 계산, 지급은 `ref_id`(기간 키)로 중복 방지 | 스케줄러가 멈춰도 결과가 틀리지 않는다 |
 | **포인트는 append-only 원장** | 감사 추적, 잔액 = SUM |
 | **웹 푸시도 커밋 후에만** (`defer_task`) | 롤백된 알림이 폰에 뜨지 않게. 전송은 백그라운드 스레드라 요청을 늦추지 않는다 |
-| **VAPID 키를 서버가 직접 만든다** | Firebase·Apple 계정 없이 Chrome·Firefox·iOS(홈 화면 앱) 푸시 서비스에 보낼 수 있다 |
-| **세션 쿠키 + CSRF 토큰** | HttpOnly·SameSite=Lax 쿠키, 상태를 바꾸는 요청은 헤더/폼 토큰 확인, 로그인 시 세션 교체 |
+| **웹은 세션 쿠키 + CSRF 토큰** | HttpOnly·SameSite=Lax 쿠키, 상태를 바꾸는 요청은 헤더/폼 토큰 확인, 로그인 시 세션 교체 |
 | **소셜 계정을 같은 이메일 계정에 자동 연결하지 않음** | 제공자가 이메일 소유를 확인하지 않았으면 계정 탈취가 가능하다 |
 | **테스트는 네트워크 0** | 외부 API는 `httpx.MockTransport`, DB는 SQLite. 실시간 E2E는 CI에서 Postgres로도 돈다 |
 
 ## API
 
-인증이 필요한 요청은 세션 쿠키로, 상태를 바꾸는 요청(POST/PUT/DELETE)은 `X-CSRF-Token` 헤더가 필요합니다. 전체 명세는 서버 실행 후 `/docs`.
+앱은 `Authorization: Bearer <토큰>`으로 부르고(CSRF 생략), 세션 쿠키로 부를 때는 상태를 바꾸는 요청(POST/PUT/DELETE)에 `X-CSRF-Token` 헤더가 필요합니다. 전체 명세는 서버 실행 후 `/docs`.
 
 | 영역 | Method · Path |
 |---|---|
@@ -81,9 +86,13 @@ migrations/            Alembic (Postgres용). SQLite는 시작할 때 create_all
 | 팀 · 리그 | `POST /api/v1/teams` · `GET /teams` · `POST /teams/join/{code}` · `POST /teams/{id}/leave` · `GET /leagues/{team}` |
 | 배틀 (두 팀 팀원만) | `POST /api/v1/battles` · `GET /battles` · `GET /battles/{id}` · `GET·POST /battles/{id}/highlights` · `POST /battles/{id}/highlights/{h}/vote` |
 | 포인트 · 알림 | `GET /api/v1/points` · `GET /notifications` · `POST /notifications/read` |
-| 웹 푸시 | `GET /api/v1/push/key` · `POST /push/subscribe` · `POST /push/unsubscribe` · `POST /push/test` |
-| PWA | `GET /sw.js` · `GET /manifest.webmanifest` · `GET /offline` |
-| 실시간 | `WS /ws/rooms/{id}?last_event_id=` (`progress.updated` `reaction.created` `member.joined` `presence.changed`) · `WS /ws/me` (`notification.created`) |
+| 웹 푸시 (예전 웹 앱용, 남겨 둠) | `GET /api/v1/push/key` · `POST /push/subscribe` · `POST /push/unsubscribe` · `POST /push/test` |
+| 웹 화면 | `GET /` · `GET·POST /login` · `GET·POST /signup` · `POST /logout` · `GET /auth/{provider}/login·callback` · `GET /r/{code}` |
+| 실시간 | `WS /ws/rooms/{id}?last_event_id=` (`progress.updated` `reaction.created` `member.joined` `presence.changed` `message.created`) · `WS /ws/me` (`notification.created`) — 앱은 `?token=` |
+| 앱 토큰 · 프로필 | `POST /api/v1/auth/token` · `POST /auth/token/signup` · `DELETE /auth/token` · `PUT /auth/me/profile` (Bearer 요청은 CSRF 생략) |
+| 책 목록 · 소개 | `GET /api/v1/books?genre=&sort=popular\|new` · `GET /books/{id}/info` (위키백과 요약 DB 캐시) |
+| 친구 · 피드 | `GET /api/v1/users/search?q=` · `GET /users/{id}` · `POST·DELETE /users/{id}/follow` · `POST /users/{id}/cheer` · `GET /me/following` · `GET /me/followers` · `GET /feed?before=` |
+| 채팅 · 통계 · 밑줄 | `GET·POST /api/v1/rooms/{id}/messages` · `GET /me/stats` · `GET /me/badges` · `POST·GET /books/{id}/highlights` · `GET /me/highlights` · `PATCH·DELETE /highlights/{id}` |
 
 ## 규칙 요약 (숫자)
 

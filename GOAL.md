@@ -1,11 +1,12 @@
-# GOAL — 함께읽기 MVP v0.1.0
+# GOAL — 함께읽기 v1.0 (안드로이드 앱)
 
-> 근거: [docs/PRD.md](docs/PRD.md) 11장 마일스톤 · 결정 로그: [.grill/reading-together-mvp.md](.grill/reading-together-mvp.md) · [.grill/phase2-6-python-build.md](.grill/phase2-6-python-build.md)
+> 근거: [docs/PRD.md](docs/PRD.md) 11장 마일스톤 · 결정 로그: [.grill/reading-together-mvp.md](.grill/reading-together-mvp.md) · [.grill/phase2-6-python-build.md](.grill/phase2-6-python-build.md) · [.grill/native-app-flet.md](.grill/native-app-flet.md)
 
 ## Objective
 
 두 명 이상의 사용자가 초대 링크 하나로 같은 퍼블릭 도메인 도서의 읽기방에 들어가, 각자 인앱 리더로 읽는 동안
-**서로의 검증된 진행률과 문단 반응(스포일러 가드 적용)이 1초 이내(P95)에 보이는 웹 MVP**를 완성한다.
+**서로의 검증된 진행률과 문단 반응(스포일러 가드 적용)이 1초 이내(P95)에 보이는 앱**을 완성한다.
+2026-10-20부터 화면은 Flet(Python) 네이티브 앱(`mobile/`)이고, 친구·피드·응원·채팅·통계·밑줄까지 "내일 출시할 수 있는 품질"을 기준으로 한다.
 완료 판정은 아래 검증 항목이 **모두** 통과하는 것이다.
 
 ## Verification (binary)
@@ -20,6 +21,9 @@
 | 6 | 체류시간 검증 테스트 (`tests/test_reading.py`) | 최소 체류시간 미달 청크는 진행률·레이스 점수에 0 반영 |
 | 7 | 스포일러 가드 테스트 (`tests/test_rooms.py`) | B의 검증 위치보다 뒤 청크 반응은 본문 없이 개수만 반환 |
 | 8 | 저작권 가드 테스트 (`tests/test_rooms.py::test_copyright_guard`) | `gutendex`·`wikisource` 이외 소스는 `has_fulltext=true`·본문 저장 불가 |
+| 9 | `cd mobile && pytest -q` · `ruff check .` | 앱 로직·세 디자인 × 라이트/다크 위젯 테스트 통과 |
+| 10 | 앱 화면 점검 (Flet 웹 모드 + Playwright Pixel 7) | 모든 탭·상세 화면이 세 디자인에서 깨짐 없이 그려지고, 반응·채팅·디자인 전환·실시간 수신이 동작 |
+| 11 | `flet build apk` | APK 생성 — JDK 17이 필요해 사용자 환경에서 실행 |
 
 ## Phase checklist
 
@@ -29,7 +33,8 @@
 - [x] **Phase 3** — 읽기방 · 초대 코드 · WebSocket 브로커 · 반응 · 스포일러 가드 (검증 5·7)
 - [x] **Phase 4** — 페이지 레이스(체류시간) · 한줄평 배틀 · 포인트 원장 · 챌린지 (검증 6)
 - [x] **Phase 5** — 팀 · 주간 리그 · 리더보드
-- [x] **Phase 6** — 앱 내 알림함(WebSocket 실시간, 방해 금지·일 5건) + VAPID 웹 푸시(FCM 계정 없이) · PWA 설치·오프라인 · 배포 설정(`Dockerfile`, `render.yaml`). 실제 배포는 계정이 필요해 제외
+- [x] **Phase 6** — 앱 내 알림함(WebSocket 실시간, 방해 금지·일 5건) + VAPID 웹 푸시(FCM 계정 없이) · PWA 설치·오프라인 · 배포 설정(`Dockerfile`, `render.yaml`). 실제 배포는 계정이 필요해 제외 (PWA·웹 화면은 Phase 7에서 앱으로 대체)
+- [x] **Phase 7** — Flet 네이티브 앱(5탭 · 리더 · 읽기방 채팅 · 친구 · 통계 · 밑줄 · 디자인 3종) + 앱 토큰·친구·피드·채팅·통계·밑줄 API, 웹은 초대 미리보기·로그인만
 
 ### 2026-10-20 검증 결과 (로컬)
 
@@ -46,6 +51,16 @@
 고치고 `tests/test_integrity.py`에 회귀 테스트로 남겼다. 그 과정에서 PRD와 달라진 규칙:
 레이스 인정은 '발생 후 10분 안에 도착한 이벤트'(PRD EXC-05는 24시간), 완독 포인트는 앱에서 끝까지 읽은 책만, 배틀 중 팀원 고정.
 
+### 2026-10-20 검증 결과 — 네이티브 앱
+
+| # | 결과 |
+|---|---|
+| 1 | 서버 `pytest -q` 147개 통과 |
+| 2 | `ruff check .` 오류 0 (mobile 포함) |
+| 9 | 앱 `pytest -q` 20개 통과 |
+| 10 | 11개 화면 × Glass 라이트 확인, 홈·나·리더는 Material·Cupertino·다크까지. 좌표 탭으로 문단 반응 보내기, 채팅 보내기, 설정에서 디자인 바로 바꾸기, 다른 계정이 보낸 채팅 실시간 수신 확인. 서버가 꺼져 있으면 첫 화면에 "연결 안 됨" |
+| 11 | 미실행 — JDK 17 미설치(사용자가 직접 설치 예정). 명령은 [mobile/README.md](mobile/README.md) |
+
 ## Design decision (결정됨)
 
 처음 시안 **A(Glass v2)**를 앱 전체에 그대로 재현했다(리더는 유리 틀 + 종이색 본문, 레이스는 밤 배경). 기준은 [docs/design-system.md](docs/design-system.md), 결정 과정은 [.grill/ui-rebuild-glass.md](.grill/ui-rebuild-glass.md).
@@ -55,7 +70,8 @@
 ## Scope
 
 - In: 웹 MVP 백엔드(FastAPI) + Jinja2 서버 렌더링 웹 화면(Reflex 대신 — 설치가 가볍고 WebSocket 연동이 단순), 퍼블릭 도메인 전문, 상용 도서 메타데이터·수동 진행률.
-- Out: 퀴즈, 상용 본문, 네이티브 앱(대신 PWA), 결제, 알라딘 API (PRD 7장), Redis(인메모리로 대체).
+- In(2026-10-20 추가): Flet 안드로이드 앱. 웹 화면은 초대 미리보기·로그인·가입만.
+- Out: 퀴즈, 상용 본문, 스토어 출시·앱 푸시(FCM), 결제, 알라딘 API (PRD 7장), Redis(인메모리로 대체).
 
 ## Stop and ask when
 
