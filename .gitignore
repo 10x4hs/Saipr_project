@@ -1,10 +1,6 @@
-# Java / Spring Boot (src/, Gradle)
-.gradle/
-build/
-out/
+# 에디터
 .idea/
-*.iml
-data/
+.vscode/
 
 # Python / FastAPI (app/)
 __pycache__/

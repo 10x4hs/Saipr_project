@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -7,7 +8,17 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     app_name: str = "saipr"
-    database_url: str = "postgresql+asyncpg://saipr:saipr@localhost:5432/saipr"
+    # 기본은 파일 SQLite — Docker 없이 `uvicorn` 한 줄로 실행. Compose에서는 Postgres URL을 주입한다.
+    database_url: str = "sqlite+aiosqlite:///./saipr.db"
+    # 연결 풀을 끈다. 테스트처럼 여러 이벤트 루프가 같은 엔진을 쓸 때 필요하다(SQLite는 항상 꺼짐).
+    db_disable_pool: bool = False
+
+    # 세션 쿠키 서명 키. 운영에서는 반드시 환경변수로 바꾼다.
+    secret_key: str = "dev-only-change-me"
+    session_cookie_secure: bool = False
+    session_max_age_seconds: int = 14 * 24 * 3600
+    # OAuth 콜백 URL을 만들 때 쓰는 외부 주소
+    public_base_url: str = "http://localhost:8000"
 
     # 외부 소스별 타임아웃. 한 소스가 느려도 통합 검색 전체가 막히지 않도록 짧게 둔다.
     http_timeout_seconds: float = 3.0
@@ -18,6 +29,27 @@ class Settings(BaseSettings):
     naver_client_secret: str | None = None
     google_books_api_key: str | None = None
     wikisource_lang: str = "ko"
+
+    # 소셜 로그인. 키가 비어 있는 제공자는 로그인 화면에 버튼이 나오지 않는다 (services/oauth.py).
+    # 카카오는 도서 검색용 REST 키를 로그인 client_id로도 쓴다.
+    kakao_client_secret: str | None = None
+    kakao_login_enabled: bool = False
+    google_client_id: str | None = None
+    google_client_secret: str | None = None
+    naver_login_enabled: bool = False
+
+    # 배틀 정산·주간 리셋 같은 주기 작업 (services/scheduler.py). 테스트에서는 끈다.
+    scheduler_enabled: bool = True
+    scheduler_interval_seconds: int = 60
+
+    @field_validator("database_url")
+    @classmethod
+    def _async_driver(cls, url: str) -> str:
+        """Render·Fly 같은 호스팅이 주는 postgres:// 주소를 asyncpg 드라이버 주소로 바꾼다."""
+        for prefix in ("postgres://", "postgresql://"):
+            if url.startswith(prefix):
+                return "postgresql+asyncpg://" + url[len(prefix) :]
+        return url
 
 
 @lru_cache

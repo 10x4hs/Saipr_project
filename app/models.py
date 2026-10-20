@@ -18,6 +18,13 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    text,
+)
+from sqlalchemy import (
+    false as sa_false,
+)
+from sqlalchemy import (
+    true as sa_true,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -74,6 +81,10 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     nickname: Mapped[str] = mapped_column(String(40))
     email: Mapped[str | None] = mapped_column(String(255), unique=True)
+    # 소셜 로그인만 쓰는 사용자는 NULL
+    password_hash: Mapped[str | None] = mapped_column(String(255))
+    # 스포일러 가드는 방 설정이 아닌 개인 설정 (PRD EXC-03)
+    spoiler_guard: Mapped[bool] = mapped_column(Boolean, default=True, server_default=sa_true())
     created_at: Mapped[datetime] = _now()
 
 
@@ -144,7 +155,15 @@ class LibraryEntry(Base):
 
 class ReadingEvent(Base):
     __tablename__ = "reading_events"
-    __table_args__ = (Index("ix_reading_events_user_book", "user_id", "book_id", "chunk_index"),)
+    __table_args__ = (
+        Index("ix_reading_events_user_book", "user_id", "book_id", "chunk_index"),
+        # 한 청크는 사람마다 한 번만 verified.
+        # 동시에 온 두 배치가 레이스 점수를 두 번 올리지 못하게 DB가 막는다
+        Index(
+            "uq_reading_events_verified_once", "user_id", "book_id", "chunk_index", unique=True,
+            postgresql_where=text("verified"), sqlite_where=text("verified"),
+        ),
+    )
 
     id: Mapped[int] = mapped_column(BigId, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
@@ -152,7 +171,11 @@ class ReadingEvent(Base):
     chunk_index: Mapped[int] = mapped_column(Integer)
     dwell_ms: Mapped[int] = mapped_column(Integer)
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    # 오프라인 큐로 24시간 넘게 늦게 도착한 이벤트는 레이스 점수에서 뺀다 (PRD EXC-05)
+    race_eligible: Mapped[bool] = mapped_column(Boolean, default=True, server_default=sa_true())
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    # 서버가 받은 시각. 클라이언트 시각(occurred_at)과 달리 조작할 수 없어 체류시간 상한의 기준이 된다
+    received_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class Room(Base):
@@ -164,7 +187,10 @@ class Room(Base):
     name: Mapped[str] = mapped_column(String(80))
     mode: Mapped[RoomMode] = mapped_column(_enum(RoomMode), default=RoomMode.ASYNC)
     invite_code: Mapped[str] = mapped_column(String(16), unique=True)
+    invite_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # 방장이 나가고 남은 멤버가 없으면 보관 처리 (PRD EXC-06)
+    archived: Mapped[bool] = mapped_column(Boolean, default=False, server_default=sa_false())
     created_at: Mapped[datetime] = _now()
 
 
@@ -196,6 +222,7 @@ class Team(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(40))
     created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    invite_code: Mapped[str | None] = mapped_column(String(16), unique=True)
 
 
 class TeamMember(Base):
@@ -203,6 +230,7 @@ class TeamMember(Base):
 
     team_id: Mapped[int] = mapped_column(ForeignKey("teams.id", ondelete="CASCADE"), primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    joined_at: Mapped[datetime] = _now()
 
 
 class Battle(Base):
@@ -259,10 +287,34 @@ class PointsLog(Base):
     """append-only 원장. 잔액은 SUM(amount)로 계산하고 행을 수정·삭제하지 않는다."""
 
     __tablename__ = "points_log"
+    __table_args__ = (
+        # 같은 사유(완독·배틀 승리·챌린지 기간)로 두 번 적립되지 않도록 DB가 마지막으로 막는다
+        Index(
+            "uq_points_log_ref", "user_id", "source", "ref_id", unique=True,
+            postgresql_where=text("ref_id IS NOT NULL"), sqlite_where=text("ref_id IS NOT NULL"),
+        ),
+    )
 
     id: Mapped[int] = mapped_column(BigId, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     source: Mapped[str] = mapped_column(String(30))
     amount: Mapped[int] = mapped_column(Integer)
     ref_id: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = _now()
+
+
+class Notification(Base):
+    """앱 내 알림함 (PRD NOTI-01). FCM 대신 WebSocket으로 실시간 전달하고 여기 남긴다."""
+
+    __tablename__ = "notifications"
+    __table_args__ = (Index("ix_notifications_user_created", "user_id", "created_at"),)
+
+    id: Mapped[int] = mapped_column(BigId, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    kind: Mapped[str] = mapped_column(String(30))
+    body: Mapped[str] = mapped_column(String(280))
+    link: Mapped[str | None] = mapped_column(String(300))
+    # 방해 금지 시간(22~08시 KST)에 생긴 알림은 이 시각 이후에 보인다
+    deliver_after: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = _now()

@@ -1,6 +1,6 @@
 [project]
 name = "saipr"
-version = "0.1.0"
+version = "0.2.0"
 description = "함께읽기 — 소셜 독서 레이어 백엔드"
 requires-python = ">=3.12"
 dependencies = [
@@ -12,6 +12,10 @@ dependencies = [
     "httpx>=0.27",
     "pydantic-settings>=2.3",
     "beautifulsoup4>=4.12",
+    "aiosqlite>=0.20",
+    "jinja2>=3.1",
+    "itsdangerous>=2.2",
+    "python-multipart>=0.0.9",
 ]
 
 [project.optional-dependencies]
@@ -19,7 +23,6 @@ dev = [
     "pytest>=8",
     "pytest-asyncio>=0.23",
     "respx>=0.21",
-    "aiosqlite>=0.20",
     "ruff>=0.5",
 ]
 
@@ -34,6 +37,7 @@ packages = ["app"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
+filterwarnings = ["ignore:Using .httpx. with .starlette.testclient."]
 
 [tool.ruff]
 line-length = 110
@@ -48,4 +52,4 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.flake8-bugbear]
 # FastAPI 의존성 주입 관용구
-extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Form"]
