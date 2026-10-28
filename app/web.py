@@ -13,14 +13,17 @@ import httpx
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import auth
 from app.api.deps import get_sources
+from app.core import appearance
 from app.core.config import Settings, get_settings
 from app.db.session import get_session
-from app.models import Book, Shelf, User
+from app.models import Book, LibraryEntry, Room, Shelf, User
 from app.services import books as book_service
+from app.services import races as race_service
 from app.services.search import FULLTEXT_SOURCES, search_all
 from app.services.uploads import MAX_UPLOAD_BYTES, parse_upload
 from app.sources.base import BookSource, SourceError
@@ -34,6 +37,9 @@ GENRE_ORDER = ["단편소설", "장편소설", "중편소설", "동화", "수필
 SHELVES = {g: [b for b in CATALOG if b["genre"] == g] for g in GENRE_ORDER}
 SHELVES = {g: books for g, books in SHELVES.items() if books}
 CATALOG_INDEX = {(b["source"], b["id"]): b for b in CATALOG}
+POPULAR_ORDER = [
+    tuple(k) for k in json.loads((Path(__file__).parent / "data" / "popular.json").read_text())["order"]
+]
 
 COVER_PALETTES = 8
 
@@ -52,10 +58,12 @@ def cover_of(book: Book) -> str | None:
 
 templates.env.globals["cover"] = cover
 templates.env.globals["cover_of"] = cover_of
+templates.env.globals["APPEARANCE"] = appearance
 
 
 def _render(request: Request, name: str, user: User | None, **ctx) -> HTMLResponse:
-    ctx |= {"user": user, "csrf": auth.csrf_token(request), "path": request.url.path}
+    look = appearance.resolve(user.settings if user else None)
+    ctx |= {"user": user, "csrf": auth.csrf_token(request), "path": request.url.path, "look": look}
     return templates.TemplateResponse(request, name, ctx)
 
 
@@ -69,6 +77,23 @@ def _daily_picks(n: int) -> list[dict]:
     return rng.sample(with_cover, min(n, len(with_cover)))
 
 
+async def popular(session: AsyncSession, n: int = 20) -> list[dict]:
+    """유명 고전 순서에 앱 안 독자 수를 더한 인기 순위."""
+    rows = await session.execute(
+        select(Book.source, Book.external_id, func.count(LibraryEntry.id))
+        .join(LibraryEntry, LibraryEntry.book_id == Book.id)
+        .where(Book.owner_id.is_(None))
+        .group_by(Book.source, Book.external_id)
+    )
+    readers = {(src, ext): cnt for src, ext, cnt in rows.all()}
+    base = len(POPULAR_ORDER)
+    score = {key: base - i for i, key in enumerate(POPULAR_ORDER)}
+    for key, cnt in readers.items():
+        score[key] = score.get(key, 0) + cnt * 3
+    ranked = sorted((k for k in score if k in CATALOG_INDEX), key=lambda k: -score[k])[:n]
+    return [CATALOG_INDEX[k] | {"rank": i + 1, "readers": readers.get(k, 0)} for i, k in enumerate(ranked)]
+
+
 # --- 소개 · 가입 · 로그인 ---
 
 
@@ -79,7 +104,7 @@ async def home(
     user: User | None = Depends(auth.current_user),
 ) -> HTMLResponse:
     if user is None:
-        return _render(request, "landing.html", None, picks=_daily_picks(9), total=len(CATALOG))
+        return _render(request, "landing.html", None, picks=(await popular(session, 9)), total=len(CATALOG))
     library = await book_service.library_of(session, user.id)
     reading = [(e, b) for e, b in library if e.shelf == Shelf.READING]
     return _render(
@@ -90,6 +115,7 @@ async def home(
         reading=reading[1:6],
         picks=_daily_picks(10),
         marquee=_daily_picks(16),
+        popular=await popular(session),
         shelves={g: books[:14] for g, books in SHELVES.items()},
     )
 
@@ -308,3 +334,134 @@ async def reader(
         raise HTTPException(404, "책을 찾을 수 없어요")
     entry = await book_service.shelve(session, user.id, book.id)
     return _render(request, "reader.html", user, book=book, entry=entry)
+
+
+# --- 친구 대결 ---
+
+
+@router.get("/races", response_class=HTMLResponse)
+async def races(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    user: User = Depends(auth.require_user),
+) -> HTMLResponse:
+    mine = await race_service.races_of(session, user.id)
+    reading = [b for e, b in await book_service.library_of(session, user.id) if e.shelf == Shelf.READING]
+    return _render(
+        request,
+        "races.html",
+        user,
+        races=[(r, b, race_service.is_over(r)) for r, b in mine],
+        reading=reading,
+        popular=await popular(session, 12),
+        durations=race_service.DURATIONS,
+        error=request.query_params.get("error"),
+    )
+
+
+@router.post("/races")
+async def create_race(
+    request: Request,
+    book_id: int = Form(...),
+    days: int = Form(7),
+    csrf: str = Form(""),
+    session: AsyncSession = Depends(get_session),
+    user: User = Depends(auth.require_user),
+) -> RedirectResponse:
+    auth.check_csrf(request, csrf)
+    book = await session.get(Book, book_id)
+    if book is None or not book_service.can_read(book, user.id) or book.owner_id is not None:
+        raise HTTPException(400, "대결은 서가에 있는 책으로만 열 수 있어요")
+    room = await race_service.create_race(session, user, book, days)
+    return RedirectResponse(f"/races/{room.id}", status_code=303)
+
+
+@router.post("/races/start/{source}/{external_id:path}")
+async def create_race_from_catalog(
+    request: Request,
+    source: str,
+    external_id: str,
+    days: int = Form(7),
+    csrf: str = Form(""),
+    sources: dict[str, BookSource] = Depends(get_sources),
+    session: AsyncSession = Depends(get_session),
+    user: User = Depends(auth.require_user),
+) -> RedirectResponse:
+    """인기 고전을 골라 바로 대결 열기 — 아직 안 가져온 책이면 가져온다."""
+    auth.check_csrf(request, csrf)
+    src = sources.get(source)
+    if src is None or source not in FULLTEXT_SOURCES:
+        raise HTTPException(400, "이 책으로는 대결을 열 수 없어요")
+    try:
+        book = await book_service.import_book(session, src, external_id)
+    except (SourceError, httpx.HTTPError) as e:
+        raise HTTPException(502, f"책을 가져오지 못했어요 ({type(e).__name__})") from e
+    room = await race_service.create_race(session, user, book, days)
+    return RedirectResponse(f"/races/{room.id}", status_code=303)
+
+
+@router.get("/races/{room_id}", response_class=HTMLResponse)
+async def race(
+    request: Request,
+    room_id: int,
+    session: AsyncSession = Depends(get_session),
+    user: User = Depends(auth.require_user),
+) -> HTMLResponse:
+
+    room = await session.get(Room, room_id)
+    if room is None or not await race_service.is_member(session, room, user.id):
+        raise HTTPException(404, "대결을 찾을 수 없어요")
+    book = await session.get(Book, room.book_id)
+    board = await race_service.standings(session, room, user.id)
+    invite = str(request.base_url).rstrip("/") + f"/join/{room.invite_code}"
+    return _render(
+        request,
+        "race.html",
+        user,
+        room=room,
+        book=book,
+        board=board,
+        invite=invite,
+        over=race_service.is_over(room),
+    )
+
+
+@router.post("/join")
+async def join_by_form(code: str = Form("")) -> RedirectResponse:
+    return RedirectResponse(f"/join/{race_service.normalize_code(code)}", status_code=303)
+
+
+@router.get("/join/{code}", response_class=HTMLResponse, response_model=None)
+async def join_preview(
+    request: Request,
+    code: str,
+    session: AsyncSession = Depends(get_session),
+    user: User = Depends(auth.require_user),
+) -> HTMLResponse | RedirectResponse:
+    room = await race_service.by_code(session, code)
+    if room is None:
+        return RedirectResponse("/races?error=코드를 찾을 수 없어요", status_code=303)
+    if await race_service.is_member(session, room, user.id):
+        return RedirectResponse(f"/races/{room.id}", status_code=303)
+    book = await session.get(Book, room.book_id)
+    owner = await session.get(User, room.owner_id)
+    count = await race_service.member_count(session, room)
+    return _render(request, "join.html", user, room=room, book=book, owner=owner, count=count)
+
+
+@router.post("/join/{code}")
+async def join(
+    request: Request,
+    code: str,
+    csrf: str = Form(""),
+    session: AsyncSession = Depends(get_session),
+    user: User = Depends(auth.require_user),
+) -> RedirectResponse:
+    auth.check_csrf(request, csrf)
+    room = await race_service.by_code(session, code)
+    if room is None:
+        return RedirectResponse("/races?error=코드를 찾을 수 없어요", status_code=303)
+    if reason := await race_service.join(session, room, user):
+        return RedirectResponse(f"/races?error={reason}", status_code=303)
+    await book_service.shelve(session, user.id, room.book_id)
+    return RedirectResponse(f"/races/{room.id}", status_code=303)

@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from app import auth, web
-from app.api import books
+from app.api import books, me
 from app.core.config import get_settings
 
 USER_AGENT = "saipr/0.1 (+https://github.com/hsK10x2/Saipr_project)"  # Wikimedia는 UA 명시 요구
@@ -45,6 +45,7 @@ async def to_login(request: Request, exc: auth.LoginRequired) -> RedirectRespons
 
 
 app.include_router(books.router)
+app.include_router(me.router)
 app.include_router(web.router)
 app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 

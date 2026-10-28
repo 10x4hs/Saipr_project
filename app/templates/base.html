@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" {% if look and look.mode != 'auto' %}data-theme="{{ look.mode }}"{% endif %} data-accent="{{ look.accent if look else 'pink' }}" style="--accent:{{ look.accent_hex if look else '#ffb3c7' }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -9,10 +9,12 @@
 <title>{% block title %}함께읽기{% endblock %}</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Geist+Mono:wght@500&display=swap">
+<meta name="csrf" content="{{ csrf }}">
 <link rel="stylesheet" href="/static/app.css">
-<script>try{const t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/static/looks.css">
 </head>
 <body class="{% block body_class %}{% endblock %}">
+<div class="fx" id="fx" data-bg="{{ look.bg if look else 'plain' }}" aria-hidden="true"></div>
 {% block body %}{% endblock %}
 </body>
 </html>

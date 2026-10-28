@@ -1,9 +1,39 @@
 {% extends "app.html" %}
-{% from "_ui.html" import book_cover, catalog_card, book_card %}
+{% from "_ui.html" import book_cover, catalog_card, book_card, icon %}
 {% block heading %}<small>{{ user.nickname }}님,</small>오늘은 뭘 읽을까요{% endblock %}
+{% block menu_extra %}
+<button type="button" data-view-toggle><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span data-view-label>목록으로 보기</span></button>
+{% endblock %}
 {% block main %}
+{# ---------- 3D: 인기 순위를 스크롤로 통과한다 ---------- #}
+<section class="depth" id="depth" aria-label="인기 고전 순위">
+  <div class="depth-stage" id="depthStage">
+    {% for b in popular %}
+    <a class="depth-item" href="/open/{{ b.source }}/{{ b.id|urlencode }}" data-i="{{ loop.index0 }}"
+       data-title="{{ b.title }}" data-author="{{ b.author or '' }}" data-rank="{{ b.rank }}" data-readers="{{ b.readers }}"
+       data-race="/races/start/{{ b.source }}/{{ b.id|urlencode }}">
+      <span class="depth-rank mono">{{ '%02d' % b.rank }}</span>
+      {{ book_cover(b.title, b.author, 'lg', img=b.cover) }}
+    </a>
+    {% endfor %}
+  </div>
+  <div class="depth-hud glass" id="depthHud">
+    <span class="mono" id="hudRank">#01 · 인기 고전</span>
+    <b id="hudTitle">{{ popular[0].title if popular else '' }}</b>
+    <span class="muted" id="hudAuthor">{{ popular[0].author if popular else '' }}</span>
+    <div class="hud-actions">
+      <a class="btn primary" id="hudRead" href="#">읽기</a>
+      <form method="post" id="hudRaceForm"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost">친구와 대결</button></form>
+    </div>
+  </div>
+  <div class="depth-hint mono" id="depthHint">↓ 스크롤해서 순위를 넘겨 보세요</div>
+  <div class="depth-spacer" id="depthSpacer"></div>
+</section>
+
+{# ---------- 목록 보기 ---------- #}
+<section class="listview" id="listview" hidden>
 {% if current %}{% set e, b = current %}
-<a class="now" href="/books/{{ b.id }}">
+<a class="now glass-card" href="/books/{{ b.id }}">
   {{ book_cover(b.title, b.author, 'lg', img=cover_of(b)) }}
   <div class="now-body">
     <span class="eyebrow mono">이어 읽기</span>
@@ -13,15 +43,16 @@
     <span class="btn primary">계속 읽기</span>
   </div>
 </a>
-{% else %}
-<section class="now empty">
-  <div class="now-body">
-    <span class="eyebrow mono">첫 책 고르기</span>
-    <h2>오늘의 추천에서 한 편 골라 보세요</h2>
-    <p class="muted">짧은 단편은 20분이면 다 읽어요.</p>
-  </div>
-</section>
 {% endif %}
+
+<div class="marquee" aria-hidden="true"><div class="marquee-track">
+  {% for b in marquee + marquee %}{{ book_cover(b.title, b.author, 'sm', img=b.cover) }}{% endfor %}
+</div></div>
+
+<section class="row">
+  <div class="row-h"><h2>인기 순위</h2><span class="mono muted">유명 고전 + 함께읽기 독자 수</span></div>
+  <ol class="ranklist">{% for b in popular[:10] %}<li><a href="/open/{{ b.source }}/{{ b.id|urlencode }}"><span class="mono">{{ b.rank }}</span>{{ book_cover(b.title, b.author, 'xs', img=b.cover) }}<div><b>{{ b.title }}</b><span>{{ b.author or '' }}</span></div></a></li>{% endfor %}</ol>
+</section>
 
 {% if reading %}
 <section class="row">
@@ -29,10 +60,6 @@
   <div class="rail">{% for e, b in reading %}{{ book_card(b, e) }}{% endfor %}</div>
 </section>
 {% endif %}
-
-<div class="marquee" aria-hidden="true"><div class="marquee-track">
-  {% for b in marquee + marquee %}{{ book_cover(b.title, b.author, 'sm', img=b.cover) }}{% endfor %}
-</div></div>
 
 <section class="row">
   <div class="row-h"><h2>오늘의 추천</h2><span class="mono muted">매일 바뀌어요</span></div>
@@ -45,4 +72,7 @@
   <div class="rail">{% for b in books %}{{ catalog_card(b) }}{% endfor %}</div>
 </section>
 {% endfor %}
+</section>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="/static/depth.js"></script>
 {% endblock %}

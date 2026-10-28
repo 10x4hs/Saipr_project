@@ -143,6 +143,10 @@ async def main() -> None:
             print(f"{genre}: {sum(b['genre'] == genre for b in books)}")
         top = await gutenberg(client)
         print(f"세계 고전: {len(top)}")
+    # 카테고리 수집에서 빠지는 유명작(분류가 덜 달린 문서)은 popular.json의 extra로 보탠다
+    extra = json.loads((OUT.parent / "popular.json").read_text())["extra"]
+    have = {(b["source"], b["id"]) for b in books}
+    books = [e for e in extra if (e["source"], e["id"]) not in have] + books
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(json.dumps(books + top, ensure_ascii=False, indent=1) + "\n")
     print(f"→ {OUT} ({len(books) + len(top)}권)")

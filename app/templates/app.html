@@ -5,14 +5,26 @@
 <div class="phone">
   <header class="top">
     <h1 class="top-title">{% block heading %}{% endblock %}</h1>
-    <a class="pill-btn" href="/search" aria-label="검색">{{ icon('search') }}</a>
-    <a class="pill-btn" href="/upload" aria-label="파일 올리기">{{ icon('upload') }}</a>
+    {% block top_extra %}{% endblock %}
+    <button class="menu-pill" id="menuBtn" aria-label="메뉴" aria-expanded="false" aria-controls="menu"><span></span><span></span></button>
   </header>
   <main class="content">{% block main %}{% endblock %}</main>
   <nav class="tabbar" aria-label="주 메뉴">
-    {% for href, name, label in [('/', 'home', '홈'), ('/discover', 'discover', '탐색'), ('/library', 'library', '서재'), ('/me', 'me', '나')] %}
+    {% for href, name, label in [('/', 'home', '홈'), ('/discover', 'discover', '탐색'), ('/races', 'race', '대결'), ('/library', 'library', '서재'), ('/me', 'me', '나')] %}
     <a href="{{ href }}" class="{{ 'on' if (path == href or (href != '/' and path.startswith(href))) else '' }}">{{ icon(name) }}<span>{{ label }}</span></a>
     {% endfor %}
   </nav>
 </div>
+
+<div class="menu" id="menu" hidden>
+  <nav class="menu-list">
+    {% block menu_extra %}{% endblock %}
+    <a href="/search">{{ icon('search') }}<span>검색</span></a>
+    <a href="/races">{{ icon('race') }}<span>친구와 대결</span></a>
+    <a href="/upload">{{ icon('upload') }}<span>내 파일 올리기</span></a>
+    <button type="button" data-open-look>{{ icon('theme') }}<span>화면 꾸미기</span></button>
+  </nav>
+</div>
+{% include "_customize.html" %}
+<script src="/static/app.js"></script>
 {% endblock %}

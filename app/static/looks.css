@@ -1,0 +1,105 @@
+/* 화면 꾸미기 — 배경화면과 강조 색. id는 app/core/appearance.py와 짝을 이룬다.
+   배경은 세 개의 빛 덩어리(--b1~3)와 선택적인 무늬(::before)·움직임(::after)으로 만든다.
+   유리 표면이 그 위에 떠 있어서 앱 전체 색이 배경을 따라 은은하게 바뀐다. */
+
+.fx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  --b1:transparent;--b2:transparent;--b3:transparent;--base:var(--bg);
+  background:
+    radial-gradient(60% 45% at 18% 12%,var(--b1),transparent 70%),
+    radial-gradient(55% 50% at 85% 30%,var(--b2),transparent 70%),
+    radial-gradient(70% 55% at 50% 100%,var(--b3),transparent 70%),
+    var(--base)}
+.fx::before,.fx::after{content:"";position:absolute;inset:0;pointer-events:none}
+.fx.mini{position:relative}
+
+/* 밝은 모드에서는 빛을 옅게 */
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .fx{filter:saturate(.85) brightness(1.55) contrast(.82)}}
+:root[data-theme="light"] .fx{filter:saturate(.85) brightness(1.55) contrast(.82)}
+
+/* ---------- 기본 ---------- */
+.fx[data-bg="plain"]{--b1:rgba(255,140,180,.14);--b3:rgba(255,140,180,.06)}
+.fx[data-bg="ash"]{--base:#121214;--b1:rgba(160,160,170,.12);--b2:rgba(90,90,100,.12)}
+.fx[data-bg="sand"]{--base:#16120d;--b1:rgba(214,170,110,.22);--b2:rgba(170,120,70,.15);--b3:rgba(120,90,50,.18)}
+.fx[data-bg="sage"]{--base:#0f1411;--b1:rgba(140,180,140,.18);--b2:rgba(90,130,100,.14);--b3:rgba(60,90,70,.2)}
+.fx[data-bg="fog"]{--base:#121418;--b1:rgba(190,200,215,.12);--b2:rgba(150,160,180,.1);--b3:rgba(200,210,225,.14)}
+.fx[data-bg="fog"]::after{background:linear-gradient(transparent 40%,rgba(200,210,225,.08) 70%,transparent);animation:drift 30s ease-in-out infinite alternate}
+
+/* ---------- 책 ---------- */
+.fx[data-bg="study"]{--base:#140d08;--b1:rgba(214,140,60,.28);--b2:rgba(120,60,30,.22);--b3:rgba(70,35,20,.4)}
+.fx[data-bg="study"]::before{background:repeating-linear-gradient(90deg,transparent 0 46px,rgba(0,0,0,.18) 46px 48px,transparent 48px 74px,rgba(255,200,140,.03) 74px 76px);-webkit-mask:linear-gradient(transparent 55%,#000);mask:linear-gradient(transparent 55%,#000)}
+.fx[data-bg="paper"]{--base:#1a1814;--b1:rgba(240,225,195,.14);--b2:rgba(220,200,160,.1);--b3:rgba(240,225,195,.08)}
+.fx[data-bg="paper"]::before{background:radial-gradient(rgba(255,240,210,.05) 1px,transparent 1.2px) 0 0/5px 5px}
+.fx[data-bg="inkwash"]{--base:#0e0f10;--b1:rgba(230,230,230,.08);--b2:rgba(0,0,0,.5);--b3:rgba(200,200,200,.1)}
+.fx[data-bg="inkwash"]::before{background:radial-gradient(120% 40% at 30% 80%,rgba(255,255,255,.07),transparent 60%),radial-gradient(80% 30% at 75% 65%,rgba(255,255,255,.05),transparent 60%);filter:blur(6px)}
+.fx[data-bg="leather"]{--base:#170b0a;--b1:rgba(150,40,40,.3);--b2:rgba(90,20,25,.3);--b3:rgba(200,150,80,.12)}
+.fx[data-bg="leather"]::before{border:10px double rgba(210,170,100,.12);inset:16px;border-radius:6px}
+.fx[data-bg="grid"]{--base:#101210;--b1:rgba(120,180,140,.1);--b3:rgba(120,180,140,.08)}
+.fx[data-bg="grid"]::before{background:linear-gradient(rgba(130,190,150,.12) 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,rgba(130,190,150,.12) 1px,transparent 1px) 0 0/22px 22px}
+.fx[data-bg="candle"]{--base:#0d0906;--b1:rgba(255,170,80,.0);--b2:rgba(120,60,20,.2);--b3:rgba(255,160,70,.3)}
+.fx[data-bg="candle"]::after{background:radial-gradient(40% 30% at 50% 100%,rgba(255,180,90,.35),transparent 70%);animation:flicker 3.2s ease-in-out infinite}
+
+/* ---------- 자연 ---------- */
+.fx[data-bg="forest"]{--base:#0a120c;--b1:rgba(70,140,80,.3);--b2:rgba(30,90,60,.3);--b3:rgba(20,60,30,.5)}
+.fx[data-bg="forest"]::before{background:radial-gradient(1px 1px at 20% 30%,rgba(220,255,200,.5),transparent),radial-gradient(1px 1px at 70% 60%,rgba(220,255,200,.4),transparent),radial-gradient(1.5px 1.5px at 40% 80%,rgba(220,255,200,.35),transparent)}
+.fx[data-bg="ocean"]{--base:#06121a;--b1:rgba(40,140,200,.3);--b2:rgba(20,90,150,.3);--b3:rgba(40,190,200,.25)}
+.fx[data-bg="ocean"]::after{background:repeating-radial-gradient(ellipse 140% 30% at 50% 120%,transparent 0 22px,rgba(160,220,255,.06) 22px 24px);animation:swell 14s ease-in-out infinite alternate}
+.fx[data-bg="hills"]{--base:#0d1216;--b1:rgba(120,150,210,.2);--b2:rgba(210,140,160,.14);--b3:transparent}
+.fx[data-bg="hills"]::before{background:radial-gradient(120% 60% at 20% 110%,rgba(60,110,70,.75) 49%,transparent 50%),radial-gradient(110% 50% at 85% 115%,rgba(40,80,55,.85) 49%,transparent 50%)}
+.fx[data-bg="desert"]{--base:#1a100a;--b1:rgba(255,170,90,.28);--b2:rgba(230,120,70,.2);--b3:rgba(140,80,40,.3)}
+.fx[data-bg="desert"]::before{background:radial-gradient(140% 40% at 30% 105%,rgba(170,105,60,.7) 49%,transparent 50%),radial-gradient(120% 35% at 80% 108%,rgba(140,85,50,.75) 49%,transparent 50%)}
+.fx[data-bg="petals"]{--base:#140b10;--b1:rgba(255,150,190,.26);--b2:rgba(220,110,160,.2);--b3:rgba(255,190,210,.14)}
+.fx[data-bg="petals"]::after{background:radial-gradient(5px 3px at 10% 10%,rgba(255,190,210,.7),transparent),radial-gradient(4px 2.5px at 60% 30%,rgba(255,200,220,.6),transparent),radial-gradient(5px 3px at 85% 5%,rgba(255,180,205,.6),transparent),radial-gradient(4px 2.5px at 30% 50%,rgba(255,210,225,.5),transparent);background-size:300px 300px;animation:fall 22s linear infinite}
+.fx[data-bg="sunset"]{--base:#160c14;--b1:rgba(255,140,90,.3);--b2:rgba(200,80,140,.28);--b3:rgba(255,190,110,.25)}
+.fx[data-bg="seaside"]{--base:#0c1018;--b1:rgba(250,160,170,.2);--b2:rgba(170,120,210,.2);--b3:transparent}
+.fx[data-bg="seaside"]::before{background:linear-gradient(transparent 58%,rgba(40,90,150,.55) 58%,rgba(20,50,100,.8));}
+.fx[data-bg="seaside"]::after{background:radial-gradient(12% 4% at 50% 58%,rgba(255,170,150,.5),transparent)}
+
+/* ---------- 날씨 ---------- */
+.fx[data-bg="sunny"]{--base:#0e1520;--b1:rgba(255,220,120,.35);--b2:rgba(120,190,255,.22);--b3:rgba(90,160,240,.2)}
+.fx[data-bg="clouds"]{--base:#10151d;--b1:rgba(170,190,220,.18);--b2:rgba(120,140,180,.18);--b3:rgba(90,110,150,.2)}
+.fx[data-bg="clouds"]::after{inset:0 -50%;background:radial-gradient(18% 9% at 20% 25%,rgba(230,235,245,.14),transparent 70%),radial-gradient(22% 10% at 55% 15%,rgba(230,235,245,.12),transparent 70%),radial-gradient(16% 8% at 80% 35%,rgba(230,235,245,.1),transparent 70%);animation:clouds 70s linear infinite}
+.fx[data-bg="rain"]{--base:#0b1016;--b1:rgba(90,130,170,.2);--b2:rgba(60,90,130,.2);--b3:rgba(40,70,100,.3)}
+.fx[data-bg="rain"]::after{inset:-100px 0 0;background:repeating-linear-gradient(105deg,transparent 0 14px,rgba(180,210,240,.12) 14px 15px,transparent 15px 31px);background-size:100% 120px;animation:rain .7s linear infinite}
+.fx[data-bg="snow"]{--base:#0e131a;--b1:rgba(200,220,255,.14);--b2:rgba(150,170,210,.14);--b3:rgba(220,230,250,.12)}
+.fx[data-bg="snow"]::after{inset:-200px 0 0;background:radial-gradient(2px 2px at 20px 30px,#fff,transparent),radial-gradient(1.5px 1.5px at 80px 120px,rgba(255,255,255,.8),transparent),radial-gradient(2.5px 2.5px at 150px 60px,rgba(255,255,255,.9),transparent),radial-gradient(1.5px 1.5px at 200px 170px,rgba(255,255,255,.7),transparent);background-size:220px 200px;opacity:.6;animation:snow 14s linear infinite}
+.fx[data-bg="storm"]{--base:#08090f;--b1:rgba(110,100,180,.22);--b2:rgba(60,60,110,.3);--b3:rgba(30,30,60,.5)}
+.fx[data-bg="storm"]::after{background:radial-gradient(60% 40% at 70% 10%,rgba(200,200,255,.35),transparent 70%);opacity:0;animation:flash 7s infinite}
+.fx[data-bg="dawn"]{--base:#0f0f1a;--b1:rgba(120,130,220,.22);--b2:rgba(240,160,170,.18);--b3:rgba(255,200,150,.22)}
+
+/* ---------- 우주 ---------- */
+.fx[data-bg="stars"]{--base:#05060c;--b1:rgba(70,80,160,.18);--b2:rgba(40,40,100,.2);--b3:rgba(30,30,70,.3)}
+.fx[data-bg="stars"]::before{background:radial-gradient(1px 1px at 10% 20%,#fff,transparent),radial-gradient(1px 1px at 30% 70%,rgba(255,255,255,.8),transparent),radial-gradient(1.5px 1.5px at 55% 35%,#fff,transparent),radial-gradient(1px 1px at 75% 80%,rgba(255,255,255,.7),transparent),radial-gradient(1px 1px at 90% 15%,rgba(255,255,255,.9),transparent);background-size:240px 240px;animation:twinkle 5s ease-in-out infinite alternate}
+.fx[data-bg="aurora"]{--base:#060b10;--b1:rgba(60,220,160,.3);--b2:rgba(80,120,255,.3);--b3:rgba(30,80,90,.4)}
+.fx[data-bg="aurora"]::after{inset:-20%;background:conic-gradient(from 200deg at 50% 30%,transparent,rgba(90,255,180,.18),transparent 30%,rgba(110,140,255,.18),transparent 60%);filter:blur(30px);animation:spin 40s linear infinite}
+.fx[data-bg="nebula"]{--base:#08050e;--b1:rgba(190,90,220,.3);--b2:rgba(90,110,255,.25);--b3:rgba(255,110,170,.2)}
+.fx[data-bg="nebula"]::before{background:radial-gradient(1px 1px at 20% 40%,rgba(255,255,255,.8),transparent),radial-gradient(1px 1px at 65% 25%,rgba(255,255,255,.7),transparent),radial-gradient(1px 1px at 80% 70%,#fff,transparent);background-size:180px 180px}
+.fx[data-bg="prism"]{--base:#0b0b10;--b1:rgba(255,110,110,.2);--b2:rgba(110,200,255,.22);--b3:rgba(255,220,110,.2)}
+.fx[data-bg="prism"]::before{background:conic-gradient(from 90deg at 40% 60%,rgba(255,90,90,.12),rgba(255,220,90,.12),rgba(90,255,160,.12),rgba(90,160,255,.12),rgba(200,90,255,.12),rgba(255,90,90,.12));filter:blur(40px)}
+.fx[data-bg="flow"]{--base:#080810;--b1:rgba(80,120,255,.3);--b2:rgba(200,90,220,.28);--b3:rgba(255,120,160,.22)}
+.fx[data-bg="flow"]::after{inset:-30%;background:radial-gradient(30% 30% at 30% 40%,rgba(120,150,255,.25),transparent 70%),radial-gradient(30% 30% at 70% 60%,rgba(230,110,220,.22),transparent 70%);filter:blur(20px);animation:orbit 28s ease-in-out infinite alternate}
+.fx[data-bg="lava"]{--base:#120605;--b1:rgba(255,90,40,.3);--b2:rgba(200,30,60,.3);--b3:rgba(255,150,50,.25)}
+.fx[data-bg="lava"]::after{inset:-30%;background:radial-gradient(22% 22% at 35% 65%,rgba(255,110,50,.3),transparent 70%),radial-gradient(18% 18% at 65% 35%,rgba(255,60,80,.28),transparent 70%);filter:blur(24px);animation:orbit 18s ease-in-out infinite alternate-reverse}
+
+/* 미리보기 칸은 화면 전체용 무늬를 작게 */
+.fx.mini::before,.fx.mini::after{background-size:auto}
+.fx.mini[data-bg="leather"]::before{inset:5px;border-width:4px}
+
+@keyframes drift{to{transform:translateY(-8%)}}
+@keyframes flicker{0%,100%{opacity:.85}45%{opacity:1}60%{opacity:.7}}
+@keyframes swell{to{transform:translateY(-14px) scaleX(1.04)}}
+@keyframes fall{to{background-position:60px 300px,-40px 300px,30px 300px,-60px 300px}}
+@keyframes clouds{to{transform:translateX(33%)}}
+@keyframes rain{to{transform:translateY(120px)}}
+@keyframes snow{to{transform:translateY(200px)}}
+@keyframes flash{0%,92%,100%{opacity:0}93%{opacity:1}95%{opacity:.2}96%{opacity:.8}}
+@keyframes twinkle{to{opacity:.55}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes orbit{to{transform:translate(8%,-6%) rotate(25deg)}}
+@media (prefers-reduced-motion:reduce){.fx::before,.fx::after{animation:none!important}}
+
+/* ---------- 강조 색 ---------- */
+:root{--accent-ink:#1a0d12}
+[data-accent="mono"]{--accent-ink:#0a0a0a}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"])[data-accent="mono"]{--accent:#0a0a0a!important;--accent-ink:#fafafa}}
+:root[data-theme="light"][data-accent="mono"]{--accent:#0a0a0a!important;--accent-ink:#fafafa}
+[data-accent="multi"] .btn.primary,[data-accent="multi"] .meter i,[data-accent="multi"] .track i{background:linear-gradient(90deg,#ff7a6b,#ffd95a,#7fd99a,#5aa0ff,#c39bff)}
