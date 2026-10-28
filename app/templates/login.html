@@ -1,0 +1,15 @@
+{% extends "_auth.html" %}
+{% block title %}로그인 — 함께읽기{% endblock %}
+{% block heading %}다시 만나서 반가워요{% endblock %}
+{% block sub %}읽던 곳에서 바로 이어 갈게요.{% endblock %}
+{% block form %}
+<form method="post" action="/login" class="fields" novalidate>
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden" name="next" value="{{ next }}">
+  {% if error %}<p class="form-err" role="alert">{{ error }}</p>{% endif %}
+  <label class="field"><span>이메일</span><input id="email" name="email" type="email" value="{{ email }}" autocomplete="email" required autofocus></label>
+  <label class="field"><span>비밀번호</span><input id="password" name="password" type="password" autocomplete="current-password" required></label>
+  <button class="btn primary wide">로그인</button>
+</form>
+<p class="switch">처음이신가요? <a href="/signup">회원가입</a></p>
+{% endblock %}

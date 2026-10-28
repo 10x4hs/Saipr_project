@@ -1,0 +1,39 @@
+{# 표지: 표지 이미지가 없는 고전을 위해 제목 해시로 색·무늬를 정한다 #}
+{% macro book_cover(title, author, size='') -%}
+{% set c = cover(title, author) -%}
+<div class="cover p{{ c.palette }} m{{ c.pattern }} {{ size }}" aria-hidden="true">
+  <span class="cv-art"></span>
+  <span class="cv-t">{{ title }}</span>
+  <span class="cv-a">{{ author or '' }}</span>
+</div>
+{%- endmacro %}
+
+{% macro catalog_card(b) -%}
+<a class="card" href="/open/{{ b.source }}/{{ b.id|urlencode }}">
+  {{ book_cover(b.title, b.author) }}
+  <b>{{ b.title }}</b>
+  <span>{{ b.author or b.genre }}</span>
+</a>
+{%- endmacro %}
+
+{% macro book_card(book, entry=None) -%}
+<a class="card" href="/books/{{ book.id }}">
+  {{ book_cover(book.title, book.author) }}
+  <b>{{ book.title }}</b>
+  {% if entry %}<span class="meter"><i style="width:{{ entry.progress_pct }}%"></i></span><span class="mono">{{ entry.progress_pct }}%</span>
+  {% else %}<span>{{ book.author or '' }}</span>{% endif %}
+</a>
+{%- endmacro %}
+
+{% macro icon(name) -%}
+<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+{%- if name == 'home' %}<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>
+{%- elif name == 'discover' %}<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>
+{%- elif name == 'library' %}<path d="M4 4h4v16H4zM10 4h4v16h-4zM16.5 4.5l3.5 1-3.8 15-3.5-1z"/>
+{%- elif name == 'me' %}<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>
+{%- elif name == 'search' %}<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+{%- elif name == 'upload' %}<path d="M12 16V4m0 0-5 5m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>
+{%- elif name == 'back' %}<path d="M15 5l-7 7 7 7"/>
+{%- elif name == 'theme' %}<path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/>
+{%- endif %}</svg>
+{%- endmacro %}

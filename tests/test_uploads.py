@@ -7,7 +7,7 @@ import pytest
 from app.services.uploads import fingerprint, parse_upload
 from app.sources.base import SourceError
 from app.sources.gutendex import GutendexSource
-from tests.conftest import mock_client
+from tests.conftest import mock_client, signup
 from tests.test_api import upstream
 
 BODY = "옛날 옛적에 한 마을이 있었다. " * 20
@@ -62,10 +62,18 @@ def test_fingerprint_ignores_spacing_and_punctuation():
     assert fingerprint("봄, 봄!\n\n장인님") == fingerprint("봄 봄  장인님")
 
 
-async def test_upload_is_private_to_its_browser(api):
-    files = {"file": ("mine.txt", BODY.encode(), "text/plain")}
+async def _upload(c, files):
+    html = (await c.get("/upload")).text
+    token = html.split('name="csrf" value="')[1].split('"')[0]
+    return await c.post("/upload", files=files, data={"csrf": token})
+
+
+async def test_upload_is_private_to_its_owner(api):
+    files = {"file": ("비밀일기장.txt", BODY.encode(), "text/plain")}
     async with api(upstream) as owner, api(upstream) as stranger:
-        r = await owner.post("/upload", files=files)
+        await signup(owner, email="owner@example.com")
+        await signup(stranger, email="stranger@example.com")
+        r = await _upload(owner, files)
         assert r.status_code == 303
         url = r.headers["location"]
         book_id = url.rsplit("/", 1)[1]
@@ -73,16 +81,16 @@ async def test_upload_is_private_to_its_browser(api):
         assert (await owner.get(f"/api/v1/books/{book_id}/chunks/0")).status_code == 200
         assert (await stranger.get(url)).status_code == 404
         assert (await stranger.get(f"/api/v1/books/{book_id}/chunks/0")).status_code == 404
-        again = await owner.post("/upload", files=files)
+        again = await _upload(owner, files)
         assert again.headers["location"] == url  # 같은 책을 다시 올려도 하나만
-        home = await owner.get("/")
-        assert "내 파일" in home.text and "mine" in home.text
-        assert "mine" not in (await stranger.get("/")).text
+        assert "비밀일기장" in (await owner.get("/library")).text
+        assert "비밀일기장" not in (await stranger.get("/library")).text
 
 
 async def test_upload_error_is_shown_on_page(api):
     async with api(upstream) as c:
-        r = await c.post("/upload", files={"file": ("x.docx", b"abc", "application/octet-stream")})
+        await signup(c)
+        r = await _upload(c, {"file": ("x.docx", b"abc", "application/octet-stream")})
     assert r.status_code == 422 and "EPUB, PDF, TXT" in r.text
 
 

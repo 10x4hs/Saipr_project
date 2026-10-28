@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "_ui.html" import book_cover %}
+{% block body_class %}landing{% endblock %}
+{% block body %}
+<header class="l-nav">
+  <span class="logo"><span class="logo-mark">읽</span>함께읽기</span>
+  <a class="l-login" href="/login">로그인</a>
+</header>
+<section class="l-hero">
+  <div class="l-copy">
+    <p class="eyebrow mono">{{ total }} PUBLIC DOMAIN BOOKS</p>
+    <h1>같은 책을,<br>각자의 속도로,<br><em>함께</em> 읽어요.</h1>
+    <p class="l-lede">김유정부터 제인 오스틴까지 저작권이 끝난 고전 {{ total }}권을 처음부터 끝까지 무료로 읽어요. 가지고 있는 EPUB·PDF도 올려서 읽을 수 있어요.</p>
+    <div class="l-cta">
+      <a class="btn primary" href="/signup">무료로 시작하기</a>
+      <a class="btn ghost" href="/login">이미 계정이 있어요</a>
+    </div>
+  </div>
+  <div class="l-stack" aria-hidden="true">
+    {% for b in picks %}<div class="l-book" style="--i:{{ loop.index0 }}">{{ book_cover(b.title, b.author, 'lg') }}</div>{% endfor %}
+  </div>
+</section>
+<section class="l-feats">
+  <div><span class="mono">01</span><b>읽은 만큼만 기록돼요</b><p>쪽마다 최소 읽기 시간을 채워야 진행률이 올라가요. 넘기기만 한 쪽은 세지 않아요.</p></div>
+  <div><span class="mono">02</span><b>어느 기기에서든 이어서</b><p>읽던 위치와 진행률이 계정에 저장돼요.</p></div>
+  <div><span class="mono">03</span><b>내 책도 같은 리더로</b><p>DRM 없는 EPUB·PDF·TXT를 올리면 본문은 나만 보여요.</p></div>
+</section>
+{% endblock %}

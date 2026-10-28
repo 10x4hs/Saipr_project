@@ -1,35 +1,44 @@
-{% extends "base.html" %}
+{% extends "app.html" %}
+{% from "_ui.html" import book_cover, catalog_card, book_card %}
+{% block heading %}{{ user.nickname }}님, 오늘은 무엇을 읽을까요{% endblock %}
 {% block main %}
-<section class="hero">
-  <p class="eyebrow mono">PUBLIC DOMAIN · {{ total }}권 · 전문 무료</p>
-  <h1>오늘 읽을 한 편</h1>
-  <p class="lede">저작권이 끝난 고전은 바로 읽고, 가지고 있는 EPUB·PDF는 올려서 읽어요. 읽은 곳은 자동으로 기억해요.</p>
-  <div class="hero-actions">
-    <a class="resume" id="resume" hidden></a>
-    <a class="ghost" href="/upload">＋ 내 파일 올리기</a>
+{% if current %}{% set e, b = current %}
+<a class="now" href="/books/{{ b.id }}">
+  {{ book_cover(b.title, b.author, 'lg') }}
+  <div class="now-body">
+    <span class="eyebrow mono">이어 읽기</span>
+    <h2>{{ b.title }}</h2>
+    <p class="muted">{{ b.author or '' }}</p>
+    <div class="now-meter"><span class="meter"><i style="width:{{ e.progress_pct }}%"></i></span><span class="mono">{{ e.current_chunk + 1 }} / {{ b.total_chunks }}쪽 · {{ e.progress_pct }}%</span></div>
+    <span class="btn primary">계속 읽기</span>
+  </div>
+</a>
+{% else %}
+<section class="now empty">
+  <div class="now-body">
+    <span class="eyebrow mono">첫 책 고르기</span>
+    <h2>오늘의 추천에서 한 편 골라 보세요</h2>
+    <p class="muted">짧은 단편은 20분이면 다 읽어요.</p>
   </div>
 </section>
-
-{% if library %}
-<h2 class="shelf-h">내 서재 <span class="mono">{{ library|length }}권</span></h2>
-<ol class="shelf">
-  {% for b in library %}
-  <li>
-    <a class="book" href="/books/{{ b.id }}" data-id="{{ b.id }}">
-      <span class="no mono">{{ '내 파일' if b.owner_key_hash else b.source|upper }}</span>
-      <span class="t">{{ b.title }}</span>
-      <span class="a">{{ b.author or '' }}</span>
-      <span class="y mono">{{ b.total_chunks }}쪽</span>
-      <span class="bar"><i></i></span>
-    </a>
-  </li>
-  {% endfor %}
-</ol>
 {% endif %}
 
+{% if reading %}
+<section class="row">
+  <div class="row-h"><h2>읽는 중</h2><a href="/library">전체</a></div>
+  <div class="rail">{% for e, b in reading %}{{ book_card(b, e) }}{% endfor %}</div>
+</section>
+{% endif %}
+
+<section class="row">
+  <div class="row-h"><h2>오늘의 추천</h2><span class="mono muted">매일 바뀌어요</span></div>
+  <div class="rail big">{% for b in picks %}{{ catalog_card(b) }}{% endfor %}</div>
+</section>
+
 {% for name, books in shelves.items() %}
-<h2 class="shelf-h">{{ name }} <a class="mono more" href="/shelf/{{ name|urlencode }}">전체 {{ books|length }}편 →</a></h2>
-{% set items = books[:preview] %}{% include "_shelf.html" %}
+<section class="row">
+  <div class="row-h"><h2>{{ name }}</h2><a href="/discover?g={{ name|urlencode }}">전체</a></div>
+  <div class="rail">{% for b in books %}{{ catalog_card(b) }}{% endfor %}</div>
+</section>
 {% endfor %}
-<script src="/static/home.js"></script>
 {% endblock %}

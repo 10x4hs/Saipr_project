@@ -1,0 +1,34 @@
+{% extends "app.html" %}
+{% from "_ui.html" import icon %}
+{% block title %}내 정보 — 함께읽기{% endblock %}
+{% block heading %}내 정보{% endblock %}
+{% block main %}
+<section class="profile">
+  <span class="avatar xl">{{ user.nickname[:1] }}</span>
+  <div><h2>{{ user.nickname }}</h2><p class="muted">{{ user.email }}</p></div>
+</section>
+<section class="stats">
+  <div><b>{{ stats.pages }}</b><span>읽은 쪽</span></div>
+  <div><b>{{ stats.reading }}</b><span>읽는 중</span></div>
+  <div><b>{{ stats.done }}</b><span>다 읽음</span></div>
+</section>
+<section class="settings">
+  <button class="set-row" id="themeBtn" type="button">{{ icon('theme') }}<span>화면 테마</span><em id="themeName">시스템</em></button>
+  <a class="set-row" href="/upload">{{ icon('upload') }}<span>내 파일 올리기</span><em>›</em></a>
+  <form method="post" action="/logout"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="set-row danger">로그아웃</button></form>
+</section>
+<script>
+(() => {
+  const names = {'': '시스템', light: '라이트', dark: '다크'}, order = ['', 'light', 'dark'];
+  let cur = ''; try { cur = localStorage.getItem('theme') || ''; } catch (e) {}
+  const paint = () => document.getElementById('themeName').textContent = names[cur];
+  paint();
+  document.getElementById('themeBtn').onclick = () => {
+    cur = order[(order.indexOf(cur) + 1) % order.length];
+    if (cur) document.documentElement.dataset.theme = cur; else delete document.documentElement.dataset.theme;
+    try { cur ? localStorage.setItem('theme', cur) : localStorage.removeItem('theme'); } catch (e) {}
+    paint();
+  };
+})();
+</script>
+{% endblock %}

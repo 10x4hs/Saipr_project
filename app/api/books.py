@@ -1,11 +1,13 @@
 import httpx
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_sources
+from app.auth import check_csrf, current_user, require_api_user
 from app.core.config import Settings, get_settings
 from app.db.session import get_session
+from app.models import Book, User
 from app.services import books as book_service
 from app.services.pace import min_dwell_ms
 from app.services.search import FULLTEXT_SOURCES, search_all
@@ -110,11 +112,11 @@ async def get_chunk(
     book_id: int,
     chunk_index: int,
     session: AsyncSession = Depends(get_session),
-    reader_key: str | None = Cookie(None),
+    user: User | None = Depends(current_user),
 ) -> ChunkOut:
     found = await book_service.get_chunk(session, book_id, chunk_index)
     # 남이 올린 책은 존재 여부도 드러내지 않도록 404로 통일
-    if found is None or not book_service.can_read(found[0], reader_key):
+    if found is None or not book_service.can_read(found[0], user.id if user else None):
         raise HTTPException(404, "chunk not found")
     book, chunk = found
     return ChunkOut(
@@ -124,4 +126,38 @@ async def get_chunk(
         text=chunk.text,
         char_count=chunk.char_count,
         min_dwell_ms=min_dwell_ms(chunk.text, book.language),
+    )
+
+
+class ProgressIn(BaseModel):
+    chunk_index: int
+    verified: bool = False
+
+
+class ProgressOut(BaseModel):
+    current_chunk: int
+    verified_chunk: int
+    progress_pct: int
+    shelf: str
+
+
+@router.put("/{book_id}/progress", response_model=ProgressOut)
+async def put_progress(
+    book_id: int,
+    body: ProgressIn,
+    request: Request,
+    x_csrf_token: str | None = Header(None),
+    session: AsyncSession = Depends(get_session),
+    user: User = Depends(require_api_user),
+) -> ProgressOut:
+    check_csrf(request, x_csrf_token)
+    book = await session.get(Book, book_id)
+    if book is None or not book_service.can_read(book, user.id):
+        raise HTTPException(404, "book not found")
+    e = await book_service.record_progress(session, user.id, book, body.chunk_index, body.verified)
+    return ProgressOut(
+        current_chunk=e.current_chunk,
+        verified_chunk=e.verified_chunk,
+        progress_pct=e.progress_pct,
+        shelf=e.shelf,
     )

@@ -1,0 +1,23 @@
+{% extends "app.html" %}
+{% from "_ui.html" import book_card %}
+{% block title %}서재 — 함께읽기{% endblock %}
+{% block heading %}내 서재{% endblock %}
+{% block main %}
+<div class="seg" role="tablist">
+  <button role="tab" data-tab="reading" aria-selected="true">읽는 중 <span>{{ tabs.reading|length }}</span></button>
+  <button role="tab" data-tab="done">다 읽음 <span>{{ tabs.done|length }}</span></button>
+  <button role="tab" data-tab="mine">내 파일 <span>{{ uploaded|length }}</span></button>
+</div>
+<div class="grid" data-panel="reading">{% for e, b in tabs.reading %}{{ book_card(b, e) }}{% else %}<p class="empty-note">아직 읽는 책이 없어요. <a href="/discover">탐색</a>에서 골라 보세요.</p>{% endfor %}</div>
+<div class="grid" data-panel="done" hidden>{% for e, b in tabs.done %}{{ book_card(b, e) }}{% else %}<p class="empty-note">끝까지 읽은 책이 여기에 모여요.</p>{% endfor %}</div>
+<div class="grid" data-panel="mine" hidden>
+  <a class="card add" href="/upload"><div class="cover add-cover">＋</div><b>파일 올리기</b><span>EPUB · PDF · TXT</span></a>
+  {% for b in uploaded %}{{ book_card(b) }}{% endfor %}
+</div>
+<script>
+document.querySelectorAll('.seg button').forEach(btn => btn.onclick = () => {
+  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-selected', b === btn));
+  document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== btn.dataset.tab);
+});
+</script>
+{% endblock %}

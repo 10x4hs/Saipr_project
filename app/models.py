@@ -74,6 +74,8 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     nickname: Mapped[str] = mapped_column(String(40))
     email: Mapped[str | None] = mapped_column(String(255), unique=True)
+    # BCrypt 해시. 소셜 로그인만 쓰는 계정은 비어 있다
+    password_hash: Mapped[str | None] = mapped_column(String(60))
     created_at: Mapped[datetime] = _now()
 
 
@@ -102,8 +104,8 @@ class Book(Base):
     # 퍼블릭 도메인 화이트리스트 소스에서만 true (app/services/search.py FULLTEXT_SOURCES)
     has_fulltext: Mapped[bool] = mapped_column(Boolean, default=False)
     total_chunks: Mapped[int] = mapped_column(Integer, default=0)
-    # 사용자가 올린 개인 파일(source="upload")만 채운다. 본문은 올린 브라우저 키로만 열린다.
-    owner_key_hash: Mapped[str | None] = mapped_column(String(64))
+    # 사용자가 올린 개인 파일(source="upload")만 채운다. 본문은 올린 사람만 열 수 있다.
+    owner_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     # 정규화한 본문의 SHA-256 — 서로 다른 사람이 올린 같은 책을 알아보는 데 쓴다.
     fingerprint: Mapped[str | None] = mapped_column(String(64), index=True)
 
@@ -141,6 +143,8 @@ class LibraryEntry(Base):
     progress_pct: Mapped[int] = mapped_column(SmallInteger, default=0)
     # 체류시간 검증을 통과한 최대 청크 인덱스 (-1 = 아직 없음). 트래커 모드는 사용 안 함
     verified_chunk: Mapped[int] = mapped_column(Integer, default=-1)
+    # 마지막으로 펼친 청크 — 이어 읽기 위치
+    current_chunk: Mapped[int] = mapped_column(Integer, default=0)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )

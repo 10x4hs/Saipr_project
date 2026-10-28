@@ -1,5 +1,6 @@
 import httpx
 
+from tests.conftest import signup
 from tests.test_sources import WIKI_HTML
 
 LONG_HTML = "".join(f"<p>{i}번째 문단. " + "가" * 500 + "</p>" for i in range(6))
@@ -43,6 +44,10 @@ async def test_import_then_read_chunks(api):
         again = await c.post("/api/v1/books/import", json={"source": "wikisource", "external_id": "긴글"})
         assert again.json()["id"] == book["id"]  # 캐시: 중복 생성 없음
 
+        anonymous = await c.get(f"/api/v1/books/{book['id']}/chunks/0")
+        assert anonymous.status_code == 404  # 본문은 로그인한 사용자만
+
+        await signup(c)
         chunk = (await c.get(f"/api/v1/books/{book['id']}/chunks/0")).json()
         assert chunk["total_chunks"] == 3
         assert chunk["text"].startswith("0번째 문단.")

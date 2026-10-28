@@ -1,32 +1,29 @@
-{% extends "base.html" %}
+{% extends "app.html" %}
 {% block title %}파일 올리기 — 함께읽기{% endblock %}
+{% block heading %}내 책 올리기{% endblock %}
 {% block main %}
-<section class="hero">
-  <p class="eyebrow mono">EPUB · PDF · TXT · 최대 20MB</p>
-  <h1>내 책 올리기</h1>
-  <p class="lede">가지고 있는 DRM 없는 파일을 올리면 바로 읽을 수 있어요. 본문은 이 브라우저에서만 열리고, 친구에게는 읽은 위치와 반응만 공유돼요.</p>
-</section>
 <form class="drop" id="drop" action="/upload" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
   <input type="file" id="file" name="file" accept=".epub,.pdf,.txt" required>
   <label for="file">
+    <span class="drop-ic">＋</span>
     <b>파일을 끌어 놓거나 눌러서 고르세요</b>
-    <span class="mono" id="picked">선택된 파일 없음</span>
+    <span class="mono" id="picked">EPUB · PDF · TXT · 최대 20MB</span>
   </label>
-  <button type="submit" id="go" disabled>올리고 읽기</button>
+  <button type="submit" class="btn primary" id="go" disabled>올리고 읽기</button>
 </form>
-{% if error %}<p class="err" role="alert">{{ error }}</p>{% endif %}
+{% if error %}<p class="form-err" role="alert">{{ error }}</p>{% endif %}
 <ul class="fine">
+  <li>본문은 나만 볼 수 있어요. 친구에게는 읽은 위치와 진행률만 보여요.</li>
   <li>DRM이 걸린 전자책(구매한 리디·교보 등)과 스캔 이미지 PDF는 열 수 없어요.</li>
-  <li>남의 파일을 올리거나 공유하지 마세요. 저작권은 원저작자에게 있어요.</li>
+  <li>저작권은 원저작자에게 있어요. 내가 가진 파일만 올려 주세요.</li>
 </ul>
 <script>
 (() => {
   const input = document.getElementById('file'), drop = document.getElementById('drop');
-  const sync = () => {
-    const f = input.files[0];
-    document.getElementById('picked').textContent = f ? `${f.name} · ${(f.size / 1048576).toFixed(1)}MB` : '선택된 파일 없음';
-    document.getElementById('go').disabled = !f;
-  };
+  const sync = () => { const f = input.files[0];
+    document.getElementById('picked').textContent = f ? `${f.name} · ${(f.size / 1048576).toFixed(1)}MB` : 'EPUB · PDF · TXT · 최대 20MB';
+    document.getElementById('go').disabled = !f; };
   input.addEventListener('change', sync);
   ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
   ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));

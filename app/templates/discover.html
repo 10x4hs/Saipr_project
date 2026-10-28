@@ -1,0 +1,25 @@
+{% extends "app.html" %}
+{% from "_ui.html" import catalog_card %}
+{% block title %}탐색 — 함께읽기{% endblock %}
+{% block heading %}탐색{% endblock %}
+{% block main %}
+<nav class="chips" aria-label="장르">
+  <a href="/discover" class="{{ 'on' if not genre }}">전체 <span>{{ total }}</span></a>
+  {% for g, books in genres.items() %}<a href="/discover?g={{ g|urlencode }}" class="{{ 'on' if g == genre }}">{{ g }} <span>{{ books|length }}</span></a>{% endfor %}
+</nav>
+<input class="filter" id="filter" placeholder="이 목록에서 제목·저자 거르기" aria-label="목록 거르기">
+<div class="grid" id="grid">
+  {% for b in books %}<div data-q="{{ b.title }} {{ b.author or '' }}">{{ catalog_card(b) }}</div>{% endfor %}
+</div>
+<p class="muted" id="none" hidden>맞는 책이 없어요.</p>
+<script>
+(() => {
+  const rows = [...document.querySelectorAll('#grid > div')];
+  document.getElementById('filter').addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase(); let shown = 0;
+    rows.forEach(r => { const hit = r.dataset.q.toLowerCase().includes(q); r.hidden = !hit; shown += hit; });
+    document.getElementById('none').hidden = shown > 0;
+  });
+})();
+</script>
+{% endblock %}

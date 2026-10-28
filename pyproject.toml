@@ -16,6 +16,8 @@ dependencies = [
     "python-multipart>=0.0.9",
     "pypdf>=4.0",
     "lxml>=5.0",
+    "bcrypt>=4.1",
+    "itsdangerous>=2.1",
 ]
 
 [project.optional-dependencies]
@@ -52,4 +54,4 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.flake8-bugbear]
 # FastAPI 의존성 주입 관용구
-extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.File", "fastapi.Cookie"]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.File", "fastapi.Cookie", "fastapi.Form", "fastapi.Header"]

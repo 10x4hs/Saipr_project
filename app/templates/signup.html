@@ -1,0 +1,16 @@
+{% extends "_auth.html" %}
+{% block title %}회원가입 — 함께읽기{% endblock %}
+{% block heading %}서재를 만들어요{% endblock %}
+{% block sub %}이메일 하나면 바로 읽기 시작할 수 있어요.{% endblock %}
+{% block form %}
+{% set e = form.errors if form else {} %}
+<form method="post" action="/signup" class="fields" novalidate>
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label class="field {{ 'bad' if e.nickname }}"><span>이름</span><input id="nickname" name="nickname" value="{{ form.nickname if form else '' }}" maxlength="40" autocomplete="nickname" required autofocus>{% if e.nickname %}<em>{{ e.nickname }}</em>{% endif %}</label>
+  <label class="field {{ 'bad' if e.email }}"><span>이메일</span><input id="email" name="email" type="email" value="{{ form.email if form else '' }}" autocomplete="email" required>{% if e.email %}<em>{{ e.email }}</em>{% endif %}</label>
+  <label class="field {{ 'bad' if e.password }}"><span>비밀번호 <small>8자 이상</small></span><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>{% if e.password %}<em>{{ e.password }}</em>{% endif %}</label>
+  <label class="field {{ 'bad' if e.password_confirm }}"><span>비밀번호 확인</span><input id="password_confirm" name="password_confirm" type="password" autocomplete="new-password" required>{% if e.password_confirm %}<em>{{ e.password_confirm }}</em>{% endif %}</label>
+  <button class="btn primary wide">가입하고 시작하기</button>
+</form>
+<p class="switch">이미 계정이 있나요? <a href="/login">로그인</a></p>
+{% endblock %}

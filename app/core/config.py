@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     google_books_api_key: str | None = None
     wikisource_lang: str = "ko"
 
+    # 세션 쿠키 서명 키. 운영에서는 반드시 .env로 바꾼다
+    secret_key: str = "dev-only-change-me"
+    session_idle_minutes: int = 30
+    cookie_secure: bool = False
+
 
 @lru_cache
 def get_settings() -> Settings:

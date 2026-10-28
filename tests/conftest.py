@@ -1,3 +1,4 @@
+import re
 from collections.abc import AsyncIterator, Callable
 
 import httpx
@@ -50,3 +51,26 @@ def api(session_factory):
 
     yield make
     app.dependency_overrides.clear()
+
+
+async def csrf_of(client: httpx.AsyncClient, path: str = "/signup") -> str:
+    html = (await client.get(path)).text
+    return re.search(r'name="csrf" value="([^"]+)"', html).group(1)
+
+
+async def signup(
+    client: httpx.AsyncClient, email: str = "reader@example.com", nickname: str = "독자"
+) -> None:
+    """회원가입(= 로그인 상태)까지 마친다. 테스트용이라 비밀번호는 고정."""
+    token = await csrf_of(client)
+    r = await client.post(
+        "/signup",
+        data={
+            "nickname": nickname,
+            "email": email,
+            "password": "password123",
+            "password_confirm": "password123",
+            "csrf": token,
+        },
+    )
+    assert r.status_code == 303, r.text

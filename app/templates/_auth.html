@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% from "_ui.html" import book_cover %}
+{% block body_class %}auth{% endblock %}
+{% block body %}
+<a class="logo auth-logo" href="/"><span class="logo-mark">읽</span>함께읽기</a>
+<main class="auth-card">
+  <h1>{% block heading %}{% endblock %}</h1>
+  <p class="muted">{% block sub %}{% endblock %}</p>
+  {% block form %}{% endblock %}
+</main>
+{% endblock %}

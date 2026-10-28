@@ -1,37 +1,21 @@
-{% extends "base.html" %}
+{% extends "app.html" %}
+{% from "_ui.html" import catalog_card, book_cover %}
 {% block title %}{{ q }} — 함께읽기{% endblock %}
+{% block heading %}검색{% endblock %}
 {% block main %}
-<h1 class="sr-h">“{{ q }}” 검색 결과</h1>
-{% if not q %}<p class="muted">검색어를 입력해 주세요.</p>{% endif %}
-
+<form class="big-search" action="/search" role="search"><input name="q" value="{{ q }}" placeholder="제목이나 저자를 입력하세요" aria-label="검색어" autofocus></form>
+{% if in_catalog %}
+<section class="row"><div class="row-h"><h2>서가에서 찾음</h2><span class="mono muted">{{ in_catalog|length }}</span></div>
+<div class="grid">{% for b in in_catalog %}{{ catalog_card(b) }}{% endfor %}</div></section>
+{% endif %}
 {% if readable %}
-<h2 class="shelf-h">바로 읽기 <span class="mono">{{ readable|length }}</span></h2>
-<ol class="shelf">
-  {% for m in readable %}
-  <li><a class="book" href="/open/{{ m.source }}/{{ m.external_id|urlencode }}">
-    <span class="no mono">{{ m.source|upper }}</span>
-    <span class="t">{{ m.title }}</span>
-    <span class="a">{{ m.authors|join(', ') }}</span>
-    <span class="y mono">읽기 →</span>
-  </a></li>
-  {% endfor %}
-</ol>
+<section class="row"><div class="row-h"><h2>바로 읽을 수 있는 책</h2><span class="mono muted">{{ readable|length }}</span></div>
+<ul class="list">{% for m in readable %}<li><a href="/open/{{ m.source }}/{{ m.external_id|urlencode }}">{{ book_cover(m.title, m.authors|join(', '), 'sm') }}<div><b>{{ m.title }}</b><span>{{ m.authors|join(', ') or m.source }}</span></div><em class="mono">읽기</em></a></li>{% endfor %}</ul></section>
 {% endif %}
-
 {% if others %}
-<h2 class="shelf-h">정보만 제공 <span class="mono">저작권 보호 도서</span></h2>
-<ol class="shelf meta">
-  {% for m in others %}
-  <li><a class="book" href="{{ m.link or '#' }}" target="_blank" rel="noopener">
-    <span class="no mono">{{ m.source|upper }}</span>
-    <span class="t">{{ m.title }}</span>
-    <span class="a">{{ m.authors|join(', ') }}</span>
-    <span class="y mono">원문 ↗</span>
-  </a></li>
-  {% endfor %}
-</ol>
+<section class="row"><div class="row-h"><h2>정보만 있는 책</h2><span class="mono muted">저작권 보호</span></div>
+<ul class="list">{% for m in others %}<li><a href="{{ m.link or '#' }}" target="_blank" rel="noopener">{% if m.cover_url %}<img class="cover sm" src="{{ m.cover_url }}" alt="">{% else %}{{ book_cover(m.title, m.authors|join(', '), 'sm') }}{% endif %}<div><b>{{ m.title }}</b><span>{{ m.authors|join(', ') }}</span></div><em class="mono">원문 ↗</em></a></li>{% endfor %}</ul></section>
 {% endif %}
-
-{% if q and not readable and not others %}<p class="muted">찾은 책이 없어요. 다른 제목으로 검색해 보세요.</p>{% endif %}
+{% if q and not (in_catalog or readable or others) %}<p class="empty-note">찾은 책이 없어요. 다른 제목으로 검색해 보세요.</p>{% endif %}
 {% if errors %}<p class="muted mono">응답 없는 소스: {{ errors.keys()|join(', ') }}</p>{% endif %}
 {% endblock %}
