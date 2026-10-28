@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block main %}
+<section class="hero">
+  <p class="eyebrow mono">PUBLIC DOMAIN · 전문 무료</p>
+  <h1>오늘 읽을 한 편</h1>
+  <p class="lede">저작권이 끝난 한국 근대 단편을 처음부터 끝까지 읽어요. 읽은 곳은 자동으로 기억해요.</p>
+  <a class="resume" id="resume" hidden></a>
+</section>
+
+<h2 class="shelf-h">추천 서가 <span class="mono">위키문헌</span></h2>
+<ol class="shelf">
+  {% for title, author, year in featured %}
+  <li>
+    <a class="book" href="/open/wikisource/{{ title|urlencode }}" data-title="{{ title }}">
+      <span class="no mono">{{ '%02d' % loop.index }}</span>
+      <span class="t">{{ title }}</span>
+      <span class="a">{{ author }}</span>
+      <span class="y mono">{{ year }}</span>
+      <span class="bar"><i></i></span>
+    </a>
+  </li>
+  {% endfor %}
+</ol>
+
+{% if imported %}
+<h2 class="shelf-h">내 서재 <span class="mono">{{ imported|length }}권</span></h2>
+<ol class="shelf">
+  {% for b in imported %}
+  <li>
+    <a class="book" href="/books/{{ b.id }}" data-id="{{ b.id }}" data-total="{{ b.total_chunks }}">
+      <span class="no mono">{{ '%02d' % loop.index }}</span>
+      <span class="t">{{ b.title }}</span>
+      <span class="a">{{ b.author or '' }}</span>
+      <span class="y mono">{{ b.total_chunks }}쪽</span>
+      <span class="bar"><i></i></span>
+    </a>
+  </li>
+  {% endfor %}
+</ol>
+{% endif %}
+<script src="/static/home.js"></script>
+{% endblock %}

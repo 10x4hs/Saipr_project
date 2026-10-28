@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}함께읽기{% endblock %}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=IBM+Plex+Sans+KR:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/static/app.css">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'}catch(e){}</script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% block body %}
+<header class="nav">
+  <a class="brand" href="/">함께읽기</a>
+  <form class="find" action="/search" role="search">
+    <input name="q" value="{{ q or '' }}" placeholder="책 제목이나 저자 검색" aria-label="검색">
+  </form>
+</header>
+<main class="page">{% block main %}{% endblock %}</main>
+{% endblock %}
+</body>
+</html>

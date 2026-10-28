@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }} — 함께읽기{% endblock %}
+{% block body_class %}reading{% endblock %}
+{% block body %}
+<div class="r-top">
+  <a href="/" class="back" aria-label="서재로">←</a>
+  <div class="r-title"><b>{{ book.title }}</b><span>{{ book.author or '' }}</span></div>
+  <div class="r-tools">
+    <button id="smaller" aria-label="글자 작게">가-</button>
+    <button id="bigger" aria-label="글자 크게">가+</button>
+    <button id="theme" aria-label="테마 바꾸기">◐</button>
+  </div>
+  <div class="r-progress"><i id="prog"></i></div>
+</div>
+
+<main class="r-page" id="page" data-book="{{ book.id }}" data-total="{{ book.total_chunks }}">
+  <article id="text" class="r-text" aria-live="polite"></article>
+</main>
+
+<nav class="r-foot">
+  <button id="prev" aria-label="이전 쪽">‹</button>
+  <div class="r-meta mono">
+    <span id="pos">1 / {{ book.total_chunks }}</span>
+    <span class="dwell" title="이 쪽을 다 읽었다고 인정되기까지"><i id="dwell"></i></span>
+    <span id="state">읽는 중</span>
+  </div>
+  <button id="next" aria-label="다음 쪽">›</button>
+</nav>
+<script src="/static/reader.js"></script>
+{% endblock %}
