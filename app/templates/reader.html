@@ -3,30 +3,25 @@
 {% block title %}{{ book.title }} — 함께읽기{% endblock %}
 {% block body_class %}reading{% endblock %}
 {% block body %}
-<div class="r-top">
-  <a href="/library" class="r-btn" aria-label="서재로">{{ icon('back') }}</a>
+<header class="r-top glass">
+  <a href="/library" class="pill-btn" aria-label="서재로">{{ icon('back') }}</a>
   <div class="r-title"><b>{{ book.title }}</b><span>{{ book.author or '' }}</span></div>
-  <div class="r-tools">
-    <button class="r-btn" id="smaller" aria-label="글자 작게">가<sup>−</sup></button>
-    <button class="r-btn" id="bigger" aria-label="글자 크게">가<sup>+</sup></button>
-    <button class="r-btn" id="tone" aria-label="종이 색 바꾸기">{{ icon('theme') }}</button>
-  </div>
-  <div class="r-progress"><i id="prog"></i></div>
+  <button class="pill-btn" id="aa" aria-label="보기 설정" aria-expanded="false">Aa</button>
+</header>
+<div class="r-sheet glass" id="sheet" hidden>
+  <div class="r-row"><span>글자 크기</span><div class="seg mini"><button id="smaller" aria-label="작게">가−</button><button id="bigger" aria-label="크게">가+</button></div></div>
+  <div class="r-row"><span>종이</span><div class="seg mini" id="tones"><button data-tone="">기본</button><button data-tone="paper">종이</button><button data-tone="night">밤</button></div></div>
 </div>
 
-<main class="r-page" id="page" data-book="{{ book.id }}" data-total="{{ book.total_chunks }}"
-      data-start="{{ entry.current_chunk }}" data-verified="{{ entry.verified_chunk }}" data-csrf="{{ csrf }}">
-  <article id="text" class="r-text" aria-live="polite"></article>
-</main>
+<main class="r-stage" id="stage" data-book="{{ book.id }}" data-total="{{ book.total_chunks }}"
+      data-start="{{ entry.current_chunk }}" data-verified="{{ entry.verified_chunk }}" data-csrf="{{ csrf }}"></main>
+<div class="pg measure" id="measure" aria-hidden="true"></div>
 
-<nav class="r-foot">
-  <button id="prev" class="r-nav" aria-label="이전 쪽">‹</button>
-  <div class="r-meta">
-    <span class="mono" id="pos">1 / {{ book.total_chunks }}</span>
-    <span class="dwell" title="이 쪽을 다 읽었다고 인정되기까지"><i id="dwell"></i></span>
-    <span id="state">읽는 중</span>
-  </div>
-  <button id="next" class="r-nav" aria-label="다음 쪽">›</button>
-</nav>
+<footer class="r-foot glass">
+  <span class="mono" id="pos">–</span>
+  <span class="dwell" title="이 쪽을 다 읽었다고 인정되기까지"><i id="dwell"></i></span>
+  <span id="state">읽는 중</span>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 <script src="/static/reader.js"></script>
 {% endblock %}

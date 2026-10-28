@@ -2,29 +2,17 @@
 {% from "_ui.html" import icon %}
 {% block body_class %}app{% endblock %}
 {% block body %}
-<aside class="side">
-  <a class="logo" href="/"><span class="logo-mark">읽</span>함께읽기</a>
-  <nav class="tabs" aria-label="주 메뉴">
-    {% for href, name, label in [('/', 'home', '홈'), ('/discover', 'discover', '탐색'), ('/library', 'library', '서재'), ('/me', 'me', '내 정보')] %}
+<div class="phone">
+  <header class="top">
+    <h1 class="top-title">{% block heading %}{% endblock %}</h1>
+    <a class="pill-btn" href="/search" aria-label="검색">{{ icon('search') }}</a>
+    <a class="pill-btn" href="/upload" aria-label="파일 올리기">{{ icon('upload') }}</a>
+  </header>
+  <main class="content">{% block main %}{% endblock %}</main>
+  <nav class="tabbar" aria-label="주 메뉴">
+    {% for href, name, label in [('/', 'home', '홈'), ('/discover', 'discover', '탐색'), ('/library', 'library', '서재'), ('/me', 'me', '나')] %}
     <a href="{{ href }}" class="{{ 'on' if (path == href or (href != '/' and path.startswith(href))) else '' }}">{{ icon(name) }}<span>{{ label }}</span></a>
     {% endfor %}
   </nav>
-  <a class="side-cta" href="/upload">{{ icon('upload') }}내 파일 올리기</a>
-  <div class="side-user"><span class="avatar">{{ user.nickname[:1] }}</span><div><b>{{ user.nickname }}</b><span>{{ user.email }}</span></div></div>
-</aside>
-<div class="main">
-  <header class="top">
-    <h1 class="top-title">{% block heading %}{% endblock %}</h1>
-    <form class="top-search" action="/search" role="search">
-      {{ icon('search') }}<input name="q" value="{{ q or '' }}" placeholder="제목, 저자 검색" aria-label="검색">
-    </form>
-    <a class="top-btn" href="/upload" aria-label="파일 올리기">{{ icon('upload') }}</a>
-  </header>
-  <main class="content">{% block main %}{% endblock %}</main>
 </div>
-<nav class="tabbar" aria-label="주 메뉴">
-  {% for href, name, label in [('/', 'home', '홈'), ('/discover', 'discover', '탐색'), ('/library', 'library', '서재'), ('/me', 'me', '내 정보')] %}
-  <a href="{{ href }}" class="{{ 'on' if (path == href or (href != '/' and path.startswith(href))) else '' }}">{{ icon(name) }}<span>{{ label }}</span></a>
-  {% endfor %}
-</nav>
 {% endblock %}

@@ -10,11 +10,11 @@
 {% endif %}
 {% if readable %}
 <section class="row"><div class="row-h"><h2>바로 읽을 수 있는 책</h2><span class="mono muted">{{ readable|length }}</span></div>
-<ul class="list">{% for m in readable %}<li><a href="/open/{{ m.source }}/{{ m.external_id|urlencode }}">{{ book_cover(m.title, m.authors|join(', '), 'sm') }}<div><b>{{ m.title }}</b><span>{{ m.authors|join(', ') or m.source }}</span></div><em class="mono">읽기</em></a></li>{% endfor %}</ul></section>
+<ul class="list">{% for m in readable %}<li><a href="/open/{{ m.source }}/{{ m.external_id|urlencode }}">{{ book_cover(m.title, m.authors|join(', '), 'xs') }}<div><b>{{ m.title }}</b><span>{{ m.authors|join(', ') or m.source }}</span></div><em class="mono">읽기</em></a></li>{% endfor %}</ul></section>
 {% endif %}
 {% if others %}
 <section class="row"><div class="row-h"><h2>정보만 있는 책</h2><span class="mono muted">저작권 보호</span></div>
-<ul class="list">{% for m in others %}<li><a href="{{ m.link or '#' }}" target="_blank" rel="noopener">{% if m.cover_url %}<img class="cover sm" src="{{ m.cover_url }}" alt="">{% else %}{{ book_cover(m.title, m.authors|join(', '), 'sm') }}{% endif %}<div><b>{{ m.title }}</b><span>{{ m.authors|join(', ') }}</span></div><em class="mono">원문 ↗</em></a></li>{% endfor %}</ul></section>
+<ul class="list">{% for m in others %}<li><a href="{{ m.link or '#' }}" target="_blank" rel="noopener">{% if m.cover_url %}<img class="thumb" src="{{ m.cover_url }}" alt="">{% else %}{{ book_cover(m.title, m.authors|join(', '), 'xs') }}{% endif %}<div><b>{{ m.title }}</b><span>{{ m.authors|join(', ') }}</span></div><em class="mono">원문 ↗</em></a></li>{% endfor %}</ul></section>
 {% endif %}
 {% if q and not (in_catalog or readable or others) %}<p class="empty-note">찾은 책이 없어요. 다른 제목으로 검색해 보세요.</p>{% endif %}
 {% if errors %}<p class="muted mono">응답 없는 소스: {{ errors.keys()|join(', ') }}</p>{% endif %}

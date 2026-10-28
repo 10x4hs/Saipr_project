@@ -44,7 +44,14 @@ def cover(title: str, author: str | None = None) -> dict:
     return {"palette": h % COVER_PALETTES, "pattern": (h >> 8) % 4}
 
 
+def cover_of(book: Book) -> str | None:
+    """가져온 책의 실제 표지 경로 (카탈로그에 있고 표지를 받아 둔 경우만)."""
+    meta = CATALOG_INDEX.get((book.source, book.external_id))
+    return meta.get("cover") if meta else None
+
+
 templates.env.globals["cover"] = cover
+templates.env.globals["cover_of"] = cover_of
 
 
 def _render(request: Request, name: str, user: User | None, **ctx) -> HTMLResponse:
@@ -58,7 +65,8 @@ def _safe_next(target: str | None) -> str:
 
 def _daily_picks(n: int) -> list[dict]:
     rng = random.Random(dt.date.today().toordinal())
-    return rng.sample([b for b in CATALOG if b["source"] == "wikisource"], n)
+    with_cover = [b for b in CATALOG if b.get("cover")] or CATALOG
+    return rng.sample(with_cover, min(n, len(with_cover)))
 
 
 # --- 소개 · 가입 · 로그인 ---
@@ -81,6 +89,7 @@ async def home(
         current=reading[0] if reading else None,
         reading=reading[1:6],
         picks=_daily_picks(10),
+        marquee=_daily_picks(16),
         shelves={g: books[:14] for g, books in SHELVES.items()},
     )
 

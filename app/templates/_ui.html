@@ -1,16 +1,19 @@
 {# 표지: 표지 이미지가 없는 고전을 위해 제목 해시로 색·무늬를 정한다 #}
-{% macro book_cover(title, author, size='') -%}
+{% macro book_cover(title, author, size='', img=None) -%}
 {% set c = cover(title, author) -%}
-<div class="cover p{{ c.palette }} m{{ c.pattern }} {{ size }}" aria-hidden="true">
-  <span class="cv-art"></span>
-  <span class="cv-t">{{ title }}</span>
-  <span class="cv-a">{{ author or '' }}</span>
+<div class="book3d {{ size }}" aria-hidden="true">
+  {%- if img %}
+  <div class="cover real"><img src="{{ img }}" alt="" loading="lazy" decoding="async"></div>
+  {%- else %}
+  <div class="cover p{{ c.palette }} m{{ c.pattern }}"><span class="cv-art"></span><span class="cv-t">{{ title }}</span><span class="cv-a">{{ author or '' }}</span></div>
+  {%- endif %}
+  <span class="edge"></span>
 </div>
 {%- endmacro %}
 
 {% macro catalog_card(b) -%}
 <a class="card" href="/open/{{ b.source }}/{{ b.id|urlencode }}">
-  {{ book_cover(b.title, b.author) }}
+  {{ book_cover(b.title, b.author, img=b.cover) }}
   <b>{{ b.title }}</b>
   <span>{{ b.author or b.genre }}</span>
 </a>
@@ -18,7 +21,7 @@
 
 {% macro book_card(book, entry=None) -%}
 <a class="card" href="/books/{{ book.id }}">
-  {{ book_cover(book.title, book.author) }}
+  {{ book_cover(book.title, book.author, img=cover_of(book)) }}
   <b>{{ book.title }}</b>
   {% if entry %}<span class="meter"><i style="width:{{ entry.progress_pct }}%"></i></span><span class="mono">{{ entry.progress_pct }}%</span>
   {% else %}<span>{{ book.author or '' }}</span>{% endif %}

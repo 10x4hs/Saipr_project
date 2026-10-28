@@ -1,10 +1,10 @@
 {% extends "app.html" %}
 {% from "_ui.html" import book_cover, catalog_card, book_card %}
-{% block heading %}{{ user.nickname }}님, 오늘은 무엇을 읽을까요{% endblock %}
+{% block heading %}<small>{{ user.nickname }}님,</small>오늘은 뭘 읽을까요{% endblock %}
 {% block main %}
 {% if current %}{% set e, b = current %}
 <a class="now" href="/books/{{ b.id }}">
-  {{ book_cover(b.title, b.author, 'lg') }}
+  {{ book_cover(b.title, b.author, 'lg', img=cover_of(b)) }}
   <div class="now-body">
     <span class="eyebrow mono">이어 읽기</span>
     <h2>{{ b.title }}</h2>
@@ -29,6 +29,10 @@
   <div class="rail">{% for e, b in reading %}{{ book_card(b, e) }}{% endfor %}</div>
 </section>
 {% endif %}
+
+<div class="marquee" aria-hidden="true"><div class="marquee-track">
+  {% for b in marquee + marquee %}{{ book_cover(b.title, b.author, 'sm', img=b.cover) }}{% endfor %}
+</div></div>
 
 <section class="row">
   <div class="row-h"><h2>오늘의 추천</h2><span class="mono muted">매일 바뀌어요</span></div>
