@@ -1,13 +1,19 @@
 {# 표지: 표지 이미지가 없는 고전을 위해 제목 해시로 색·무늬를 정한다 #}
+{# 책 한 권을 앞표지·책등·페이지 단면·윗면·뒤표지가 있는 3D 상자로 그린다 #}
 {% macro book_cover(title, author, size='', img=None) -%}
 {% set c = cover(title, author) -%}
-<div class="book3d {{ size }}" aria-hidden="true">
-  {%- if img %}
-  <div class="cover real"><img src="{{ img }}" alt="" loading="lazy" decoding="async"></div>
-  {%- else %}
-  <div class="cover p{{ c.palette }} m{{ c.pattern }}"><span class="cv-art"></span><span class="cv-t">{{ title }}</span><span class="cv-a">{{ author or '' }}</span></div>
-  {%- endif %}
-  <span class="edge"></span>
+<div class="book3d {{ size }} p{{ c.palette }}"{% if img %} style="--img:url('{{ img }}')"{% endif %} aria-hidden="true">
+  <div class="bk">
+    {%- if img %}
+    <div class="bk-front cover real"><img src="{{ img }}" alt="" loading="lazy" decoding="async"></div>
+    {%- else %}
+    <div class="bk-front cover p{{ c.palette }} m{{ c.pattern }}"><span class="cv-art"></span><span class="cv-t">{{ title }}</span><span class="cv-a">{{ author or '' }}</span></div>
+    {%- endif %}
+    <span class="bk-spine"><span>{{ title }}</span></span>
+    <span class="bk-pages"></span>
+    <span class="bk-top"></span>
+    <span class="bk-back"></span>
+  </div>
 </div>
 {%- endmacro %}
 

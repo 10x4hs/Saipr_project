@@ -5,29 +5,29 @@
 <button type="button" data-view-toggle><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span data-view-label>목록으로 보기</span></button>
 {% endblock %}
 {% block main %}
-{# ---------- 3D: 인기 순위를 스크롤로 통과한다 ---------- #}
-<section class="depth" id="depth" aria-label="인기 고전 순위">
-  <div class="depth-stage" id="depthStage">
-    {% for b in popular %}
-    <a class="depth-item" href="/open/{{ b.source }}/{{ b.id|urlencode }}" data-i="{{ loop.index0 }}"
-       data-title="{{ b.title }}" data-author="{{ b.author or '' }}" data-rank="{{ b.rank }}" data-readers="{{ b.readers }}"
-       data-race="/races/start/{{ b.source }}/{{ b.id|urlencode }}">
-      <span class="depth-rank mono">{{ '%02d' % b.rank }}</span>
-      {{ book_cover(b.title, b.author, 'lg', img=b.cover) }}
-    </a>
-    {% endfor %}
-  </div>
-  <div class="depth-hud glass" id="depthHud">
-    <span class="mono" id="hudRank">#01 · 인기 고전</span>
-    <b id="hudTitle">{{ popular[0].title if popular else '' }}</b>
-    <span class="muted" id="hudAuthor">{{ popular[0].author if popular else '' }}</span>
-    <div class="hud-actions">
-      <a class="btn primary" id="hudRead" href="#">읽기</a>
-      <form method="post" id="hudRaceForm"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost">친구와 대결</button></form>
+{# ---------- 3D: 책들이 원통(드럼)에 꽂혀 스크롤하면 위로 말려 올라간다 ---------- #}
+<section class="drum" id="drum" aria-label="인기 고전">
+  <div class="drum-view" id="drumView">
+    <div class="drum-axis" id="drumAxis">
+      {% for row in drum|batch(3) %}
+      <div class="drum-row" data-row="{{ loop.index0 }}">
+        {% for b in row %}
+        <a class="drum-book" href="/open/{{ b.source }}/{{ b.id|urlencode }}" data-title="{{ b.title }}" data-author="{{ b.author or '' }}"
+           data-rank="{{ b.rank or '' }}" data-readers="{{ b.readers or 0 }}" data-race="/races/start/{{ b.source }}/{{ b.id|urlencode }}">
+          {% if b.rank %}<span class="drum-rank mono">{{ b.rank }}</span>{% endif %}
+          {{ book_cover(b.title, b.author, img=b.cover) }}
+        </a>
+        {% endfor %}
+      </div>
+      {% endfor %}
     </div>
   </div>
-  <div class="depth-hint mono" id="depthHint">↓ 스크롤해서 순위를 넘겨 보세요</div>
-  <div class="depth-spacer" id="depthSpacer"></div>
+  <div class="drum-hud glass" id="drumHud">
+    <div class="hud-text"><span class="mono" id="hudRank">인기 고전</span><b id="hudTitle"></b><span class="muted" id="hudAuthor"></span></div>
+    <a class="btn primary" id="hudRead" href="#">읽기</a>
+    <form method="post" id="hudRaceForm"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost" aria-label="친구와 대결">대결</button></form>
+  </div>
+  <div class="drum-spacer" id="drumSpacer"></div>
 </section>
 
 {# ---------- 목록 보기 ---------- #}
@@ -74,5 +74,5 @@
 {% endfor %}
 </section>
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
-<script src="/static/depth.js"></script>
+<script src="/static/drum.js"></script>
 {% endblock %}

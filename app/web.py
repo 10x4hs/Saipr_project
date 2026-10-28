@@ -94,6 +94,13 @@ async def popular(session: AsyncSession, n: int = 20) -> list[dict]:
     return [CATALOG_INDEX[k] | {"rank": i + 1, "readers": readers.get(k, 0)} for i, k in enumerate(ranked)]
 
 
+def _fill(ranked: list[dict], n: int) -> list[dict]:
+    """인기 순위 뒤를 오늘의 추천으로 채워 드럼 한 바퀴를 꽉 채운다."""
+    seen = {(b["source"], b["id"]) for b in ranked}
+    extra = [b for b in _daily_picks(n * 2) if (b["source"], b["id"]) not in seen]
+    return (ranked + extra)[:n]
+
+
 # --- 소개 · 가입 · 로그인 ---
 
 
@@ -115,7 +122,8 @@ async def home(
         reading=reading[1:6],
         picks=_daily_picks(10),
         marquee=_daily_picks(16),
-        popular=await popular(session),
+        popular=(top := await popular(session, 30)),
+        drum=_fill(top, 45),
         shelves={g: books[:14] for g, books in SHELVES.items()},
     )
 

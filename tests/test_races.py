@@ -83,5 +83,5 @@ async def test_home_has_3d_popular_with_famous_first(api):
     async with api(upstream) as c:
         await signup(c)
         r = await c.get("/")
-    assert 'class="depth-item"' in r.text
+    assert 'class="drum-book"' in r.text
     assert r.text.index('data-title="운수 좋은 날"') < r.text.index('data-title="봄봄"')

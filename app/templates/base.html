@@ -15,6 +15,7 @@
 </head>
 <body class="{% block body_class %}{% endblock %}">
 <div class="fx" id="fx" data-bg="{{ look.bg if look else 'plain' }}" aria-hidden="true"></div>
+<script src="/static/fx.js" defer></script>
 {% block body %}{% endblock %}
 </body>
 </html>
