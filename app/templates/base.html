@@ -15,6 +15,7 @@
   <form class="find" action="/search" role="search">
     <input name="q" value="{{ q or '' }}" placeholder="책 제목이나 저자 검색" aria-label="검색">
   </form>
+  <a class="nav-up" href="/upload">파일 올리기</a>
 </header>
 <main class="page">{% block main %}{% endblock %}</main>
 {% endblock %}

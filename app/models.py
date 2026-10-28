@@ -102,6 +102,10 @@ class Book(Base):
     # 퍼블릭 도메인 화이트리스트 소스에서만 true (app/services/search.py FULLTEXT_SOURCES)
     has_fulltext: Mapped[bool] = mapped_column(Boolean, default=False)
     total_chunks: Mapped[int] = mapped_column(Integer, default=0)
+    # 사용자가 올린 개인 파일(source="upload")만 채운다. 본문은 올린 브라우저 키로만 열린다.
+    owner_key_hash: Mapped[str | None] = mapped_column(String(64))
+    # 정규화한 본문의 SHA-256 — 서로 다른 사람이 올린 같은 책을 알아보는 데 쓴다.
+    fingerprint: Mapped[str | None] = mapped_column(String(64), index=True)
 
     chunks: Mapped[list["BookChunk"]] = relationship(
         back_populates="book", order_by="BookChunk.chunk_index", cascade="all, delete-orphan"

@@ -1,34 +1,22 @@
 {% extends "base.html" %}
 {% block main %}
 <section class="hero">
-  <p class="eyebrow mono">PUBLIC DOMAIN · 전문 무료</p>
+  <p class="eyebrow mono">PUBLIC DOMAIN · 내 파일 · 전문 읽기</p>
   <h1>오늘 읽을 한 편</h1>
-  <p class="lede">저작권이 끝난 한국 근대 단편을 처음부터 끝까지 읽어요. 읽은 곳은 자동으로 기억해요.</p>
-  <a class="resume" id="resume" hidden></a>
+  <p class="lede">저작권이 끝난 고전은 바로 읽고, 가지고 있는 EPUB·PDF는 올려서 읽어요. 읽은 곳은 자동으로 기억해요.</p>
+  <div class="hero-actions">
+    <a class="resume" id="resume" hidden></a>
+    <a class="ghost" href="/upload">＋ 내 파일 올리기</a>
+  </div>
 </section>
 
-<h2 class="shelf-h">추천 서가 <span class="mono">위키문헌</span></h2>
+{% if library %}
+<h2 class="shelf-h">내 서재 <span class="mono">{{ library|length }}권</span></h2>
 <ol class="shelf">
-  {% for title, author, year in featured %}
+  {% for b in library %}
   <li>
-    <a class="book" href="/open/wikisource/{{ title|urlencode }}" data-title="{{ title }}">
-      <span class="no mono">{{ '%02d' % loop.index }}</span>
-      <span class="t">{{ title }}</span>
-      <span class="a">{{ author }}</span>
-      <span class="y mono">{{ year }}</span>
-      <span class="bar"><i></i></span>
-    </a>
-  </li>
-  {% endfor %}
-</ol>
-
-{% if imported %}
-<h2 class="shelf-h">내 서재 <span class="mono">{{ imported|length }}권</span></h2>
-<ol class="shelf">
-  {% for b in imported %}
-  <li>
-    <a class="book" href="/books/{{ b.id }}" data-id="{{ b.id }}" data-total="{{ b.total_chunks }}">
-      <span class="no mono">{{ '%02d' % loop.index }}</span>
+    <a class="book" href="/books/{{ b.id }}" data-id="{{ b.id }}">
+      <span class="no mono">{{ '내 파일' if b.owner_key_hash else b.source|upper }}</span>
       <span class="t">{{ b.title }}</span>
       <span class="a">{{ b.author or '' }}</span>
       <span class="y mono">{{ b.total_chunks }}쪽</span>
@@ -38,5 +26,21 @@
   {% endfor %}
 </ol>
 {% endif %}
+
+{% for name, books in shelves.items() %}
+<h2 class="shelf-h">{{ name }} <span class="mono">{{ books|length }}편</span></h2>
+<ol class="shelf">
+  {% for source, ext, title, author, year in books %}
+  <li>
+    <a class="book" href="/open/{{ source }}/{{ ext|urlencode }}">
+      <span class="no mono">{{ '%02d' % loop.index }}</span>
+      <span class="t">{{ title }}</span>
+      <span class="a">{{ author }}</span>
+      <span class="y mono">{{ year }}</span>
+    </a>
+  </li>
+  {% endfor %}
+</ol>
+{% endfor %}
 <script src="/static/home.js"></script>
 {% endblock %}

@@ -1,5 +1,5 @@
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -107,10 +107,14 @@ async def import_book(
 
 @router.get("/{book_id}/chunks/{chunk_index}", response_model=ChunkOut)
 async def get_chunk(
-    book_id: int, chunk_index: int, session: AsyncSession = Depends(get_session)
+    book_id: int,
+    chunk_index: int,
+    session: AsyncSession = Depends(get_session),
+    reader_key: str | None = Cookie(None),
 ) -> ChunkOut:
     found = await book_service.get_chunk(session, book_id, chunk_index)
-    if found is None:
+    # 남이 올린 책은 존재 여부도 드러내지 않도록 404로 통일
+    if found is None or not book_service.can_read(found[0], reader_key):
         raise HTTPException(404, "chunk not found")
     book, chunk = found
     return ChunkOut(

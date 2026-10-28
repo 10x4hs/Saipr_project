@@ -75,3 +75,21 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .dwell.ok i{background:var(--ok)}
 #state.ok{color:var(--ok)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* nav + upload */
+.nav-up{font-size:13px;color:var(--dim);white-space:nowrap}
+.nav-up:hover{color:var(--signal)}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.hero-actions .resume{margin-top:0}
+.ghost{display:inline-flex;align-items:center;padding:12px 18px;border-radius:999px;font-size:14px;color:var(--dim)}
+.ghost:hover{color:var(--signal)}
+.drop{display:grid;gap:16px}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.drop label{display:grid;gap:8px;place-items:center;text-align:center;padding:64px 24px;border:1px dashed var(--faint);border-radius:12px;cursor:pointer;transition:border-color .2s,background .2s}
+.drop label b{font-family:var(--f-text);font-weight:600;font-size:18px}
+.drop label span{color:var(--dim)}
+.drop.over label,.drop label:hover,.drop input:focus-visible+label{border-color:var(--signal);background:color-mix(in srgb,var(--signal) 6%,transparent)}
+.drop button{justify-self:start;font-weight:600;color:var(--bg);background:var(--text);padding:12px 22px;border-radius:999px}
+.drop button:disabled{opacity:.35;cursor:default}
+.err{color:#d9534f;margin-top:16px}
+.fine{color:var(--dim);font-size:13px;line-height:1.8;padding-left:18px;margin-top:32px}

@@ -19,7 +19,7 @@
 | 5 | E2E 시나리오 테스트 (Phase 3에서 추가) | 사용자 A 방 생성 → B 초대 링크 입장 → A가 청크 검증 → B의 WebSocket이 1초 내 `progress.updated` 수신 |
 | 6 | 체류시간 검증 테스트 | 최소 체류시간 미달 청크는 진행률·레이스 점수에 0 반영 |
 | 7 | 스포일러 가드 테스트 | B의 검증 위치보다 뒤 청크 반응은 본문 없이 개수만 반환 |
-| 8 | 저작권 가드 테스트 | `gutendex`·`wikisource` 이외 소스는 `has_fulltext=true`·본문 저장 불가 |
+| 8 | 저작권 가드 테스트 | 외부 소스 중 `gutendex`·`wikisource`만 본문 저장. 사용자가 올린 파일(`upload`)은 올린 브라우저에서만 본문이 열림 |
 
 ## Phase checklist
 

@@ -22,10 +22,20 @@ async def test_kakao_parses_documents_and_sends_key():
 
     def handler(req: httpx.Request) -> httpx.Response:
         seen["auth"] = req.headers["Authorization"]
-        return httpx.Response(200, json={"documents": [{
-            "title": "봄봄", "authors": ["김유정"], "isbn": "8936433598 9788936433598",
-            "thumbnail": "", "url": "https://book.kakao/x",
-        }]})
+        return httpx.Response(
+            200,
+            json={
+                "documents": [
+                    {
+                        "title": "봄봄",
+                        "authors": ["김유정"],
+                        "isbn": "8936433598 9788936433598",
+                        "thumbnail": "",
+                        "url": "https://book.kakao/x",
+                    }
+                ]
+            },
+        )
 
     [hit] = await KakaoSource(mock_client(handler), "KEY").search("봄봄")
     assert seen["auth"] == "KakaoAK KEY"
@@ -35,10 +45,20 @@ async def test_kakao_parses_documents_and_sends_key():
 
 async def test_naver_strips_markup_and_splits_authors():
     def handler(req):
-        return httpx.Response(200, json={"items": [{
-            "title": "<b>봄봄</b> &amp; 동백꽃", "author": "김유정^엮은이", "isbn": "9788936433598",
-            "image": "https://img", "link": "https://naver/x",
-        }]})
+        return httpx.Response(
+            200,
+            json={
+                "items": [
+                    {
+                        "title": "<b>봄봄</b> &amp; 동백꽃",
+                        "author": "김유정^엮은이",
+                        "isbn": "9788936433598",
+                        "image": "https://img",
+                        "link": "https://naver/x",
+                    }
+                ]
+            },
+        )
 
     [hit] = await NaverSource(mock_client(handler), "id", "secret").search("봄봄")
     assert hit.title == "봄봄 & 동백꽃"
@@ -47,11 +67,25 @@ async def test_naver_strips_markup_and_splits_authors():
 
 async def test_google_books_picks_isbn13():
     def handler(req):
-        return httpx.Response(200, json={"items": [{"id": "g1", "volumeInfo": {
-            "title": "Spring", "authors": ["Kim"], "language": "en",
-            "industryIdentifiers": [{"type": "ISBN_10", "identifier": "1"},
-                                    {"type": "ISBN_13", "identifier": "9781234567897"}],
-        }}]})
+        return httpx.Response(
+            200,
+            json={
+                "items": [
+                    {
+                        "id": "g1",
+                        "volumeInfo": {
+                            "title": "Spring",
+                            "authors": ["Kim"],
+                            "language": "en",
+                            "industryIdentifiers": [
+                                {"type": "ISBN_10", "identifier": "1"},
+                                {"type": "ISBN_13", "identifier": "9781234567897"},
+                            ],
+                        },
+                    }
+                ]
+            },
+        )
 
     [hit] = await GoogleBooksSource(mock_client(handler)).search("spring")
     assert hit.isbn13 == "9781234567897"
@@ -68,10 +102,15 @@ So she was considering.
 License junk"""
 
 GUTENDEX_BOOK = {
-    "id": 11, "title": "Alice", "authors": [{"name": "Carroll, Lewis"}], "languages": ["en"],
-    "formats": {"text/plain; charset=us-ascii": "https://g/11.txt",
-                "text/plain; charset=utf-8": "https://g/11-0.txt",
-                "image/jpeg": "https://g/11.jpg"},
+    "id": 11,
+    "title": "Alice",
+    "authors": [{"name": "Carroll, Lewis"}],
+    "languages": ["en"],
+    "formats": {
+        "text/plain; charset=us-ascii": "https://g/11.txt",
+        "text/plain; charset=utf-8": "https://g/11-0.txt",
+        "image/jpeg": "https://g/11.jpg",
+    },
 }
 
 
