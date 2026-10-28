@@ -37,7 +37,7 @@
 |---|---|---|
 | 1 | ✅ | `pytest -q` 70개 통과 |
 | 2 | ✅ | `ruff check .` 오류 0 |
-| 3 | ⬜ | 브랜치를 아직 올리지 않음 — PR 후 확인 |
+| 3 | ✅ | PR #6 GitHub Actions — test·migrations 녹색 |
 | 4 | ✅ | 내장 PostgreSQL(pgserver)에서 `upgrade → downgrade base → upgrade`, `alembic check` 드리프트 없음 |
 | 5 | ✅ | `tests/test_social.py::test_friend_progress_arrives_over_websocket_within_a_second` |
 | 6 | ✅ | `tests/test_web.py::test_skimming_is_not_credited` — 서버가 펼친 시각부터 잰다 |
