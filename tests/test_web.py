@@ -1,4 +1,4 @@
-from tests.conftest import signup
+from tests.conftest import read_chunk, signup
 from tests.test_api import upstream
 
 
@@ -31,19 +31,19 @@ async def test_open_shelves_book_and_reader_resumes(api):
     assert "봄봄" in library.text  # 펼친 책은 서재에 '읽는 중'으로
 
 
-async def test_progress_is_saved_and_resumed(api):
+async def test_progress_is_saved_and_resumed(api, clock):
     async with api(upstream) as c:
         await signup(c)
         url = (await c.get("/open/wikisource/긴글")).headers["location"]
         book_id = url.rsplit("/", 1)[1]
         token = (await c.get(url)).text.split('data-csrf="')[1].split('"')[0]
-        for i, verified in [(0, True), (1, True), (2, False)]:
-            r = await c.put(
-                f"/api/v1/books/{book_id}/progress",
-                json={"chunk_index": i, "verified": verified},
-                headers={"X-CSRF-Token": token},
-            )
+        await read_chunk(c, book_id, 0, token, clock)
+        await read_chunk(c, book_id, 1, token, clock)
+        r = await c.put(
+            f"/api/v1/books/{book_id}/progress", json={"chunk_index": 2}, headers={"X-CSRF-Token": token}
+        )
         assert r.json() == {"current_chunk": 2, "verified_chunk": 1, "progress_pct": 67, "shelf": "reading"}
+        clock(10)
         done = await c.put(
             f"/api/v1/books/{book_id}/progress",
             json={"chunk_index": 2, "verified": True},
@@ -52,6 +52,26 @@ async def test_progress_is_saved_and_resumed(api):
         reader = await c.get(url)
     assert done.json()["shelf"] == "done"
     assert 'data-start="2"' in reader.text
+
+
+async def test_skimming_is_not_credited(api, clock):
+    """GOAL #6: 최소 체류시간을 못 채운 쪽은 진행률·레이스 점수에 0."""
+    async with api(upstream) as c:
+        await signup(c)
+        url = (await c.get("/open/wikisource/긴글")).headers["location"]
+        book_id = url.rsplit("/", 1)[1]
+        token = (await c.get(url)).text.split('data-csrf="')[1].split('"')[0]
+        h = {"X-CSRF-Token": token}
+        await c.put(f"/api/v1/books/{book_id}/progress", json={"chunk_index": 0}, headers=h)
+        clock(0.01)  # 0.6초 만에 '다 읽음'
+        quick = await c.put(
+            f"/api/v1/books/{book_id}/progress", json={"chunk_index": 0, "verified": True}, headers=h
+        )
+        never_opened = await c.put(
+            f"/api/v1/books/{book_id}/progress", json={"chunk_index": 1, "verified": True}, headers=h
+        )
+    assert quick.json()["verified_chunk"] == -1 and quick.json()["progress_pct"] == 0
+    assert never_opened.json()["verified_chunk"] == -1  # 펼친 적 없는 쪽, 순서를 건너뛴 쪽도 0
 
 
 async def test_progress_requires_csrf(api):

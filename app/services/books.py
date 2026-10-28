@@ -1,11 +1,13 @@
+import datetime as dt
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Book, BookChunk, LibraryEntry, Shelf
+from app.models import Book, BookChunk, LibraryEntry, ReadingEvent, Shelf
 from app.services.chunker import chunk_text, target_for
+from app.services.pace import credited_dwell_ms, is_verified, min_dwell_ms
 from app.services.search import FULLTEXT_SOURCES
 from app.services.uploads import ParsedBook, fingerprint
 from app.sources.base import BookSource, SourceError
@@ -65,6 +67,11 @@ async def get_chunk(session: AsyncSession, book_id: int, chunk_index: int) -> tu
 UPLOAD_SOURCE = "upload"
 
 
+def clock() -> dt.datetime:
+    """현재 시각 — 테스트에서 시간을 흘려보낼 수 있게 한곳에 둔다."""
+    return dt.datetime.now(dt.UTC)
+
+
 def can_read(book: Book, user_id: int | None) -> bool:
     """퍼블릭 도메인 책은 로그인한 누구나, 올린 책은 올린 사람만 읽는다."""
     if not book.has_fulltext or user_id is None:
@@ -119,10 +126,57 @@ async def shelve(session: AsyncSession, user_id: int, book_id: int) -> LibraryEn
 async def record_progress(
     session: AsyncSession, user_id: int, book: Book, chunk_index: int, verified: bool
 ) -> LibraryEntry:
+    """위치를 저장하고, '다 읽었다'는 요청은 서버가 잰 체류시간으로 판정한다.
+
+    쪽을 펼칠 때(verified=False) 시각을 남기고, 다 읽었다는 요청이 오면 그 사이 시간이
+    청크 글자 수로 정한 최소 체류시간을 넘었을 때만 인정한다(PRD BTL-01, GOAL #6).
+    클라이언트가 보낸 verified 값만 믿으면 API 한 번으로 레이스 점수를 올릴 수 있다.
+    """
     entry = await shelve(session, user_id, book.id)
-    entry.current_chunk = max(0, min(chunk_index, book.total_chunks - 1))
-    if verified and chunk_index > entry.verified_chunk:
-        entry.verified_chunk = chunk_index
+    chunk_index = max(0, min(chunk_index, book.total_chunks - 1))
+    now = clock()
+    entry.current_chunk = chunk_index
+    if not verified:
+        session.add(
+            ReadingEvent(
+                user_id=user_id,
+                book_id=book.id,
+                chunk_index=chunk_index,
+                dwell_ms=0,
+                verified=False,
+                occurred_at=now,
+            )
+        )
+    elif chunk_index == entry.verified_chunk + 1:  # 순서대로 읽은 쪽만
+        opened = await session.scalar(
+            select(func.max(ReadingEvent.occurred_at)).where(
+                ReadingEvent.user_id == user_id,
+                ReadingEvent.book_id == book.id,
+                ReadingEvent.chunk_index == chunk_index,
+                ReadingEvent.verified.is_(False),
+            )
+        )
+        if opened is not None:
+            if opened.tzinfo is None:  # SQLite는 시간대를 버린다
+                opened = opened.replace(tzinfo=dt.UTC)
+            chunk = await session.scalar(
+                select(BookChunk).where(BookChunk.book_id == book.id, BookChunk.chunk_index == chunk_index)
+            )
+            need = min_dwell_ms(chunk.text, book.language) if chunk else 0
+            dwell = credited_dwell_ms(int((now - opened).total_seconds() * 1000), need)
+            ok = is_verified(dwell, need)
+            session.add(
+                ReadingEvent(
+                    user_id=user_id,
+                    book_id=book.id,
+                    chunk_index=chunk_index,
+                    dwell_ms=dwell,
+                    verified=ok,
+                    occurred_at=now,
+                )
+            )
+            if ok:
+                entry.verified_chunk = chunk_index
     entry.progress_pct = round((entry.verified_chunk + 1) / max(book.total_chunks, 1) * 100)
     if entry.verified_chunk >= book.total_chunks - 1:
         entry.shelf = Shelf.DONE

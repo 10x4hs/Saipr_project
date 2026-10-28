@@ -74,3 +74,30 @@ async def signup(
         },
     )
     assert r.status_code == 303, r.text
+
+
+@pytest.fixture
+def clock(monkeypatch):
+    """서버 시계를 앞으로 돌린다: clock(분)."""
+    import datetime as dt
+
+    from app.services import books as book_service
+
+    state = {"now": dt.datetime.now(dt.UTC)}
+    monkeypatch.setattr(book_service, "clock", lambda: state["now"])
+
+    def advance(minutes: float = 10) -> None:
+        state["now"] += dt.timedelta(minutes=minutes)
+
+    return advance
+
+
+async def read_chunk(client: httpx.AsyncClient, book_id, index: int, token: str, advance) -> dict:
+    """쪽을 펼치고, 충분히 읽은 뒤(시계를 돌려) 다 읽었다고 보낸다."""
+    headers = {"X-CSRF-Token": token}
+    await client.put(f"/api/v1/books/{book_id}/progress", json={"chunk_index": index}, headers=headers)
+    advance(10)
+    r = await client.put(
+        f"/api/v1/books/{book_id}/progress", json={"chunk_index": index, "verified": True}, headers=headers
+    )
+    return r.json()

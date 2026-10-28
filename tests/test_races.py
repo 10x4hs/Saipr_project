@@ -1,6 +1,6 @@
 import re
 
-from tests.conftest import signup
+from tests.conftest import read_chunk, signup
 from tests.test_api import upstream
 
 
@@ -8,7 +8,7 @@ def csrf(html: str) -> str:
     return re.search(r'name="csrf" value="([^"]+)"', html).group(1)
 
 
-async def test_race_invite_join_and_leaderboard(api):
+async def test_race_invite_join_and_leaderboard(api, clock):
     async with api(upstream) as host, api(upstream) as friend:
         await signup(host, email="host@example.com", nickname="호스트")
         await signup(friend, email="friend@example.com", nickname="친구")
@@ -31,11 +31,7 @@ async def test_race_invite_join_and_leaderboard(api):
         book_id = re.search(r'href="/books/(\d+)"', race.text).group(1)
         reader = await friend.get(f"/books/{book_id}")
         token = reader.text.split('data-csrf="')[1].split('"')[0]
-        await friend.put(
-            f"/api/v1/books/{book_id}/progress",
-            json={"chunk_index": 0, "verified": True},
-            headers={"X-CSRF-Token": token},
-        )
+        await read_chunk(friend, book_id, 0, token, clock)
         board = (await host.get(race_url)).text
     names = re.findall(r'<div class="who"><b>([^<]+?)\s*(?:<em>|</b>)', board)
     assert names == ["친구", "호스트"]  # 검증된 쪽이 많은 친구가 1위

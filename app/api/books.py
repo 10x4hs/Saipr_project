@@ -8,7 +8,9 @@ from app.auth import check_csrf, current_user, require_api_user
 from app.core.config import Settings, get_settings
 from app.db.session import get_session
 from app.models import Book, User
+from app.realtime import broker
 from app.services import books as book_service
+from app.services import social
 from app.services.pace import min_dwell_ms
 from app.services.search import FULLTEXT_SOURCES, search_all
 from app.sources.base import BookSource, SourceError
@@ -154,7 +156,23 @@ async def put_progress(
     book = await session.get(Book, book_id)
     if book is None or not book_service.can_read(book, user.id):
         raise HTTPException(404, "book not found")
+    before = await book_service.shelve(session, user.id, book.id)
+    was_verified = before.verified_chunk
     e = await book_service.record_progress(session, user.id, book, body.chunk_index, body.verified)
+    # 같은 방 친구들에게: 검증 위치가 올라갔거나 다른 쪽으로 옮겼을 때
+    others = await social.circle(session, user.id, book.id) - {user.id}
+    await broker.publish(
+        book.id,
+        others,
+        {
+            "type": "progress.updated",
+            "user_id": user.id,
+            "nickname": user.nickname,
+            "current_chunk": e.current_chunk,
+            "verified_chunk": e.verified_chunk,
+            "advanced": e.verified_chunk > was_verified,
+        },
+    )
     return ProgressOut(
         current_chunk=e.current_chunk,
         verified_chunk=e.verified_chunk,
