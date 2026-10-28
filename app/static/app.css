@@ -420,3 +420,30 @@ h3.sub,.sheet h3{font-size:14px;font-weight:600;color:var(--dim);margin:22px 0 1
 /* 밝은 사진 위에서도 읽히도록 안내 문구에 어두운 유리 받침 */
 .step-msg:not(:empty),.step-back{justify-self:center;padding:6px 14px;border-radius:999px;background:rgba(0,0,0,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .step-msg:empty{min-height:0;padding:0}
+
+/* ---------- reader: 반응 · 친구 · 알림 ---------- */
+.pg p[data-a]{cursor:pointer;border-radius:4px;transition:background .3s var(--ease)}
+.pg p[data-a]:hover{background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.pg .rx{display:inline-block;margin-left:6px;padding:0 8px;border-radius:999px;font:500 12px/1.7 var(--f-ui);text-indent:0;color:var(--ink);background:color-mix(in srgb,var(--accent) 22%,transparent);vertical-align:2px}
+.friends{display:flex;margin-left:4px}
+.fchip{position:relative;margin-left:-6px}
+.fchip i{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;font:700 12px var(--f-ui);font-style:normal;background:var(--accent);color:var(--accent-ink);border:2px solid var(--bg)}
+.fchip em{position:absolute;right:-6px;bottom:-4px;min-width:16px;height:14px;padding:0 3px;border-radius:7px;font:500 9px/14px var(--f-mono);font-style:normal;text-align:center;background:var(--text);color:var(--bg)}
+.r-toast{position:fixed;z-index:30;left:50%;top:calc(76px + env(safe-area-inset-top));transform:translateX(-50%);max-width:calc(100% - 32px);padding:10px 16px;border-radius:999px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r-toast.in{animation:toastin .6s var(--ease)}
+@keyframes toastin{from{opacity:0;transform:translateX(-50%) translateY(-10px)}}
+.react-sheet{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+.react-quote{margin:14px 0 0;padding:12px 14px;border-left:3px solid var(--accent);border-radius:4px 12px 12px 4px;background:var(--sunken);font:15px/1.7 var(--f-serif);color:var(--body)}
+.emoji-row{display:flex;justify-content:space-between;gap:6px;margin-top:16px}
+.emoji-row button{flex:1;height:52px;border-radius:16px;font-size:24px;background:var(--sunken);border:1px solid var(--glass-line);transition:transform .4s var(--ease)}
+.emoji-row button:active,.emoji-row button.pop{transform:scale(1.15)}
+.react-form{display:flex;gap:8px;margin-top:12px}
+.react-form input{flex:1;min-width:0;height:48px;padding:0 16px;font:inherit;font-size:15px;color:var(--text);background:var(--sunken);border:1px solid var(--glass-line);border-radius:999px}
+.react-form input:focus{outline:none;border-color:var(--accent)}
+.react-form .btn{height:48px;padding:0 18px;font-size:14px}
+.react-list{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:12px;max-height:34dvh;overflow-y:auto}
+.react-list li{display:flex;gap:10px;align-items:flex-start}
+.react-list li.emoji p{font-size:22px;line-height:1.2}
+.react-list b{font-size:13px}
+.react-list p{margin:2px 0 0;font-size:14px;color:var(--body)}
+.avatar.sm{width:28px;height:28px;font-size:12px}

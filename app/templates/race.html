@@ -14,9 +14,9 @@
 
 <section class="row">
   <div class="row-h"><h2>순위</h2><span class="mono muted">검증된 쪽 / {{ book.total_chunks }}</span></div>
-  <ol class="board">
+  <ol class="board" id="board" data-room="{{ room.id }}" data-book="{{ book.id }}" data-total="{{ book.total_chunks }}">
     {% for s in board %}
-    <li class="{{ 'me' if s.is_me }}">
+    <li class="{{ 'me' if s.is_me }}" data-uid="{{ s.user.id }}">
       <span class="pos mono">{{ loop.index }}</span>
       <span class="avatar">{{ s.user.nickname[:1] }}</span>
       <div class="who"><b>{{ s.user.nickname }}{% if s.is_me %} <em>나</em>{% endif %}</b><span class="track"><i style="width:{{ s.pct }}%"></i></span></div>
@@ -52,7 +52,39 @@
       left.textContent = s > 86400 ? `${Math.floor(s / 86400)}일 ${Math.floor(s % 86400 / 3600)}시간` : `${Math.floor(s / 3600)}시간 ${Math.floor(s % 3600 / 60)}분`; };
     tick(); setInterval(tick, 30000);
   }
-  setTimeout(() => location.reload(), 20000);  // 순위 새로고침
+  // 실시간 순위: 같은 방 친구가 쪽을 다 읽으면 서버가 알려 주고, 순위를 다시 받아 자리바꿈을 애니메이션한다
+  const board = document.getElementById('board');
+  const render = data => {
+    const first = new Map([...board.children].map(li => [li.dataset.uid, li.getBoundingClientRect().top]));
+    board.innerHTML = '';
+    data.board.forEach((s, i) => {
+      const li = document.createElement('li');
+      li.dataset.uid = s.user_id; if (s.me) li.className = 'me';
+      li.innerHTML = '<span class="pos mono"></span><span class="avatar"></span><div class="who"><b></b><span class="track"><i></i></span></div><span class="mono pages"></span>';
+      li.querySelector('.pos').textContent = i + 1;
+      li.querySelector('.avatar').textContent = s.nickname.slice(0, 1);
+      li.querySelector('b').textContent = s.nickname;
+      if (s.me) { const em = document.createElement('em'); em.textContent = '나'; li.querySelector('b').append(' ', em); }
+      li.querySelector('.track i').style.width = s.pct + '%';
+      li.querySelector('.pages').textContent = `${s.pages}쪽`;
+      board.appendChild(li);
+      const was = first.get(String(s.user_id));
+      if (was !== undefined) {
+        const dy = was - li.getBoundingClientRect().top;
+        if (dy) li.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], { duration: 700, easing: 'cubic-bezier(.16,1,.3,1)' });
+      }
+    });
+    document.querySelector('.race-hero h2').textContent = `${data.board.length}명이 달리는 중`;
+  };
+  const refresh = () => fetch(`/api/v1/races/${board.dataset.room}/standings`).then(r => r.ok && r.json()).then(d => d && render(d)).catch(() => {});
+  const connect = () => {
+    const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/api/v1/ws/books/${board.dataset.book}`);
+    const ping = setInterval(() => ws.readyState === 1 && ws.send('ping'), 25000);
+    ws.onmessage = ev => { const m = JSON.parse(ev.data); if (m.type === 'progress.updated' && m.advanced) refresh(); };
+    ws.onclose = () => { clearInterval(ping); setTimeout(connect, 3000); };
+  };
+  connect();
+  setInterval(refresh, 60000);  // 새로 참가한 친구까지 반영
 })();
 </script>
 {% endblock %}

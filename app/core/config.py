@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     secret_key: str = "dev-only-change-me"
     session_idle_minutes: int = 30
     cookie_secure: bool = False
+    # 시연·로컬 테스트용 최소 체류시간 배율. 운영은 반드시 1.0
+    dwell_scale: float = 1.0
 
 
 @lru_cache

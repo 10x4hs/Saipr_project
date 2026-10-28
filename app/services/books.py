@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.models import Book, BookChunk, LibraryEntry, ReadingEvent, Shelf
 from app.services.chunker import chunk_text, target_for
 from app.services.pace import credited_dwell_ms, is_verified, min_dwell_ms
@@ -65,6 +66,10 @@ async def get_chunk(session: AsyncSession, book_id: int, chunk_index: int) -> tu
 
 
 UPLOAD_SOURCE = "upload"
+
+
+def required_dwell_ms(text: str, language: str | None) -> int:
+    return int(min_dwell_ms(text, language) * get_settings().dwell_scale)
 
 
 def clock() -> dt.datetime:
@@ -162,7 +167,7 @@ async def record_progress(
             chunk = await session.scalar(
                 select(BookChunk).where(BookChunk.book_id == book.id, BookChunk.chunk_index == chunk_index)
             )
-            need = min_dwell_ms(chunk.text, book.language) if chunk else 0
+            need = required_dwell_ms(chunk.text, book.language) if chunk else 0
             dwell = credited_dwell_ms(int((now - opened).total_seconds() * 1000), need)
             ok = is_verified(dwell, need)
             session.add(

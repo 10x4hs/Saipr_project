@@ -11,7 +11,6 @@ from app.models import Book, User
 from app.realtime import broker
 from app.services import books as book_service
 from app.services import social
-from app.services.pace import min_dwell_ms
 from app.services.search import FULLTEXT_SOURCES, search_all
 from app.sources.base import BookSource, SourceError
 
@@ -127,7 +126,7 @@ async def get_chunk(
         total_chunks=book.total_chunks,
         text=chunk.text,
         char_count=chunk.char_count,
-        min_dwell_ms=min_dwell_ms(chunk.text, book.language),
+        min_dwell_ms=book_service.required_dwell_ms(chunk.text, book.language),
     )
 
 

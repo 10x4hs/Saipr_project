@@ -21,7 +21,24 @@
   <span class="mono" id="pos">–</span>
   <span class="dwell" title="이 쪽을 다 읽었다고 인정되기까지"><i id="dwell"></i></span>
   <span id="state">읽는 중</span>
+  <span class="friends" id="friends" aria-label="같이 읽는 친구"></span>
 </footer>
+
+<div class="r-toast glass" id="toast" role="status" aria-live="polite" hidden></div>
+
+<div class="sheet-wrap" id="react" hidden>
+  <section class="sheet glass react-sheet" role="dialog" aria-modal="true" aria-labelledby="reactTitle">
+    <header class="sheet-h"><h2 id="reactTitle">이 문단에 반응</h2><button class="x" data-close aria-label="닫기">×</button></header>
+    <blockquote class="react-quote" id="reactQuote"></blockquote>
+    <div class="emoji-row" id="emojiRow"></div>
+    <form class="react-form" id="reactForm">
+      <input id="reactText" maxlength="140" placeholder="한 줄로 남기기 (같은 방 친구만 봐요)" autocomplete="off">
+      <button class="btn primary">남기기</button>
+    </form>
+    <p class="hint" id="reactMsg"></p>
+    <ul class="react-list" id="reactList"></ul>
+  </section>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 <script src="/static/reader.js"></script>
 {% endblock %}

@@ -13,6 +13,7 @@ let verifiedUpTo = +stage.dataset.verified;
 let chunk = Math.min(+stage.dataset.start || 0, total - 1);
 let chunkData = null, minMs = 0, dwellMs = 0, pageFlip = null, pageCount = 0, lead = 0;
 const cache = new Map();
+let lastOpened = -1, sentVerify = false;
 
 function fetchChunk(i) {
   if (!cache.has(i)) cache.set(i, fetch(`/api/v1/books/${bookId}/chunks/${i}`).then(r => {
@@ -27,7 +28,15 @@ function save(verified = false) {
     method: 'PUT', keepalive: true,
     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
     body: JSON.stringify({ chunk_index: chunk, verified }),
-  }).then(r => r.ok && r.json()).then(d => { if (d) verifiedUpTo = d.verified_chunk; }).catch(() => {});
+  }).then(r => r.ok && r.json()).then(d => {
+    if (!d) return;
+    const opened = d.verified_chunk > verifiedUpTo;
+    verifiedUpTo = d.verified_chunk;
+    paintDwell();
+    if (opened && verified) loadReactions(chunk);   // 다 읽은 순간 봉인이 풀린다
+    // 서버 시계로는 아직 모자라면 잠시 뒤 다시 보낸다
+    if (verified && d.verified_chunk < chunk) setTimeout(() => { sentVerify = false; }, 1500);
+  }).catch(() => {});
 }
 
 // --- 페이지 나누기: 실제 페이지와 같은 크기의 측정용 상자에 문단을 채워 본다 ---
@@ -39,10 +48,11 @@ function paginate(text) {
   const pages = [];
   m.innerHTML = '';
   const flush = () => { if (m.childElementCount) { pages.push(m.innerHTML); m.innerHTML = ''; } };
-  for (const para of text.split(/\n\s*\n/)) {
+  text.split(/\n\s*\n/).forEach((para, anchor) => {
     let rest = para, cont = false;
     while (rest) {
       const p = document.createElement('p');
+      p.dataset.a = anchor;
       if (cont) p.className = 'cont';
       p.textContent = rest;
       m.appendChild(p);
@@ -67,7 +77,7 @@ function paginate(text) {
       rest = words.slice(lo).join(' ');
       cont = true;
     }
-  }
+  });
   flush();
   return pages;
 }
@@ -84,7 +94,7 @@ async function open(i, { atEnd = false } = {}) {
   try { chunkData = await fetchChunk(chunk); }
   catch (e) { stage.innerHTML = '<p class="r-err">이 쪽을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</p>'; return; }
   await document.fonts.ready;
-  minMs = chunkData.min_dwell_ms; dwellMs = 0;
+  minMs = chunkData.min_dwell_ms; dwellMs = 0; sentVerify = false;
 
   const pages = paginate(chunkData.text).map(h => pageEl(h));
   // 청크 경계에 '넘김용' 페이지를 붙여, 그 페이지에 닿으면 이웃 청크를 불러온다
@@ -102,14 +112,15 @@ async function open(i, { atEnd = false } = {}) {
   pageFlip = new St.PageFlip(book, {
     width: stage.clientWidth, height: stage.clientHeight, size: 'fixed',
     usePortrait: true, showCover: false, mobileScrollSupport: true,
-    maxShadowOpacity: .45, flippingTime: 650, swipeDistance: 24, drawShadow: true,
+    maxShadowOpacity: .45, flippingTime: 650, swipeDistance: 24, drawShadow: true, disableFlipByClick: true,
   });
   pageFlip.loadFromHTML(book.querySelectorAll('.pg'));
   const startAt = atEnd ? pageCount - 2 : lead;
   pageFlip.turnToPage(Math.max(0, startAt));
   pageFlip.on('flip', e => onPage(e.data));
   onPage(pageFlip.getCurrentPageIndex());
-  save(false);
+  if (lastOpened !== chunk) { lastOpened = chunk; save(false); }
+  loadReactions(chunk);
   if (chunk + 1 < total) fetchChunk(chunk + 1).catch(() => {});
 }
 
@@ -132,7 +143,7 @@ function paintDwell() {
 setInterval(() => {
   if (document.hidden || !chunkData || chunk <= verifiedUpTo || chunk > verifiedUpTo + 1) return;
   dwellMs += 250;
-  if (dwellMs >= minMs) { verifiedUpTo = chunk; save(true); }
+  if (dwellMs >= minMs && !sentVerify) { sentVerify = true; save(true); }
   paintDwell();
 }, 250);
 
@@ -158,3 +169,149 @@ $('aa').onclick = () => { const s = $('sheet'); s.hidden = !s.hidden; $('aa').se
 let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(relayout, 250); });
 
 open(chunk);
+
+// ---------------- 함께 읽기: 반응 · 친구 · 실시간 ----------------
+let reacts = { items: [], sealed: 0 }, friendMap = new Map(), emojis = ['❤️', '😂', '😮', '😢', '👏'];
+let sheetAnchor = 0;
+
+async function loadReactions(i) {
+  try {
+    const r = await fetch(`/api/v1/books/${bookId}/reactions?chunk=${i}`);
+    if (!r.ok || i !== chunk) return;
+    reacts = await r.json();
+    paintReactions();
+    if (reacts.sealed) toast(`🔒 이 쪽에 친구 반응 ${reacts.sealed}개 — 다 읽으면 열려요`);
+  } catch (e) {}
+}
+
+function paintReactions() {
+  const by = new Map();
+  reacts.items.forEach(x => { if (!by.has(x.anchor)) by.set(x.anchor, []); by.get(x.anchor).push(x); });
+  // 페이지 넘김 라이브러리가 페이지를 복제하므로 화면에 있는 모든 사본에 붙인다
+  stage.querySelectorAll('p[data-a]').forEach(p => {
+    p.querySelector('.rx')?.remove();
+    const list = by.get(+p.dataset.a);
+    // 문단이 여러 페이지에 걸치면 마지막 조각에만 붙인다
+    if (!list || (p.nextElementSibling && p.nextElementSibling.dataset.a === p.dataset.a)) return;
+    const counts = {};
+    list.forEach(x => { const k = x.kind === 'comment' ? '💬' : x.body; counts[k] = (counts[k] || 0) + 1; });
+    const b = document.createElement('span');
+    b.className = 'rx';
+    b.textContent = Object.entries(counts).map(([k, n]) => n > 1 ? `${k}${n}` : k).join(' ');
+    p.appendChild(b);
+  });
+}
+
+// 탭: 문단이면 반응 시트, 페이지 가장자리면 넘김
+let down = null;
+stage.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY }; });
+stage.addEventListener('click', e => {
+  if (!pageFlip || !down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) return;
+  const r = stage.getBoundingClientRect(), x = (e.clientX - r.left) / r.width;
+  if (x > .82) return pageFlip.flipNext();
+  if (x < .18) return pageFlip.flipPrev();
+  const p = e.target.closest('p[data-a]');
+  if (p) openSheet(+p.dataset.a, p.textContent.replace(/[❤️😂😮😢👏💬\d\s]+$/u, ''));
+});
+
+function openSheet(anchor, quote) {
+  sheetAnchor = anchor;
+  $('reactQuote').textContent = quote.length > 90 ? quote.slice(0, 90) + '…' : quote;
+  $('reactMsg').textContent = chunk > verifiedUpTo + 1 ? '아직 읽지 않은 쪽이에요' : '';
+  renderSheetList();
+  $('react').hidden = false;
+  document.body.classList.add('locked');
+}
+function closeSheet() { $('react').hidden = true; document.body.classList.remove('locked'); }
+$('react').addEventListener('click', e => { if (e.target.id === 'react' || e.target.closest('[data-close]')) closeSheet(); });
+
+function renderSheetList() {
+  const list = reacts.items.filter(x => x.anchor === sheetAnchor);
+  $('reactList').innerHTML = list.length ? '' : '<li class="muted">아직 반응이 없어요. 첫 반응을 남겨 보세요.</li>';
+  list.forEach(x => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="avatar sm"></span><div><b></b><p></p></div>`;
+    li.querySelector('.avatar').textContent = x.nickname.slice(0, 1);
+    li.querySelector('b').textContent = x.mine ? `${x.nickname} (나)` : x.nickname;
+    li.querySelector('p').textContent = x.body;
+    if (x.kind === 'emoji') li.classList.add('emoji');
+    $('reactList').appendChild(li);
+  });
+}
+
+async function sendReaction(payload) {
+  const r = await fetch(`/api/v1/books/${bookId}/reactions`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+    body: JSON.stringify({ chunk_index: chunk, anchor: sheetAnchor, ...payload }),
+  });
+  if (!r.ok) { $('reactMsg').textContent = (await r.json().catch(() => ({}))).detail || '남기지 못했어요'; return; }
+  reacts.items.push(await r.json());
+  paintReactions(); renderSheetList();
+  if (payload.comment) $('reactText').value = '';   // 이모지를 보낼 때는 쓰던 글을 지우지 않는다
+  $('reactMsg').textContent = '남겼어요';
+}
+$('reactForm').addEventListener('submit', e => { e.preventDefault(); const t = $('reactText').value.trim(); if (t) sendReaction({ comment: t }); });
+
+function renderEmojis() {
+  $('emojiRow').innerHTML = '';
+  emojis.forEach(em => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = em; b.setAttribute('aria-label', `${em} 반응`);
+    b.onclick = () => { b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); sendReaction({ emoji: em }); };
+    $('emojiRow').appendChild(b);
+  });
+}
+
+function paintFriends() {
+  const box = $('friends'); box.innerHTML = '';
+  [...friendMap.values()].forEach(f => {
+    const s = document.createElement('span');
+    s.className = 'fchip';
+    s.title = `${f.nickname} · ${f.current_chunk + 1}쪽`;
+    s.innerHTML = '<i></i><em></em>';
+    s.querySelector('i').textContent = f.nickname.slice(0, 1);
+    s.querySelector('em').textContent = f.verified_chunk + 1;
+    box.appendChild(s);
+  });
+}
+
+let toastTimer = 0;
+function toast(text) {
+  const t = $('toast'); t.textContent = text; t.hidden = false;
+  t.classList.remove('in'); void t.offsetWidth; t.classList.add('in');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
+}
+
+async function social() {
+  renderEmojis();
+  try {
+    const d = await (await fetch(`/api/v1/books/${bookId}/social`)).json();
+    emojis = d.emojis || emojis; renderEmojis();
+    d.friends.forEach(f => friendMap.set(f.user_id, f));
+    paintFriends();
+    if (d.sealed_ahead) setTimeout(() => toast(`🔒 앞에서 ${d.sealed_ahead}개의 반응이 기다리고 있어요`), 1200);
+  } catch (e) {}
+  connect();
+}
+
+function connect() {
+  const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/api/v1/ws/books/${bookId}`);
+  const ping = setInterval(() => ws.readyState === 1 && ws.send('ping'), 25000);
+  ws.onmessage = ev => {
+    const m = JSON.parse(ev.data);
+    if (m.type === 'progress.updated') {
+      const before = friendMap.get(m.user_id);
+      friendMap.set(m.user_id, { user_id: m.user_id, nickname: m.nickname, current_chunk: m.current_chunk, verified_chunk: m.verified_chunk });
+      paintFriends();
+      if (m.advanced) {
+        const passed = before && before.verified_chunk <= verifiedUpTo && m.verified_chunk > verifiedUpTo;
+        toast(passed ? `🏃 ${m.nickname}님이 나를 앞질렀어요` : `${m.nickname}님이 ${m.verified_chunk + 1}쪽을 다 읽었어요`);
+      }
+    } else if (m.type === 'reaction.added') {
+      toast(`${m.nickname}님이 ${m.chunk + 1}쪽에 반응을 남겼어요`);
+      if (m.chunk === chunk) loadReactions(chunk);
+    }
+  };
+  ws.onclose = () => { clearInterval(ping); setTimeout(connect, 3000); };
+}
+
+social();
