@@ -106,7 +106,7 @@ a:hover .cover,a:focus-visible .cover,.now:hover .cover{transform:rotateY(-26deg
 /* ---------- auth: 사진 한 장 + 유리 알약 입력칸 하나 ---------- */
 .auth{min-height:100dvh;display:grid;grid-template-rows:auto 1fr auto;color:#fff;background:#120d09;overflow:hidden}
 .auth .fx{display:none}
-.auth-bg{position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.05) 35%,rgba(0,0,0,.45)),url("/static/img/auth.jpg") center/cover no-repeat;transform:scale(1.04);animation:breathe 24s ease-in-out infinite alternate}
+.auth-bg{position:fixed;inset:0;z-index:-1;background:radial-gradient(80% 60% at 50% 45%,transparent,rgba(10,6,3,.55)),linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,0) 40%,rgba(0,0,0,.5)),url("/static/img/auth.jpg") 62% center/cover no-repeat;transform:scale(1.04);animation:breathe 24s ease-in-out infinite alternate}
 @keyframes breathe{to{transform:scale(1.1) translateY(-1%)}}
 .auth-brand{justify-self:center;margin-top:calc(28px + env(safe-area-inset-top));font-size:22px;font-weight:700;letter-spacing:-.03em;text-shadow:0 2px 16px rgba(0,0,0,.35)}
 .auth-main{display:grid;place-items:center;padding:0 20px}
