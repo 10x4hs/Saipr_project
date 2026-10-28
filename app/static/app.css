@@ -309,10 +309,10 @@ body.locked{overflow:hidden}
 /* ---------- home: 3D drum ---------- */
 .in-drum .content{padding-bottom:0}
 .drum{position:relative}
-.drum-view{position:fixed;inset:0;z-index:2;perspective:900px;perspective-origin:50% 34%;overflow:hidden;pointer-events:none;
-  -webkit-mask:linear-gradient(transparent 4%,#000 14%,#000 80%,transparent 95%);mask:linear-gradient(transparent 4%,#000 14%,#000 80%,transparent 95%)}
-.drum-axis{position:absolute;left:50%;top:30%;width:0;height:0;transform-style:preserve-3d}
-.drum-row{--w:min(calc(100vw - 48px),420px);position:absolute;left:calc(var(--w) / -2);top:0;width:var(--w);margin-top:-30%;display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+.drum-view{position:fixed;inset:0;z-index:2;perspective:640px;perspective-origin:50% 22%;overflow:hidden;pointer-events:none;
+  -webkit-mask:linear-gradient(transparent 0,#000 6%,#000 82%,transparent 94%);mask:linear-gradient(transparent 0,#000 6%,#000 82%,transparent 94%)}
+.drum-axis{position:absolute;left:50%;top:calc(150px + env(safe-area-inset-top));width:0;height:0;transform-style:preserve-3d}
+.drum-row{--w:min(calc(100vw - 48px),420px);position:absolute;left:calc(var(--w) / -2);top:0;width:var(--w);transform-origin:50% 0;display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
   transform-style:preserve-3d;backface-visibility:hidden;will-change:transform,opacity}
 .drum-book{position:relative;display:block;pointer-events:auto;transition:transform .6s var(--ease)}
 .drum-book .bk{--tilt:22deg}

@@ -19,3 +19,4 @@ dist/
 .env
 scratch-dev.db
 app/static/covers/
+docs/demo/*.mp4

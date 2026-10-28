@@ -1,4 +1,4 @@
-# 아키텍처 (Phase 0–1)
+# 아키텍처
 
 ```
 app/
@@ -41,7 +41,38 @@ migrations/            Alembic (async)
 | POST | `/api/v1/books/import` | `{source, external_id}` 퍼블릭 도메인 전문 가져오기 (400: 비허용 소스, 422: 본문 없음, 502: 상위 장애) |
 | GET | `/api/v1/books/{id}/chunks/{index}` | 청크 본문 + `min_dwell_ms` |
 
+## 추가된 구성 (2026-10)
+
+```
+app/auth.py            이메일 세션 인증 — BCrypt(12), 30분 유휴 만료, 로그인 시 세션 재발급, CSRF
+app/web.py             모바일 웹 앱 화면(Jinja2) — 홈 3D, 탐색, 서재, 대결, 리더, 화면 꾸미기
+app/api/me.py          화면 꾸미기 저장 (users.settings)
+app/api/social.py      반응 · 친구 진행 · 대결 순위 · WebSocket /api/v1/ws/books/{id}
+app/realtime.py        책 단위 인메모리 브로커
+app/services/races.py  대결방(rooms) — 초대 코드, 정원 8, 순위 = 검증된 청크 수
+app/services/social.py 반응 + 스포일러 가드, 같은 방 범위(circle)
+app/services/uploads.py EPUB·PDF·TXT → 본문, DRM 거부, 본문 지문(같은 책 판별)
+app/core/appearance.py 테마 · 배경 30종 · 강조 색 12종 (looks.css와 짝)
+```
+
+| 결정 | 이유 |
+|---|---|
+| **체류시간은 서버가 잰다** — 쪽을 펼친 시각(reading_events)부터 "다 읽음" 요청까지 | 클라이언트의 verified 값을 믿으면 API 한 번으로 레이스 점수를 올릴 수 있다 |
+| **WebSocket 이벤트에 반응 본문을 싣지 않는다** | 받는 쪽이 자기 스포일러 가드가 걸린 API로 다시 읽게 해서, 소켓으로 스포일러가 새지 않게 |
+| **반응은 같은 방(circle) 안에서만** | 모르는 사람의 반응이 섞이지 않게(PRD ROOM-03) |
+| **화면 꾸미기는 계정에 저장, 서버가 렌더링 때 적용** | 모든 기기 동일, 첫 화면부터 깜빡임 없음 |
+| **3D는 CSS transform + 작은 JS** (책 상자, 롤러 홈, StPageFlip) | 빌드 단계 없이 Python 서버만으로 배포 |
+
+| Method | Path | 설명 |
+|---|---|---|
+| PUT | `/api/v1/books/{id}/progress` | `{chunk_index, verified}` — 펼침 기록 / 서버 체류시간 판정, 같은 방에 `progress.updated` |
+| GET·POST | `/api/v1/books/{id}/reactions` | 반응 목록(가드 적용) / 남기기, 같은 방에 `reaction.added` |
+| GET | `/api/v1/books/{id}/social` | 같은 방 친구 진행 · 봉인된 반응 수 |
+| GET | `/api/v1/races/{id}/standings` | 대결 순위 |
+| PUT | `/api/v1/me/settings` | 테마 · 배경 · 강조 색 |
+| WS | `/api/v1/ws/books/{id}` | 실시간 이벤트 (로그인 세션 필요, 아니면 4401) |
+
 ## 다음 Phase에서 채울 자리
 
-- Phase 2: `app/api/auth.py`(Authlib), `library.py`, `reading_events` 수집 → `services/pace.py` 사용
-- Phase 3: `app/realtime/broker.py`(인메모리 → Redis Pub/Sub 동일 인터페이스), `/ws/rooms/{id}`
+- 소셜 로그인(Authlib)을 `app/auth.py` 옆에 붙인다 (oauth_accounts 테이블은 이미 있음)
+- 서버를 여러 대로 늘리면 `app/realtime.py`의 Broker를 Redis Pub/Sub 구현으로 교체
