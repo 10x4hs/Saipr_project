@@ -1,5 +1,6 @@
 """웹 화면 — 서재(홈) · 검색 · 파일 올리기 · 리더. 서버 렌더링(Jinja2) + 리더만 작은 JS."""
 
+import json
 import secrets
 from pathlib import Path
 
@@ -25,35 +26,12 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 READER_KEY = "reader_key"
 KEY_MAX_AGE = 60 * 60 * 24 * 365 * 2
 
-# (source, external_id, 제목, 저자, 연도) — 모두 저자 사후 70년이 지난 작품
-SHELVES = {
-    "한국 근대 단편": [
-        ("wikisource", "봄봄", "봄봄", "김유정", 1935),
-        ("wikisource", "동백꽃", "동백꽃", "김유정", 1936),
-        ("wikisource", "만무방", "만무방", "김유정", 1935),
-        ("wikisource", "운수 좋은 날", "운수 좋은 날", "현진건", 1924),
-        ("wikisource", "B사감과 러브레터", "B사감과 러브레터", "현진건", 1925),
-        ("wikisource", "고향 (현진건)", "고향", "현진건", 1926),
-        ("wikisource", "메밀꽃 필 무렵", "메밀꽃 필 무렵", "이효석", 1936),
-        ("wikisource", "날개", "날개", "이상", 1936),
-        ("wikisource", "감자", "감자", "김동인", 1925),
-        ("wikisource", "배따라기", "배따라기", "김동인", 1921),
-        ("wikisource", "광염 소나타", "광염 소나타", "김동인", 1930),
-        ("wikisource", "벙어리 삼룡이", "벙어리 삼룡이", "나도향", 1925),
-        ("wikisource", "물레방아", "물레방아", "나도향", 1925),
-        ("wikisource", "레디메이드 인생", "레디메이드 인생", "채만식", 1934),
-        ("wikisource", "치숙", "치숙", "채만식", 1938),
-        ("wikisource", "탈출기", "탈출기", "최서해", 1925),
-    ],
-    "영어 고전": [
-        ("gutendex", "1342", "Pride and Prejudice", "Jane Austen", 1813),
-        ("gutendex", "11", "Alice's Adventures in Wonderland", "Lewis Carroll", 1865),
-        ("gutendex", "84", "Frankenstein", "Mary Shelley", 1818),
-        ("gutendex", "1661", "The Adventures of Sherlock Holmes", "Arthur Conan Doyle", 1892),
-        ("gutendex", "5200", "Metamorphosis", "Franz Kafka", 1915),
-        ("gutendex", "64317", "The Great Gatsby", "F. Scott Fitzgerald", 1925),
-    ],
-}
+# 서가 카탈로그 — scripts/build_catalog.py로 만든다 (퍼블릭 도메인 확인된 작품만)
+CATALOG: list[dict] = json.loads((Path(__file__).parent / "data" / "catalog.json").read_text())
+GENRE_ORDER = ["단편소설", "장편소설", "중편소설", "동화", "수필", "시집", "세계 고전"]
+SHELVES = {g: [b for b in CATALOG if b["genre"] == g] for g in GENRE_ORDER}
+SHELVES = {g: books for g, books in SHELVES.items() if books}
+PREVIEW = 8
 
 
 def _remember_key(response: RedirectResponse, key: str) -> None:
@@ -73,8 +51,17 @@ async def home(
     ).all()
     uploads = await book_service.uploads_of(session, reader_key)
     return templates.TemplateResponse(
-        request, "home.html", {"shelves": SHELVES, "library": [*uploads, *public]}
+        request,
+        "home.html",
+        {"shelves": SHELVES, "preview": PREVIEW, "total": len(CATALOG), "library": [*uploads, *public]},
     )
+
+
+@router.get("/shelf/{genre}", response_class=HTMLResponse)
+async def shelf(request: Request, genre: str) -> HTMLResponse:
+    if genre not in SHELVES:
+        raise HTTPException(404, "서가를 찾을 수 없어요")
+    return templates.TemplateResponse(request, "shelf.html", {"genre": genre, "books": SHELVES[genre]})
 
 
 @router.get("/search", response_class=HTMLResponse)

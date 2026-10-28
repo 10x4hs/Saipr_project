@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block main %}
 <section class="hero">
-  <p class="eyebrow mono">PUBLIC DOMAIN · 내 파일 · 전문 읽기</p>
+  <p class="eyebrow mono">PUBLIC DOMAIN · {{ total }}권 · 전문 무료</p>
   <h1>오늘 읽을 한 편</h1>
   <p class="lede">저작권이 끝난 고전은 바로 읽고, 가지고 있는 EPUB·PDF는 올려서 읽어요. 읽은 곳은 자동으로 기억해요.</p>
   <div class="hero-actions">
@@ -28,19 +28,8 @@
 {% endif %}
 
 {% for name, books in shelves.items() %}
-<h2 class="shelf-h">{{ name }} <span class="mono">{{ books|length }}편</span></h2>
-<ol class="shelf">
-  {% for source, ext, title, author, year in books %}
-  <li>
-    <a class="book" href="/open/{{ source }}/{{ ext|urlencode }}">
-      <span class="no mono">{{ '%02d' % loop.index }}</span>
-      <span class="t">{{ title }}</span>
-      <span class="a">{{ author }}</span>
-      <span class="y mono">{{ year }}</span>
-    </a>
-  </li>
-  {% endfor %}
-</ol>
+<h2 class="shelf-h">{{ name }} <a class="mono more" href="/shelf/{{ name|urlencode }}">전체 {{ books|length }}편 →</a></h2>
+{% set items = books[:preview] %}{% include "_shelf.html" %}
 {% endfor %}
 <script src="/static/home.js"></script>
 {% endblock %}

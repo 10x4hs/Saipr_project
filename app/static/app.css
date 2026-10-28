@@ -93,3 +93,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .drop button:disabled{opacity:.35;cursor:default}
 .err{color:#d9534f;margin-top:16px}
 .fine{color:var(--dim);font-size:13px;line-height:1.8;padding-left:18px;margin-top:32px}
+
+.shelf-h .more{color:var(--dim)}
+.shelf-h .more:hover{color:var(--signal)}
+.hero.compact{padding:64px 0 24px}
+.filter{width:100%;max-width:420px;margin-top:24px;font:inherit;font-size:15px;color:var(--text);background:transparent;border:0;border-bottom:1px solid var(--faint);padding:10px 0}
+.filter:focus{outline:none;border-color:var(--signal)}

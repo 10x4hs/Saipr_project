@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ genre }} — 함께읽기{% endblock %}
+{% block main %}
+<section class="hero compact">
+  <p class="eyebrow mono">{{ books|length }}편 · PUBLIC DOMAIN</p>
+  <h1>{{ genre }}</h1>
+  <input class="filter" id="filter" placeholder="제목이나 저자로 거르기" aria-label="서가 안에서 거르기">
+</section>
+{% set items = books %}{% include "_shelf.html" %}
+<p class="muted" id="none" hidden>맞는 책이 없어요.</p>
+<script>
+(() => {
+  const rows = [...document.querySelectorAll('.shelf li')];
+  document.getElementById('filter').addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase();
+    let shown = 0;
+    rows.forEach(li => { const hit = li.dataset.q.toLowerCase().includes(q); li.hidden = !hit; shown += hit; });
+    document.getElementById('none').hidden = shown > 0;
+  });
+})();
+</script>
+{% endblock %}

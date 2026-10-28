@@ -5,7 +5,7 @@ async def test_home_lists_featured_shelf(api):
     async with api(upstream) as c:
         r = await c.get("/")
     assert r.status_code == 200
-    assert "봄봄" in r.text and "/open/wikisource/%EB%B4%84%EB%B4%84" in r.text
+    assert "단편소설" in r.text and "/shelf/" in r.text
 
 
 async def test_open_imports_then_reader_renders(api):
@@ -42,3 +42,21 @@ async def test_static_assets_served(api):
     async with api(upstream) as c:
         r = await c.get("/static/reader.js")
     assert r.status_code == 200
+
+
+async def test_shelf_page_lists_whole_genre(api):
+    from app.web import SHELVES
+
+    async with api(upstream) as c:
+        r = await c.get("/shelf/단편소설")
+        missing = await c.get("/shelf/없는장르")
+    assert r.status_code == 200 and r.text.count('class="book"') == len(SHELVES["단편소설"])
+    assert missing.status_code == 404
+
+
+def test_catalog_entries_are_well_formed():
+    from app.web import CATALOG
+
+    assert len(CATALOG) > 300
+    assert {b["source"] for b in CATALOG} <= {"wikisource", "gutendex"}
+    assert len({(b["source"], b["id"]) for b in CATALOG}) == len(CATALOG)
