@@ -1,15 +1,19 @@
 {% extends "_auth.html" %}
 {% block title %}로그인 — 함께읽기{% endblock %}
-{% block heading %}다시 만나서 반가워요{% endblock %}
-{% block sub %}읽던 곳에서 바로 이어 갈게요.{% endblock %}
 {% block form %}
-<form method="post" action="/login" class="fields" novalidate>
+<form method="post" action="/login" class="steps" novalidate>
   <input type="hidden" name="csrf" value="{{ csrf }}">
   <input type="hidden" name="next" value="{{ next }}">
-  {% if error %}<p class="form-err" role="alert">{{ error }}</p>{% endif %}
-  <label class="field"><span>이메일</span><input id="email" name="email" type="email" value="{{ email }}" autocomplete="email" required autofocus></label>
-  <label class="field"><span>비밀번호</span><input id="password" name="password" type="password" autocomplete="current-password" required></label>
-  <button class="btn primary wide">로그인</button>
+  <div class="step" data-step>
+    <label class="sr" for="email">이메일</label>
+    <div class="pill-field"><input id="email" name="email" type="email" value="{{ email }}" placeholder="이메일" autocomplete="email" required autofocus><button type="button" class="go" data-next aria-label="다음">→</button></div>
+  </div>
+  <div class="step" data-step>
+    <label class="sr" for="password">비밀번호</label>
+    <div class="pill-field"><input id="password" name="password" type="password" placeholder="비밀번호" autocomplete="current-password" required minlength="1"><button class="go" aria-label="로그인">→</button></div>
+  </div>
+  <p class="step-msg" role="alert" data-msg>{{ error or '' }}</p>
+  <button type="button" class="step-back" data-back hidden>‹ 이메일 다시 입력</button>
 </form>
-<p class="switch">처음이신가요? <a href="/signup">회원가입</a></p>
 {% endblock %}
+{% block foot %}같은 책을, 각자의 속도로 · <a href="/signup">가입하기</a>{% endblock %}

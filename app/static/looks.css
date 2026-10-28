@@ -2,7 +2,8 @@
    배경은 세 개의 빛 덩어리(--b1~3)와 선택적인 무늬(::before)·움직임(::after)으로 만든다.
    유리 표면이 그 위에 떠 있어서 앱 전체 색이 배경을 따라 은은하게 바뀐다. */
 
-.fx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+/* 배경은 항상 페이지 내용 뒤(z-index:-1)에 깔린다 */
+.fx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;
   --b1:transparent;--b2:transparent;--b3:transparent;--base:var(--bg);
   background:
     radial-gradient(60% 45% at 18% 12%,var(--b1),transparent 70%),
@@ -10,7 +11,7 @@
     radial-gradient(70% 55% at 50% 100%,var(--b3),transparent 70%),
     var(--base)}
 .fx::before,.fx::after{content:"";position:absolute;inset:0;pointer-events:none}
-.fx.mini{position:relative}
+.fx.mini{position:relative;z-index:auto}
 
 /* 밝은 모드에서는 빛을 옅게 */
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .fx{filter:saturate(.85) brightness(1.55) contrast(.82)}}
