@@ -123,7 +123,7 @@ async def home(
         picks=_daily_picks(10),
         marquee=_daily_picks(16),
         popular=(top := await popular(session, 30)),
-        drum=_fill(top, 45),
+        drum=_fill(top, 40),
         shelves={g: books[:14] for g, books in SHELVES.items()},
     )
 

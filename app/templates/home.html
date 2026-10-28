@@ -5,20 +5,16 @@
 <button type="button" data-view-toggle><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span data-view-label>목록으로 보기</span></button>
 {% endblock %}
 {% block main %}
-{# ---------- 3D: 책들이 원통(드럼)에 꽂혀 스크롤하면 위로 말려 올라간다 ---------- #}
-<section class="drum" id="drum" aria-label="인기 고전">
-  <div class="drum-view" id="drumView">
-    <div class="drum-axis" id="drumAxis">
-      {% for row in drum|batch(3) %}
-      <div class="drum-row" data-row="{{ loop.index0 }}">
-        {% for b in row %}
-        <a class="drum-book" href="/open/{{ b.source }}/{{ b.id|urlencode }}" data-title="{{ b.title }}" data-author="{{ b.author or '' }}"
-           data-rank="{{ b.rank or '' }}" data-readers="{{ b.readers or 0 }}" data-race="/races/start/{{ b.source }}/{{ b.id|urlencode }}">
-          {% if b.rank %}<span class="drum-rank mono">{{ b.rank }}</span>{% endif %}
-          {{ book_cover(b.title, b.author, img=b.cover) }}
-        </a>
-        {% endfor %}
-      </div>
+{# ---------- 3D: 책들이 나선 계단처럼 위로·뒤로 감겨 쌓여 있고, 스크롤하면 앞으로 한 권씩 내려온다 ---------- #}
+<section class="helix" id="drum" aria-label="인기 고전">
+  <div class="hx-view">
+    <div class="hx-stage" id="hxStage">
+      {% for b in drum %}
+      <a class="hx-book" href="/open/{{ b.source }}/{{ b.id|urlencode }}" data-title="{{ b.title }}" data-author="{{ b.author or '' }}"
+         data-rank="{{ b.rank or '' }}" data-readers="{{ b.readers or 0 }}" data-race="/races/start/{{ b.source }}/{{ b.id|urlencode }}">
+        {% if b.rank %}<span class="hx-rank mono">{{ b.rank }}</span>{% endif %}
+        {{ book_cover(b.title, b.author, 'solid', img=b.cover) }}
+      </a>
       {% endfor %}
     </div>
   </div>
@@ -27,6 +23,7 @@
     <a class="btn primary" id="hudRead" href="#">읽기</a>
     <form method="post" id="hudRaceForm"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost" aria-label="친구와 대결">대결</button></form>
   </div>
+  <div class="hx-count mono" id="hxCount"></div>
   <div class="drum-spacer" id="drumSpacer"></div>
 </section>
 
@@ -74,5 +71,5 @@
 {% endfor %}
 </section>
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
-<script src="/static/drum.js"></script>
+<script src="/static/helix.js"></script>
 {% endblock %}

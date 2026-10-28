@@ -306,21 +306,24 @@ body.locked{overflow:hidden}
 @keyframes fade{from{opacity:0}}
 @keyframes pop{from{opacity:0;transform:scale(.9) translateY(-6px)}}
 
-/* ---------- home: 3D drum ---------- */
+/* ---------- home: 3D 나선 (bloomworld 방식) ---------- */
 .in-drum .content{padding-bottom:0}
-.drum{position:relative}
-.drum-view{position:fixed;inset:0;z-index:2;perspective:640px;perspective-origin:50% 22%;overflow:hidden;pointer-events:none;
-  -webkit-mask:linear-gradient(transparent 0,#000 6%,#000 82%,transparent 94%);mask:linear-gradient(transparent 0,#000 6%,#000 82%,transparent 94%)}
-.drum-axis{position:absolute;left:50%;top:calc(150px + env(safe-area-inset-top));width:0;height:0;transform-style:preserve-3d}
-.drum-row{--w:min(calc(100vw - 48px),420px);position:absolute;left:calc(var(--w) / -2);top:0;width:var(--w);transform-origin:50% 0;display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
-  transform-style:preserve-3d;backface-visibility:hidden;will-change:transform,opacity}
-.drum-book{position:relative;display:block;pointer-events:auto;transition:transform .6s var(--ease)}
-.drum-book .bk{--tilt:22deg}
-.drum-row.front .drum-book{transform:translateZ(18px)}
-.drum-book.focus{transform:translateZ(46px) translateY(-6px)}
-.drum-book.focus .bk{transform:rotateY(8deg) rotateX(3deg)}
-.drum-rank{position:absolute;z-index:2;left:-4px;top:-10px;min-width:24px;height:24px;padding:0 6px;display:grid;place-items:center;border-radius:999px;font-size:12px;
-  background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 16px -6px rgba(0,0,0,.6);transform:translateZ(30px)}
+.helix{position:relative}
+.hx-view{position:fixed;inset:0;z-index:2;perspective:1100px;perspective-origin:50% 62%;overflow:hidden;pointer-events:none;
+  -webkit-mask:linear-gradient(transparent 0,#000 12%,#000 84%,transparent 97%);mask:linear-gradient(transparent 0,#000 12%,#000 84%,transparent 97%)}
+.hx-stage{position:absolute;left:50%;top:60%;width:0;height:0;transform-style:preserve-3d}
+.hx-book{--w:min(50vw,200px);position:absolute;left:calc(var(--w) / -2);top:calc(var(--w) * -0.75);width:var(--w);transform-style:preserve-3d;will-change:transform;pointer-events:auto}
+/* 3D 사슬을 끊지 않는다: 책 상자 안까지 preserve-3d, 흐림·어둡게는 각 면에만 */
+.book3d.solid{perspective:none;transform-style:preserve-3d;--d:16cqw}
+.book3d.solid .bk{--tilt:0deg;transition:none}
+.hx-book .bk>*{opacity:var(--a,1);filter:brightness(var(--shade,1))}
+.hx-book .book3d::after{opacity:calc(var(--a,1) * .9)}
+a.hx-book:hover .bk{transform:none}
+.hx-book.focus .bk{transform:translateZ(14px) rotateY(-8deg)}
+.hx-book .bk{transition:transform .7s var(--ease)}
+.hx-rank{position:absolute;z-index:3;left:-8px;top:-12px;min-width:28px;height:28px;padding:0 8px;display:grid;place-items:center;border-radius:999px;font-size:13px;
+  background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 20px -6px rgba(0,0,0,.6);transform:translateZ(calc(var(--w) * .1));opacity:var(--a,1)}
+.hx-count{position:fixed;z-index:3;right:max(20px,calc(50% - var(--app) / 2 + 20px));top:calc(84px + env(safe-area-inset-top));color:var(--dim)}
 .drum-hud{position:fixed;z-index:20;left:50%;bottom:calc(var(--tab) + 22px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(calc(100% - 32px),calc(var(--app) - 32px));
   display:flex;align-items:center;gap:8px;padding:10px 10px 10px 18px;border-radius:999px}
 .hud-text{flex:1;display:grid;min-width:0;line-height:1.3}
