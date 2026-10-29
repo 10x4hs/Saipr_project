@@ -1,0 +1,96 @@
+{# 표지: 표지 이미지가 없는 고전을 위해 제목 해시로 색·무늬를 정한다 #}
+{# 책 한 권을 앞표지·책등·페이지 단면·윗면·뒤표지가 있는 3D 상자로 그린다 #}
+{% macro book_cover(title, author, size='', img=None) -%}
+{% set c = cover(title, author) -%}
+<div class="book3d {{ size }} p{{ c.palette }}"{% if img %} style="--img:url('{{ img }}')"{% endif %} aria-hidden="true">
+  <div class="bk">
+    {%- if img %}
+    <div class="bk-front cover real"><img src="{{ img }}" alt="" loading="lazy" decoding="async"></div>
+    {%- else %}
+    <div class="bk-front cover p{{ c.palette }} m{{ c.pattern }}"><span class="cv-art"></span><span class="cv-t">{{ title }}</span><span class="cv-a">{{ author or '' }}</span></div>
+    {%- endif %}
+    <span class="bk-spine"><span>{{ title }}</span></span>
+    <span class="bk-pages"></span>
+    <span class="bk-top"></span>
+    <span class="bk-back"></span>
+  </div>
+</div>
+{%- endmacro %}
+
+{% macro flat_cover(title, author, img=None) -%}
+{# 목록용 가벼운 표지: 3D 면 대신 앞표지 하나와 그림자로 책등을 흉내 낸다(수백 권을 한 화면에 그려도 가볍게) #}
+{% set c = cover(title, author) -%}
+<div class="flatbook p{{ c.palette }}" aria-hidden="true">
+  {%- if img %}<img src="{{ img }}" alt="" loading="lazy" decoding="async">
+  {%- else %}<div class="cover p{{ c.palette }} m{{ c.pattern }}"><span class="cv-art"></span><span class="cv-t">{{ title }}</span><span class="cv-a">{{ author or '' }}</span></div>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro store_card(b) -%}
+<a class="card" href="/store/{{ b.id }}">
+  {{ flat_cover(b.title, b.author, b.cover) }}
+  <b>{{ b.title }}</b>
+  <span>{{ b.author or '' }}</span>
+</a>
+{%- endmacro %}
+
+{% macro catalog_card(b, flat=False) -%}
+<a class="card" href="/open/{{ b.source }}/{{ b.id|urlencode }}">
+  {% if flat %}{{ flat_cover(b.title, b.author, b.cover) }}{% else %}{{ book_cover(b.title, b.author, img=b.cover) }}{% endif %}
+  <b>{{ b.title }}</b>
+  <span>{{ b.author or b.genre }}</span>
+</a>
+{%- endmacro %}
+
+{% macro book_card(book, entry=None) -%}
+<a class="card" href="/books/{{ book.id }}">
+  {{ book_cover(book.title, book.author, img=cover_of(book)) }}
+  <b>{{ book.title }}</b>
+  {% if entry %}<span class="meter"><i style="width:{{ entry.progress_pct }}%"></i></span><span class="mono">{{ entry.progress_pct }}%</span>
+  {% else %}<span>{{ book.author or '' }}</span>{% endif %}
+</a>
+{%- endmacro %}
+
+{% macro icon(name) -%}
+<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+{%- if name == 'home' %}<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>
+{%- elif name == 'discover' %}<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>
+{%- elif name == 'library' %}<path d="M4 4h4v16H4zM10 4h4v16h-4zM16.5 4.5l3.5 1-3.8 15-3.5-1z"/>
+{%- elif name == 'me' %}<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>
+{%- elif name == 'search' %}<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+{%- elif name == 'upload' %}<path d="M12 16V4m0 0-5 5m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>
+{%- elif name == 'back' %}<path d="M15 5l-7 7 7 7"/>
+{%- elif name == 'race' %}<path d="M5 21V4m0 0h11l-2 4 2 4H5"/>
+{%- elif name == 'theme' %}<path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/>
+{%- endif %}</svg>
+{%- endmacro %}
+
+{# 프로필 사진(없으면 이름 첫 글자) #}
+{% macro avatar(u, cls='') -%}
+{% set src = avatar_url(u) -%}
+<span class="avatar {{ cls }}">{% if src %}<img src="{{ src }}" alt="">{% else %}{{ u.nickname[:1] }}{% endif %}</span>
+{%- endmacro %}
+
+{# 책 소개 영상: 썸네일만 보이다가 누르면 그 자리에서 YouTube가 재생된다 #}
+{% macro video_list(videos) -%}
+<ul class="videos">
+  {% for v in videos %}
+  <li>
+    <button type="button" class="yt" data-yt="{{ v.id }}" aria-label="{{ v.title }} 재생">
+      <img src="https://i.ytimg.com/vi/{{ v.id }}/hqdefault.jpg" alt="" loading="lazy">
+      <span class="yt-play">▶</span>{% if v.length %}<span class="yt-len mono">{{ v.length }}</span>{% endif %}
+    </button>
+    <b>{{ v.title }}</b>
+    <span>{{ v.channel or '' }}{% if v.views %} · {{ v.views|replace('조회수 ', '') }}{% endif %}</span>
+  </li>
+  {% endfor %}
+</ul>
+<script>
+document.querySelectorAll('.yt').forEach(b => b.addEventListener('click', () => {
+  const f = document.createElement('iframe');
+  f.src = `https://www.youtube-nocookie.com/embed/${b.dataset.yt}?autoplay=1&playsinline=1&rel=0`;
+  f.allow = 'autoplay; encrypted-media; picture-in-picture'; f.allowFullscreen = true; f.title = b.getAttribute('aria-label');
+  b.replaceWith(f);
+}, { once: true }));
+</script>
+{%- endmacro %}

@@ -7,7 +7,7 @@
 같은 책을 각자의 속도로 읽으면서 친구의 진행률과 문단 반응이 실시간으로 겹쳐 보이고,
 팀을 짜서 공정한 페이지 레이스로 경쟁합니다.
 
- **[PRD](docs/PRD.md)** · [디자인 시스템](docs/design-system.md) · [아키텍처](docs/architecture.md) · [GOAL](GOAL.md) · [Figma](https://www.figma.com/design/mp2nKNmBdJ7Dg2rc2p9rht)
+ **[PRD](docs/PRD.md)** · [아키텍처](docs/architecture.md) · [GOAL](GOAL.md) · [Figma](https://www.figma.com/design/mp2nKNmBdJ7Dg2rc2p9rht)
 
 <img src="docs/images/01-home.png" width="200" alt="홈"> <img src="docs/images/03-reader.png" width="200" alt="리더"> <img src="docs/images/b-03-reader.png" width="200" alt="리더 시안 B">
 
@@ -33,79 +33,73 @@
 - **스포일러 가드** — 내가 아직 안 읽은 위치의 반응은 내용 없이 "앞에서 N개의 반응이 기다리고 있어요"로만 보입니다.
 - **체류시간 검증** — 청크 글자 수 대비 최소 체류시간을 서버가 판정해, 넘기기만 한 구간은 레이스 점수에서 빠집니다.
 
-## 테마 선택
+## 지금 되는 것
 
-같은 6화면을 두 방향으로 만들었습니다. 
+> 배포: **https://saipr-reading.vercel.app** (Vercel + Neon Postgres). 서버리스라 WebSocket 대신 대결 순위는 15초마다 새로고침되고, 4.5MB 넘는 파일은 올릴 수 없어요.
 
-| | 홈 | 리더 | 레이스 |
-|---|---|---|---|
-| **A · Grass** | <img src="docs/images/01-home.png" width="180"> | <img src="docs/images/03-reader.png" width="180"> | <img src="docs/images/05-race.png" width="180"> |
-| **B · Paper** | <img src="docs/images/b-01-home.png" width="180"> | <img src="docs/images/b-03-reader.png" width="180"> | <img src="docs/images/b-05-race.png" width="180"> |
+> 시연 영상: `docs/demo/함께읽기-시연.mp4` (56초, 저장소에는 올리지 않음 — 아래 "시연 영상 만들기"로 다시 만들 수 있어요)
+
+| 화면 | 기능 |
+|---|---|
+| 로그인 · 가입 | 사진 한 장 위 유리 입력칸 하나씩 (이메일 → 비밀번호). BCrypt·CSRF·30분 세션 |
+| 홈 | 인기 고전이 나선을 따라 **3D로 감겨 쌓이고** 스크롤하면 한 권씩 앞으로. 책을 누르면 열림. 뒤에는 손에 반응하는 점 물결 배경 |
+| 탐색 · 검색 | 퍼블릭 도메인 866권 · 24개 서가 — 한국(단편·장편·중편·고전소설·신소설·판소리·시·희곡·동화·수필)과 세계(고전·추리·SF·동화·모험·공포·로맨스·시·희곡·철학·어린이·역사), 장르 칩·필터, 외부 검색 |
+| 리더 | 화면 크기로 쪽을 나눠 **3D 페이지 넘김**, 서버가 잰 체류시간으로만 "읽음", 문단을 눌러 반응(이모지 5종·한 줄 글) |
+| 대결 | 6자리 초대 코드·공유, 검증된 쪽 수로 순위, WebSocket으로 실시간 갱신·추월 애니메이션 |
+| 함께 읽기 | 같은 방 친구의 진행·반응 알림, **스포일러 가드**(내가 아직 못 읽은 쪽의 반응은 개수만) |
+| 서재 · 올리기 | 읽는 중·다 읽음·내 파일, DRM 없는 EPUB·PDF·TXT 올리기(본문은 나만) |
+| 서점 | 저작권이 살아 있는 유명 도서 130권 — 표지·정보와 알라딘 전자책 링크, 산 파일(DRM 없는 것) 올리기 연결, 북튜버 소개 영상 |
+| 나 | 프로필 사진 · 닉네임 · 읽은 쪽 통계 · 화면 꾸미기 |
+| 화면 꾸미기 | 자동·밝게·어둡게, 배경 30종(기본·책·자연·날씨·우주, 캔버스 비·눈·별), 강조 색 12종 — 계정에 저장 |
 
 ## 저장소 구성
 
-백엔드·프론트 모두 Python입니다.
+| 경로 | 내용 |
+|---|---|
+| `app/api/` | JSON API · WebSocket (`books`, `me`, `social`) |
+| `app/web.py`, `app/templates/`, `app/static/` | 서버 렌더링 모바일 웹 앱 (Jinja2 + 작은 바닐라 JS) |
+| `app/services/` | 검색 · 청크화 · 체류시간 · 서재 · 업로드 파싱 · 대결 · 반응 |
+| `app/realtime.py` | 책 단위 인메모리 브로커 (여러 대로 늘리면 Redis Pub/Sub로 교체) |
+| `app/data/` | 서가 카탈로그 · 인기 고전 순서 |
+| `scripts/` | `build_catalog.py`(퍼블릭 도메인 수집), `fetch_covers.py`(표지 이미지 — 프로토타입 전용) |
+| `migrations/`, `tests/` | Alembic · pytest (네트워크 0) |
 
-| 경로 | 내용 | 스택 |
-|---|---|---|
-| `app/`, `migrations/`, `tests/` | 도서 검색·전문 청크화 API (PRD Phase 0–1) | Python 3.12 · FastAPI · SQLAlchemy · Alembic |
-| `docs/` | PRD · 디자인 시스템 · 시안 목업(HTML) · 아키텍처 | |
-
-> 백엔드는 Python(FastAPI) 하나로 통일했습니다. 이전 Spring Boot 세션 인증(PR #1)은 Phase 2에서 FastAPI로 옮깁니다(git 이력에 보존).
-
-## 빠른 시작 — 도서 API (Python)
-
-```bash
-cp .env.example .env          # API 키는 선택 — 없으면 Google Books·위키문헌·Gutendex만 사용
-docker compose up --build     # Postgres + API, 마이그레이션 자동 적용
-```
+## 빠른 시작
 
 ```bash
-# 검색 (여러 소스 병렬 조회, 실패한 소스는 errors에 표시)
-curl "localhost:8000/api/v1/books/search?q=봄봄"
-
-# 퍼블릭 도메인 전문 가져오기 → 청크 읽기
-curl -X POST localhost:8000/api/v1/books/import \
-     -H "Content-Type: application/json" \
-     -d '{"source": "wikisource", "external_id": "봄봄"}'
-curl localhost:8000/api/v1/books/1/chunks/0
-```
-
-API 문서는 서버 실행 후 <http://localhost:8000/docs>.
-
-로컬 개발:
-
-```bash
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+python3.12 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-pytest -q          # 외부 네트워크 없이 실행 (httpx.MockTransport + in-memory SQLite)
-ruff check .
-uvicorn app.main:app --reload
+python scripts/fetch_covers.py      # 선택: 표지 이미지 (없으면 생성 표지)
+cp .env.example .env                # SECRET_KEY는 운영에서 반드시 바꾸기
+docker compose up --build           # Postgres + 앱 (http://localhost:8000)
 ```
 
-| 환경 변수 | 필수 | 설명 |
-|---|---|---|
-| `DATABASE_URL` | ✅ | `postgresql+asyncpg://…` |
-| `KAKAO_REST_API_KEY` | | 카카오 도서검색 (국내 1순위) |
-| `NAVER_CLIENT_ID` / `NAVER_CLIENT_SECRET` | | 네이버 책 검색 (보조) |
-| `GOOGLE_BOOKS_API_KEY` | | 없으면 낮은 쿼터로 동작 |
-| `WIKISOURCE_LANG` | | 기본 `ko` |
+DB 없이 바로 보기(SQLite):
+
+```bash
+export DATABASE_URL="sqlite+aiosqlite:///$PWD/scratch-dev.db" DWELL_SCALE=0.06   # 시연용: 체류시간 6%
+python -c "import asyncio;from sqlalchemy.ext.asyncio import create_async_engine;from app import models;from app.db.base import Base
+async def m():
+    e=create_async_engine('$DATABASE_URL')
+    async with e.begin() as c: await c.run_sync(Base.metadata.create_all)
+asyncio.run(m())"
+uvicorn app.main:app --port 8011
+```
+
+검증: `pytest -q` · `ruff check .` — 완료 기준과 현재 상태는 [GOAL.md](GOAL.md).
 
 ## 로드맵
 
-- [x] Phase 0 — 스캐폴딩 · DB · Docker · CI
-- [x] Phase 1 — 도서 소스 어댑터 · 통합 검색 · 전문 청크화
-- [ ] 세션 기반 회원가입·로그인 — Spring 버전(PR #1)을 FastAPI로 이식 (Phase 2)
-- [ ] Phase 2 — 소셜 로그인 · 내 서재 · 리더 이벤트 · 트래커 모드
-- [ ] Phase 3 — 읽기방 · WebSocket 진행률 동기화 · 문단 반응 · 스포일러 가드
-- [ ] Phase 4 — 페이지 레이스 · 한줄평 배틀 · 포인트
-- [ ] Phase 5 — 팀 · 주간 리그
-- [ ] Phase 6 — 푸시 알림 · 배포
-
-완료 기준은 [GOAL.md](GOAL.md)에 측정 가능한 형태로 정리되어 있습니다.
+- [x] Phase 0–1 — 스캐폴딩 · 도서 소스 · 통합 검색 · 청크화
+- [x] 계정 · 서재 · 리더(3D 넘김) · 업로드 · 화면 꾸미기
+- [x] Phase 3 — 대결방 · 초대 코드 · 실시간 · 문단 반응 · 스포일러 가드
+- [ ] 소셜 로그인 · 트래커 모드(상용 도서 수동 진행률)
+- [ ] 한줄평 배틀 · 포인트 · 팀 리그 · 푸시 · 배포
 
 ## 콘텐츠·약관 원칙
 
+- 본문은 두 경로로만 들어옵니다: 퍼블릭 도메인 소스(위키문헌·구텐베르크), 그리고 사용자가 직접 올린 DRM 없는 EPUB·PDF·TXT. 올린 파일의 본문은 올린 브라우저에서만 열리고, 다른 사람에게는 위치·진행률·반응만 공유됩니다. DRM 해제나 웹 크롤링으로 본문을 모으지 않습니다.
 - 퍼블릭 도메인이 아닌 본문은 저장·배포하지 않습니다.
 - 알라딘 Open API는 법인 사업자의 도서정보 서비스 이용 제한 조항 때문에 사용하지 않습니다.
 - 외부 검색 결과에는 원 출처 링크를 함께 제공합니다.
+- 책 표지 이미지(`scripts/fetch_covers.py`)는 출시하지 않는 시연용으로만 받아 두고 저장소에 올리지 않습니다. 출시 전에는 라이선스가 있는 표지 API로 바꿔야 합니다.

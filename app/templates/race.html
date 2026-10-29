@@ -1,0 +1,92 @@
+{% extends "app.html" %}
+{% from "_ui.html" import book_cover, avatar %}
+{% block title %}{{ book.title }} 레이스 — 함께읽기{% endblock %}
+{% block heading %}<small>{{ '끝난 대결' if over else '진행 중' }}</small>{{ book.title }}{% endblock %}
+{% block main %}
+<section class="race-hero glass-card">
+  {{ book_cover(book.title, book.author, img=cover_of(book)) }}
+  <div>
+    <span class="mono muted">{% if over %}끝남{% else %}남은 시간 <b id="left" data-ends="{{ room.ends_at.isoformat() if room.ends_at else '' }}">–</b>{% endif %}</span>
+    <h2>{{ board|length }}명이 달리는 중</h2>
+    <a class="btn primary" href="/books/{{ book.id }}">이어서 읽기</a>
+  </div>
+</section>
+
+<section class="row">
+  <div class="row-h"><h2>순위</h2><span class="mono muted">검증된 쪽 / {{ book.total_chunks }}</span></div>
+  <ol class="board" id="board" data-room="{{ room.id }}" data-book="{{ book.id }}" data-total="{{ book.total_chunks }}">
+    {% for s in board %}
+    <li class="{{ 'me' if s.is_me }}" data-uid="{{ s.user.id }}">
+      <span class="pos mono">{{ loop.index }}</span>
+      {{ avatar(s.user) }}
+      <div class="who"><b>{{ s.user.nickname }}{% if s.is_me %} <em>나</em>{% endif %}</b><span class="track"><i style="width:{{ s.pct }}%"></i></span></div>
+      <span class="mono">{{ s.pages }}쪽</span>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+
+<section class="invite glass-card">
+  <span class="mono muted">초대 코드</span>
+  <div class="code-big mono" id="code">{{ room.invite_code }}</div>
+  <div class="hud-actions">
+    <button class="btn primary" id="share" data-url="{{ invite }}" data-title="{{ book.title }}">초대 보내기</button>
+    <button class="btn ghost" id="copy">코드 복사</button>
+  </div>
+  <span class="muted small" id="copied" aria-live="polite"></span>
+</section>
+<script>
+(() => {
+  const share = document.getElementById('share'), note = document.getElementById('copied');
+  const text = `함께읽기에서 「${share.dataset.title}」 페이지 레이스 하자! 코드 ${document.getElementById('code').textContent}`;
+  const copy = async v => { try { await navigator.clipboard.writeText(v); note.textContent = '복사했어요'; } catch (e) { note.textContent = v; } };
+  share.onclick = async () => {
+    if (navigator.share) { try { await navigator.share({ title: '함께읽기 대결', text, url: share.dataset.url }); return; } catch (e) {} }
+    copy(`${text}\n${share.dataset.url}`);
+  };
+  document.getElementById('copy').onclick = () => copy(document.getElementById('code').textContent);
+  const left = document.getElementById('left');
+  if (left && left.dataset.ends) {
+    const ends = new Date(left.dataset.ends.endsWith('Z') || left.dataset.ends.includes('+') ? left.dataset.ends : left.dataset.ends + 'Z');
+    const tick = () => { const s = Math.max(0, (ends - Date.now()) / 1000);
+      left.textContent = s > 86400 ? `${Math.floor(s / 86400)}일 ${Math.floor(s % 86400 / 3600)}시간` : `${Math.floor(s / 3600)}시간 ${Math.floor(s % 3600 / 60)}분`; };
+    tick(); setInterval(tick, 30000);
+  }
+  // 실시간 순위: 같은 방 친구가 쪽을 다 읽으면 서버가 알려 주고, 순위를 다시 받아 자리바꿈을 애니메이션한다
+  const board = document.getElementById('board');
+  const render = data => {
+    const first = new Map([...board.children].map(li => [li.dataset.uid, li.getBoundingClientRect().top]));
+    board.innerHTML = '';
+    data.board.forEach((s, i) => {
+      const li = document.createElement('li');
+      li.dataset.uid = s.user_id; if (s.me) li.className = 'me';
+      li.innerHTML = '<span class="pos mono"></span><span class="avatar"></span><div class="who"><b></b><span class="track"><i></i></span></div><span class="mono pages"></span>';
+      li.querySelector('.pos').textContent = i + 1;
+      const av = li.querySelector('.avatar'); if (s.avatar) { const im = new Image(); im.src = s.avatar; av.appendChild(im); } else av.textContent = s.nickname.slice(0, 1);
+      li.querySelector('b').textContent = s.nickname;
+      if (s.me) { const em = document.createElement('em'); em.textContent = '나'; li.querySelector('b').append(' ', em); }
+      li.querySelector('.track i').style.width = s.pct + '%';
+      li.querySelector('.pages').textContent = `${s.pages}쪽`;
+      board.appendChild(li);
+      const was = first.get(String(s.user_id));
+      if (was !== undefined) {
+        const dy = was - li.getBoundingClientRect().top;
+        if (dy) li.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], { duration: 700, easing: 'cubic-bezier(.16,1,.3,1)' });
+      }
+    });
+    document.querySelector('.race-hero h2').textContent = `${data.board.length}명이 달리는 중`;
+  };
+  const refresh = () => fetch(`/api/v1/races/${board.dataset.room}/standings`).then(r => r.ok && r.json()).then(d => d && render(d)).catch(() => {});
+  let retry = 3000;
+  const connect = () => {
+    const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/api/v1/ws/books/${board.dataset.book}`);
+    const ping = setInterval(() => ws.readyState === 1 && ws.send('ping'), 25000);
+    ws.onmessage = ev => { const m = JSON.parse(ev.data); if (m.type === 'progress.updated' && m.advanced) refresh(); };
+    ws.onopen = () => { retry = 3000; };
+    ws.onclose = () => { clearInterval(ping); setTimeout(connect, retry); retry = Math.min(retry * 2, 60000); };
+  };
+  connect();
+  setInterval(refresh, 15000);  // WebSocket이 없어도 순위가 따라오게
+})();
+</script>
+{% endblock %}

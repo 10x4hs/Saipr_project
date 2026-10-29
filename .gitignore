@@ -3,7 +3,7 @@ build/
 out/
 .idea/
 *.iml
-data/
+/data/
 
 # Python / FastAPI (app/)
 __pycache__/
@@ -17,3 +17,8 @@ dist/
 
 # 공통
 .env
+scratch-dev.db
+app/static/covers/
+docs/demo/*.mp4
+.vercel
+.env*

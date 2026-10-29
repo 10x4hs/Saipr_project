@@ -13,6 +13,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    LargeBinary,
     SmallInteger,
     String,
     Text,
@@ -74,6 +75,14 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     nickname: Mapped[str] = mapped_column(String(40))
     email: Mapped[str | None] = mapped_column(String(255), unique=True)
+    # BCrypt 해시. 소셜 로그인만 쓰는 계정은 비어 있다
+    password_hash: Mapped[str | None] = mapped_column(String(60))
+    # 화면 꾸미기 {"mode": "auto|light|dark", "bg": "<배경 id>", "accent": "<색 id>"} — 모든 기기 공통
+    settings: Mapped[dict | None] = mapped_column(JSON)
+    # 프로필 사진 — 브라우저에서 256px JPEG로 줄여 올린 것 (수십 KB)
+    avatar: Mapped[bytes | None] = mapped_column(LargeBinary)
+    # 로그아웃하면 올라간다 — 서명 쿠키 세션이라 서버에서 지울 수 없어서, 예전 쿠키를 이 번호로 무효화한다
+    session_version: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     created_at: Mapped[datetime] = _now()
 
 
@@ -102,6 +111,10 @@ class Book(Base):
     # 퍼블릭 도메인 화이트리스트 소스에서만 true (app/services/search.py FULLTEXT_SOURCES)
     has_fulltext: Mapped[bool] = mapped_column(Boolean, default=False)
     total_chunks: Mapped[int] = mapped_column(Integer, default=0)
+    # 사용자가 올린 개인 파일(source="upload")만 채운다. 본문은 올린 사람만 열 수 있다.
+    owner_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    # 정규화한 본문의 SHA-256 — 서로 다른 사람이 올린 같은 책을 알아보는 데 쓴다.
+    fingerprint: Mapped[str | None] = mapped_column(String(64), index=True)
 
     chunks: Mapped[list["BookChunk"]] = relationship(
         back_populates="book", order_by="BookChunk.chunk_index", cascade="all, delete-orphan"
@@ -137,6 +150,8 @@ class LibraryEntry(Base):
     progress_pct: Mapped[int] = mapped_column(SmallInteger, default=0)
     # 체류시간 검증을 통과한 최대 청크 인덱스 (-1 = 아직 없음). 트래커 모드는 사용 안 함
     verified_chunk: Mapped[int] = mapped_column(Integer, default=-1)
+    # 마지막으로 펼친 청크 — 이어 읽기 위치
+    current_chunk: Mapped[int] = mapped_column(Integer, default=0)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )

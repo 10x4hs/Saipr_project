@@ -1,0 +1,24 @@
+{
+ "_comment": "3D 홈 상단에 보여 줄 유명 고전 순서. 앱 안 독자 수가 쌓이면 그 점수가 더해진다.",
+ "order": [
+  ["wikisource", "운수 좋은 날"], ["wikisource", "메밀꽃 필 무렵"], ["wikisource", "봄봄"], ["gutendex", "1342"],
+  ["wikisource", "동백꽃"], ["gutendex", "1513"], ["wikisource", "날개"], ["gutendex", "11"],
+  ["wikisource", "감자"], ["gutendex", "84"], ["wikisource", "B사감과 러브레터"], ["gutendex", "1661"],
+  ["wikisource", "벙어리 삼룡이"], ["gutendex", "64317"], ["wikisource", "광염 소나타"], ["gutendex", "174"],
+  ["wikisource", "배따라기"], ["gutendex", "5200"], ["wikisource", "발가락이 닮았다"], ["gutendex", "345"],
+  ["wikisource", "빈처"], ["gutendex", "98"], ["wikisource", "술 권하는 사회"], ["gutendex", "2554"],
+  ["wikisource", "만무방"], ["gutendex", "768"], ["wikisource", "레디메이드 인생"], ["gutendex", "1727"],
+  ["wikisource", "금 따는 콩밭"], ["wikisource", "소낙비"]
+ ],
+ "extra": [
+  {"source": "wikisource", "id": "운수 좋은 날", "title": "운수 좋은 날", "author": "현진건", "year": 1924, "genre": "단편소설", "lang": "ko"},
+  {"source": "wikisource", "id": "감자", "title": "감자", "author": "김동인", "year": 1925, "genre": "단편소설", "lang": "ko"},
+  {"source": "wikisource", "id": "B사감과 러브레터", "title": "B사감과 러브레터", "author": "현진건", "year": 1925, "genre": "단편소설", "lang": "ko"},
+  {"source": "wikisource", "id": "벙어리 삼룡이", "title": "벙어리 삼룡이", "author": "나도향", "year": 1925, "genre": "단편소설", "lang": "ko"},
+  {"source": "wikisource", "id": "배따라기", "title": "배따라기", "author": "김동인", "year": 1921, "genre": "단편소설", "lang": "ko"},
+  {"source": "wikisource", "id": "레디메이드 인생", "title": "레디메이드 인생", "author": "채만식", "year": 1934, "genre": "단편소설", "lang": "ko"},
+  {"source": "wikisource", "id": "빈처", "title": "빈처", "author": "현진건", "year": 1921, "genre": "단편소설", "lang": "ko"},
+  {"source": "wikisource", "id": "술 권하는 사회", "title": "술 권하는 사회", "author": "현진건", "year": 1921, "genre": "단편소설", "lang": "ko"},
+  {"source": "wikisource", "id": "발가락이 닮았다", "title": "발가락이 닮았다", "author": "김동인", "year": 1932, "genre": "단편소설", "lang": "ko"}
+ ]
+}

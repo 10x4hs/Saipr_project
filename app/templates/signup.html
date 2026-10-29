@@ -1,0 +1,23 @@
+{% extends "_auth.html" %}
+{% block title %}회원가입 — 함께읽기{% endblock %}
+{% block form %}
+{% set e = form.errors if form else {} %}
+<form method="post" action="/signup" class="steps" novalidate data-first-error="{{ (e.keys()|list)[0] if e else '' }}">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  {% for name, ph, typ, ac, val in [
+      ('nickname', '이름', 'text', 'nickname', form.nickname if form else ''),
+      ('email', '이메일', 'email', 'email', form.email if form else ''),
+      ('password', '비밀번호 (8자 이상)', 'password', 'new-password', ''),
+      ('password_confirm', '비밀번호 한 번 더', 'password', 'new-password', '')] %}
+  <div class="step" data-step data-name="{{ name }}" data-error="{{ e.get(name, '') }}">
+    <label class="sr" for="{{ name }}">{{ ph }}</label>
+    <div class="pill-field"><input id="{{ name }}" name="{{ name }}" type="{{ typ }}" value="{{ val }}" placeholder="{{ ph }}" autocomplete="{{ ac }}" required {% if name == 'nickname' %}maxlength="40" autofocus{% endif %}{% if name == 'password' %} minlength="8"{% endif %}>
+      {% if loop.last %}<button class="go" aria-label="가입하기">→</button>{% else %}<button type="button" class="go" data-next aria-label="다음">→</button>{% endif %}</div>
+  </div>
+  {% endfor %}
+  <p class="step-msg" role="alert" data-msg></p>
+  <div class="step-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <button type="button" class="step-back" data-back hidden>‹ 이전</button>
+</form>
+{% endblock %}
+{% block foot %}이미 계정이 있나요? · <a href="/login">로그인</a>{% endblock %}

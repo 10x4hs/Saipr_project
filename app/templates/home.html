@@ -1,0 +1,27 @@
+{% extends "app.html" %}
+{% from "_ui.html" import book_cover, catalog_card, book_card, icon %}
+{% block heading %}<small>{{ user.nickname }}님,</small>오늘은 뭘 읽을까요{% endblock %}
+
+{% block main %}
+{# ---------- 3D: 책들이 나선 계단처럼 위로·뒤로 감겨 쌓여 있고, 스크롤하면 앞으로 한 권씩 내려온다 ---------- #}
+<section class="helix" id="drum" aria-label="인기 고전">
+  <div class="dotfield" id="dotfield" aria-hidden="true"></div>
+  <div class="hx-view">
+    <div class="hx-stage" id="hxStage">
+      {% for b in drum %}
+      <a class="hx-book" href="{{ '/store/' ~ b.id if b.store else '/open/' ~ b.source ~ '/' ~ (b.id|urlencode) }}" data-title="{{ b.title }}" data-author="{{ b.author or '' }}"
+         data-rank="{{ b.rank or '' }}" data-readers="{{ b.readers or 0 }}" data-race="/races/start/{{ b.source }}/{{ b.id|urlencode }}">
+        {% if b.rank %}<span class="hx-rank mono">{{ b.rank }}</span>{% endif %}
+        {{ book_cover(b.title, b.author, 'solid', img=b.cover) }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="hx-count mono" id="hxCount"></div>
+  <div class="drum-spacer" id="drumSpacer"></div>
+</section>
+
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="/static/helix.js"></script>
+<script src="/static/backdrop.js"></script>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_ui.html" import book_cover %}
+{% block body_class %}landing{% endblock %}
+{% block body %}
+<div class="phone">
+  <header class="l-nav">
+    <span class="logo"><span class="logo-mark">읽</span>함께읽기</span>
+    <a class="pill" href="/login">로그인</a>
+  </header>
+  <section class="l-stage" aria-hidden="true">
+    <div class="l-glow"></div>
+    {% for b in picks[:5] %}<div class="l-book" style="--i:{{ loop.index0 - 2 }}">{{ book_cover(b.title, b.author, 'lg', img=b.cover) }}</div>{% endfor %}
+  </section>
+  <section class="l-copy">
+    <p class="eyebrow mono">{{ total }} BOOKS · FREE</p>
+    <h1>같은 책을<br>각자의 속도로<br><em>함께</em> 읽어요</h1>
+    <p class="l-lede">고전 {{ total }}권을 처음부터 끝까지. 내 EPUB·PDF도 같은 리더로 넘겨 읽어요.</p>
+  </section>
+  <div class="marquee" aria-hidden="true"><div class="marquee-track">
+    {% for b in picks + picks %}{{ book_cover(b.title, b.author, 'sm', img=b.cover) }}{% endfor %}
+  </div></div>
+  <div class="l-cta">
+    <a class="btn primary wide" href="/signup">무료로 시작하기</a>
+    <a class="btn ghost wide" href="/login">이미 계정이 있어요</a>
+  </div>
+</div>
+{% endblock %}

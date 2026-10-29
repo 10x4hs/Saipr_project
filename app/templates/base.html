@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ko" {% if look and look.mode != 'auto' %}data-theme="{{ look.mode }}"{% endif %} data-accent="{{ look.accent if look else 'pink' }}" style="--accent:{{ look.accent_hex if look else '#ffb3c7' }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>{% block title %}함께읽기{% endblock %}</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Geist+Mono:wght@500&display=swap">
+<meta name="csrf" content="{{ csrf }}">
+<link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/static/looks.css">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<div class="fx" id="fx" data-bg="{{ look.bg if look else 'plain' }}" aria-hidden="true"></div>
+<script src="/static/fx.js" defer></script>
+{% block body %}{% endblock %}
+</body>
+</html>

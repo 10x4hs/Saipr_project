@@ -1,0 +1,30 @@
+{% extends "app.html" %}
+{% from "_ui.html" import catalog_card, store_card %}
+{% block title %}탐색 — 함께읽기{% endblock %}
+{% block heading %}<small><a href="/discover">‹ 탐색</a></small>{{ genre or "전체" }}{% endblock %}
+{% block main %}
+<nav class="chips" aria-label="장르">
+  <a href="/discover?g=%EC%84%9C%EC%A0%90" class="{{ 'on' if genre == '서점' }}">서점 <span>{{ store|length }}</span></a>
+  <a href="/discover?g=all" class="{{ 'on' if not genre }}">전체 <span>{{ total }}</span></a>
+  {% for g, books in genres.items() %}<a href="/discover?g={{ g|urlencode }}" class="{{ 'on' if g == genre }}">{{ g }} <span>{{ books|length }}</span></a>{% endfor %}
+</nav>
+<input class="filter" id="filter" placeholder="이 목록에서 제목·저자 거르기" aria-label="목록 거르기">
+{% if genre == '서점' %}
+<p class="hint">본문은 없고 표지·정보만 있어요. 알라딘에서 전자책을 사거나, 가지고 있는 DRM 없는 파일을 올려 읽어요.</p>
+{% endif %}
+<div class="grid" id="grid">
+  {% if genre == '서점' %}{% for b in store %}<div data-q="{{ b.title }} {{ b.author or '' }}">{{ store_card(b) }}</div>{% endfor %}
+  {% else %}{% for b in books %}<div data-q="{{ b.title }} {{ b.author or '' }}">{{ catalog_card(b, True) }}</div>{% endfor %}{% endif %}
+</div>
+<p class="muted" id="none" hidden>맞는 책이 없어요.</p>
+<script>
+(() => {
+  const rows = [...document.querySelectorAll('#grid > div')];
+  document.getElementById('filter').addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase(); let shown = 0;
+    rows.forEach(r => { const hit = r.dataset.q.toLowerCase().includes(q); r.hidden = !hit; shown += hit; });
+    document.getElementById('none').hidden = shown > 0;
+  });
+})();
+</script>
+{% endblock %}
