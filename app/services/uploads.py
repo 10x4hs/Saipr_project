@@ -16,6 +16,11 @@ from app.sources.base import SourceError
 from app.sources.wikisource import html_to_text
 
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
+# 압축 폭탄·거대 PDF로 서버를 멈추지 못하게 하는 상한
+MAX_UNZIPPED_BYTES = 80 * 1024 * 1024
+MAX_EPUB_ENTRIES = 3000
+MAX_PDF_PAGES = 2000
+MAX_TEXT_CHARS = 6_000_000
 ALLOWED = (".epub", ".pdf", ".txt")
 
 
@@ -61,6 +66,9 @@ def parse_txt(data: bytes) -> tuple[str, None, str]:
 def parse_epub(data: bytes) -> tuple[str, str | None, str]:
     try:
         z = zipfile.ZipFile(io.BytesIO(data))
+        infos = z.infolist()
+        if len(infos) > MAX_EPUB_ENTRIES or sum(i.file_size for i in infos) > MAX_UNZIPPED_BYTES:
+            raise SourceError("파일이 너무 커요 (압축을 풀면 80MB를 넘어요)")
         if any(n.endswith("encryption.xml") for n in z.namelist()):
             raise SourceError("DRM이 걸린 EPUB은 열 수 없어요")
         container = BeautifulSoup(z.read("META-INF/container.xml"), "xml")
@@ -73,11 +81,12 @@ def parse_epub(data: bytes) -> tuple[str, str | None, str]:
     author = opf.find("dc:creator") or opf.find("creator")
     base = posixpath.dirname(opf_path)
     manifest = {i["id"]: i["href"] for i in opf.find_all("item") if i.get("id") and i.get("href")}
-    parts = []
+    parts, seen = [], set()
     for ref in opf.find_all("itemref"):
         href = manifest.get(ref.get("idref", ""))
-        if not href:
+        if not href or href in seen:  # 같은 장을 여러 번 넣은 spine은 한 번만
             continue
+        seen.add(href)
         try:
             html = z.read(posixpath.normpath(posixpath.join(base, href)))
         except KeyError:
@@ -99,7 +108,14 @@ def parse_pdf(data: bytes) -> tuple[str, str | None, str]:
         reader = PdfReader(io.BytesIO(data))
         if reader.is_encrypted:
             raise SourceError("암호가 걸린 PDF는 열 수 없어요")
-        pages = [page.extract_text() or "" for page in reader.pages]
+        if len(reader.pages) > MAX_PDF_PAGES:
+            raise SourceError(f"쪽수가 너무 많아요 (최대 {MAX_PDF_PAGES}쪽)")
+        pages, size = [], 0
+        for page in reader.pages:
+            pages.append(page.extract_text() or "")
+            size += len(pages[-1])
+            if size > MAX_TEXT_CHARS:
+                raise SourceError("본문이 너무 길어요")
     except PdfReadError as e:
         raise SourceError("올바른 PDF 파일이 아니에요") from e
     meta = reader.metadata
@@ -108,13 +124,15 @@ def parse_pdf(data: bytes) -> tuple[str, str | None, str]:
     return (meta.title or "") if meta else "", (meta.author if meta else None), text
 
 
-def parse_upload(filename: str, data: bytes) -> ParsedBook:
+def parse_upload(filename: str, data: bytes, max_bytes: int = MAX_UPLOAD_BYTES) -> ParsedBook:
     ext = posixpath.splitext(filename.lower())[1]
     if ext not in ALLOWED:
         raise SourceError("EPUB, PDF, TXT 파일만 올릴 수 있어요")
-    if len(data) > MAX_UPLOAD_BYTES:
-        raise SourceError("파일이 너무 커요 (최대 20MB)")
+    if len(data) > max_bytes:
+        raise SourceError(f"파일이 너무 커요 (최대 {max_bytes // (1024 * 1024)}MB)")
     title, author, text = {".epub": parse_epub, ".pdf": parse_pdf, ".txt": parse_txt}[ext](data)
+    if len(text) > MAX_TEXT_CHARS:
+        raise SourceError("본문이 너무 길어요")
     if len(text.strip()) < 50:
         raise SourceError("본문을 찾지 못했어요. 스캔한 이미지 PDF는 지원하지 않아요")
     fallback = posixpath.splitext(posixpath.basename(filename))[0]

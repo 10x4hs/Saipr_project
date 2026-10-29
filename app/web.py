@@ -8,6 +8,7 @@ import hashlib
 import json
 import random
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import httpx
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
@@ -25,7 +26,7 @@ from app.models import Book, LibraryEntry, Room, Shelf, User
 from app.services import books as book_service
 from app.services import races as race_service
 from app.services.search import FULLTEXT_SOURCES, search_all
-from app.services.uploads import MAX_UPLOAD_BYTES, parse_upload
+from app.services.uploads import parse_upload
 from app.sources.base import BookSource, SourceError
 
 router = APIRouter(include_in_schema=False)
@@ -98,7 +99,14 @@ def _render(request: Request, name: str, user: User | None, **ctx) -> HTMLRespon
 
 
 def _safe_next(target: str | None) -> str:
-    return target if target and target.startswith("/") and not target.startswith("//") else "/"
+    """로그인 뒤 돌아갈 곳 — 이 사이트 안의 경로만.
+
+    `//evil.com`과 `/\\evil.com`(브라우저가 \\를 /로 바꾼다)은 다른 사이트로 가므로 막는다.
+    """
+    if not target or not target.startswith("/") or "\\" in target or target.startswith("//"):
+        return "/"
+    parts = urlsplit(target)
+    return target if not parts.scheme and not parts.netloc else "/"
 
 
 def _daily_picks(n: int) -> list[dict]:
@@ -222,9 +230,11 @@ async def login(
 
 
 @router.post("/logout")
-async def logout(request: Request, csrf: str = Form("")) -> RedirectResponse:
+async def logout(
+    request: Request, csrf: str = Form(""), session: AsyncSession = Depends(get_session)
+) -> RedirectResponse:
     auth.check_csrf(request, csrf)
-    auth.logout(request)
+    await auth.logout(request, session)
     return RedirectResponse("/", status_code=303)
 
 
@@ -326,7 +336,14 @@ async def search(
 async def upload_form(
     request: Request, store: str | None = None, user: User = Depends(auth.require_user)
 ) -> HTMLResponse:
-    return _render(request, "upload.html", user, error=None, for_book=STORE_INDEX.get(store or ""))
+    return _render(
+        request,
+        "upload.html",
+        user,
+        error=None,
+        for_book=STORE_INDEX.get(store or ""),
+        max_mb=get_settings().max_upload_mb,
+    )
 
 
 @router.post("/upload", response_class=HTMLResponse, response_model=None)
@@ -340,11 +357,14 @@ async def upload(
 ) -> HTMLResponse | RedirectResponse:
     auth.check_csrf(request, csrf)
     for_book = STORE_INDEX.get(store)
-    data = await file.read(MAX_UPLOAD_BYTES + 1)
+    limit = get_settings().max_upload_mb * 1024 * 1024
+    data = await file.read(limit + 1)
     try:
-        parsed = parse_upload(file.filename or "untitled.txt", data)
+        parsed = parse_upload(file.filename or "untitled.txt", data, limit)
     except SourceError as e:
-        resp = _render(request, "upload.html", user, error=str(e), for_book=for_book)
+        resp = _render(
+            request, "upload.html", user, error=str(e), for_book=for_book, max_mb=get_settings().max_upload_mb
+        )
         resp.status_code = 422
         return resp
     book = await book_service.save_upload(session, parsed, user.id)
@@ -568,8 +588,8 @@ async def avatar(
     from fastapi.responses import Response
 
     u = await session.get(User, user_id)
-    if u is None or not u.avatar:
-        raise HTTPException(404)
+    if u is None or not u.avatar or not await race_service.shares_room(session, _.id, user_id):
+        raise HTTPException(404)  # 본인이나 같은 대결방 사람의 사진만
     return Response(
         u.avatar, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=31536000, immutable"}
     )

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, WebSocke
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth import check_csrf, require_api_user
+from app.auth import check_csrf, require_api_user, user_of_session
 from app.db.session import get_session
 from app.models import Book, Room, User
 from app.realtime import broker
@@ -112,8 +112,8 @@ async def book_socket(
     websocket: WebSocket, book_id: int, session: AsyncSession = Depends(get_session)
 ) -> None:
     """같은 책을 읽는 친구의 진행·반응 소식을 받는 연결 (로그인 세션 필요)."""
-    uid = websocket.session.get("uid") if "session" in websocket.scope else None
-    user = await session.get(User, uid) if uid else None
+    # HTTP와 같은 규칙: 30분 유휴 만료와 로그아웃 무효화를 함께 검사
+    user = await user_of_session(websocket, session) if "session" in websocket.scope else None
     book = await session.get(Book, book_id)
     if user is None or book is None or not book_service.can_read(book, user.id):
         await websocket.close(code=4401)

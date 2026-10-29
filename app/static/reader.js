@@ -321,9 +321,9 @@ function connect() {
       if (m.chunk === chunk) loadReactions(chunk);
     }
   };
-  // 서버리스 배포처럼 WebSocket이 없는 곳에서는 점점 드물게 다시 시도한다
-  ws.onopen = () => { retry = 3000; };
-  ws.onclose = () => { clearInterval(ping); setTimeout(connect, retry); retry = Math.min(retry * 2, 60000); };
+  // 서버리스 배포처럼 WebSocket이 없는 곳에서는 점점 드물게 다시 시도하고, 그동안은 주기적으로 물어본다
+  ws.onopen = () => { retry = 3000; stopPolling(); };
+  ws.onclose = () => { clearInterval(ping); startPolling(); setTimeout(connect, retry); retry = Math.min(retry * 2, 60000); };
 }
 
 social();
@@ -353,3 +353,25 @@ document.querySelectorAll('#modes button').forEach(b => b.onclick = () => {
   mode = b.dataset.mode; local.set('flip', mode); applyMode();
   if (chunkData) open(chunk);
 });
+
+// ---------------- WebSocket이 없을 때: 20초마다 친구 진행을 물어본다 ----------------
+let pollTimer = 0;
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(async () => {
+    if (document.hidden) return;
+    try {
+      const d = await (await fetch(`/api/v1/books/${bookId}/social`)).json();
+      d.friends.forEach(f => {
+        const before = friendMap.get(f.user_id);
+        friendMap.set(f.user_id, f);
+        if (before && f.verified_chunk > before.verified_chunk) {
+          const passed = before.verified_chunk <= verifiedUpTo && f.verified_chunk > verifiedUpTo;
+          toast(passed ? `🏃 ${f.nickname}님이 나를 앞질렀어요` : `${f.nickname}님이 ${f.verified_chunk + 1}쪽을 다 읽었어요`);
+        }
+      });
+      paintFriends();
+    } catch (e) {}
+  }, 20000);
+}
+function stopPolling() { clearInterval(pollTimer); pollTimer = 0; }

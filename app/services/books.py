@@ -153,14 +153,24 @@ async def record_progress(
             )
         )
     elif chunk_index == entry.verified_chunk + 1:  # 순서대로 읽은 쪽만
-        opened = await session.scalar(
+        mine = (ReadingEvent.user_id == user_id, ReadingEvent.book_id == book.id)
+        # 앞 쪽을 다 읽은 뒤에 펼친 기록만 센다 — 여러 쪽을 미리 펼쳐 두고 한꺼번에 인정받는 것을 막는다
+        since = await session.scalar(
             select(func.max(ReadingEvent.occurred_at)).where(
-                ReadingEvent.user_id == user_id,
-                ReadingEvent.book_id == book.id,
-                ReadingEvent.chunk_index == chunk_index,
-                ReadingEvent.verified.is_(False),
+                *mine, ReadingEvent.chunk_index == chunk_index - 1, ReadingEvent.verified.is_(True)
             )
         )
+        # 그중 가장 이른 펼침부터 잰다(다시 보내도 처음부터 다시 세지 않는다).
+        # 실패한 판정 기록(dwell_ms > 0)은 펼침이 아니다
+        q = select(func.min(ReadingEvent.occurred_at)).where(
+            *mine,
+            ReadingEvent.chunk_index == chunk_index,
+            ReadingEvent.verified.is_(False),
+            ReadingEvent.dwell_ms == 0,
+        )
+        if since is not None:
+            q = q.where(ReadingEvent.occurred_at >= since)
+        opened = await session.scalar(q)
         if opened is not None:
             if opened.tzinfo is None:  # SQLite는 시간대를 버린다
                 opened = opened.replace(tzinfo=dt.UTC)
@@ -175,7 +185,7 @@ async def record_progress(
                     user_id=user_id,
                     book_id=book.id,
                     chunk_index=chunk_index,
-                    dwell_ms=dwell,
+                    dwell_ms=max(dwell, 1),  # 0이면 '펼침'과 구별되지 않는다
                     verified=ok,
                     occurred_at=now,
                 )

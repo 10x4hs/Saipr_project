@@ -93,9 +93,13 @@ async def search_books(
 @router.post("/import", response_model=BookOut)
 async def import_book(
     body: ImportIn,
+    request: Request,
+    x_csrf_token: str | None = Header(None),
     sources: dict[str, BookSource] = Depends(get_sources),
     session: AsyncSession = Depends(get_session),
+    user: User = Depends(require_api_user),
 ) -> BookOut:
+    check_csrf(request, x_csrf_token)  # 외부 요청과 DB 저장을 일으키므로 로그인한 화면에서만
     src = sources.get(body.source)
     if src is None or body.source not in FULLTEXT_SOURCES:
         raise HTTPException(400, f"'{body.source}' is not a public-domain full-text source")

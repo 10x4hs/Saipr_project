@@ -1,3 +1,4 @@
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -10,7 +11,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app import auth, web
 from app.api import books, me, social
-from app.core.config import get_settings
+from app.core.config import Settings, get_settings
 
 USER_AGENT = "saipr/0.1 (+https://github.com/hsK10x2/Saipr_project)"  # Wikimedia는 UA 명시 요구
 
@@ -37,6 +38,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="함께읽기 API", version="0.1.0", lifespan=lifespan)
 _settings = get_settings()
+if os.environ.get("VERCEL") and _settings.secret_key == Settings.model_fields["secret_key"].default:
+    # 기본 키는 공개 저장소에 있어 누구나 세션 쿠키를 위조할 수 있다
+    raise RuntimeError("SECRET_KEY 환경 변수를 설정해야 배포할 수 있어요")
 app.add_middleware(
     SessionMiddleware,
     secret_key=_settings.secret_key,

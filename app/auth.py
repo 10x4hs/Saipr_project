@@ -97,11 +97,23 @@ async def authenticate(session: AsyncSession, email: str, password: str) -> User
 
 def login(request: Request, user: User) -> None:
     request.session.clear()  # 기존 세션 내용·CSRF 토큰을 버리고 새로 시작
-    request.session.update({"uid": user.id, "seen": int(time.time()), "csrf": secrets.token_urlsafe(32)})
+    request.session.update(
+        {
+            "uid": user.id,
+            "sv": user.session_version or 0,
+            "seen": int(time.time()),
+            "csrf": secrets.token_urlsafe(32),
+        }
+    )
 
 
-def logout(request: Request) -> None:
+async def logout(request: Request, session: AsyncSession) -> None:
+    """이 기기 쿠키를 지우고, 같은 계정의 다른(예전·탈취된) 쿠키도 더는 통하지 않게 번호를 올린다."""
+    uid = request.session.get("uid")
     request.session.clear()
+    if uid and (user := await session.get(User, uid)):
+        user.session_version = (user.session_version or 0) + 1
+        await session.commit()
 
 
 def csrf_token(request: Request) -> str:
@@ -116,7 +128,8 @@ def check_csrf(request: Request, token: str | None) -> None:
         raise HTTPException(403, "요청이 만료됐어요. 페이지를 새로고침해 주세요")
 
 
-def _session_uid(request: Request) -> int | None:
+def session_uid(request) -> int | None:
+    """세션의 사용자 id — 30분 넘게 쉬었으면 만료. HTTP 요청과 WebSocket 모두에 쓴다."""
     uid, seen = request.session.get("uid"), request.session.get("seen", 0)
     if uid is None:
         return None
@@ -128,9 +141,17 @@ def _session_uid(request: Request) -> int | None:
     return uid
 
 
+async def user_of_session(request, session: AsyncSession) -> User | None:
+    uid = session_uid(request)
+    user = await session.get(User, uid) if uid else None
+    if user is not None and request.session.get("sv", 0) != (user.session_version or 0):
+        request.session.clear()  # 로그아웃 이전에 받은 쿠키
+        return None
+    return user
+
+
 async def current_user(request: Request, session: AsyncSession = Depends(get_session)) -> User | None:
-    uid = _session_uid(request)
-    return await session.get(User, uid) if uid else None
+    return await user_of_session(request, session)
 
 
 async def require_user(user: User | None = Depends(current_user)) -> User:

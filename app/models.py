@@ -81,6 +81,8 @@ class User(Base):
     settings: Mapped[dict | None] = mapped_column(JSON)
     # 프로필 사진 — 브라우저에서 256px JPEG로 줄여 올린 것 (수십 KB)
     avatar: Mapped[bytes | None] = mapped_column(LargeBinary)
+    # 로그아웃하면 올라간다 — 서명 쿠키 세션이라 서버에서 지울 수 없어서, 예전 쿠키를 이 번호로 무효화한다
+    session_version: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     created_at: Mapped[datetime] = _now()
 
 

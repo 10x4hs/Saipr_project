@@ -8,11 +8,11 @@
 <form class="drop" id="drop" action="/upload" method="post" enctype="multipart/form-data">
   <input type="hidden" name="csrf" value="{{ csrf }}">
   <input type="hidden" name="store" value="{{ for_book.id if for_book else '' }}">
-  <input type="file" id="file" name="file" accept=".epub,.pdf,.txt" required>
+  <input type="file" id="file" name="file" accept=".epub,.pdf,.txt" required data-max="{{ max_mb }}">
   <label for="file">
     <span class="drop-ic">＋</span>
     <b>파일을 끌어 놓거나 눌러서 고르세요</b>
-    <span class="mono" id="picked">EPUB · PDF · TXT · 최대 20MB</span>
+    <span class="mono" id="picked">EPUB · PDF · TXT · 최대 {{ max_mb }}MB</span>
   </label>
   <button type="submit" class="btn primary" id="go" disabled>올리고 읽기</button>
 </form>
@@ -26,8 +26,10 @@
 (() => {
   const input = document.getElementById('file'), drop = document.getElementById('drop');
   const sync = () => { const f = input.files[0];
-    document.getElementById('picked').textContent = f ? `${f.name} · ${(f.size / 1048576).toFixed(1)}MB` : 'EPUB · PDF · TXT · 최대 20MB';
-    document.getElementById('go').disabled = !f; };
+    document.getElementById('picked').textContent = f ? `${f.name} · ${(f.size / 1048576).toFixed(1)}MB` : 'EPUB · PDF · TXT · 최대 {{ max_mb }}MB';
+    const tooBig = f && f.size > input.dataset.max * 1048576;
+    if (tooBig) document.getElementById('picked').textContent = `${f.name} — ${input.dataset.max}MB보다 커서 올릴 수 없어요`;
+    document.getElementById('go').disabled = !f || tooBig; };
   input.addEventListener('change', sync);
   ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
   ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));

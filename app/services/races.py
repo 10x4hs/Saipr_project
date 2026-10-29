@@ -131,3 +131,15 @@ async def races_of(session: AsyncSession, user_id: int) -> list[tuple[Room, Book
         .order_by(Room.id.desc())
     )
     return [(r, b) for r, b in rows.all()]
+
+
+async def shares_room(session: AsyncSession, a: int, b: int) -> bool:
+    """두 사람이 같은 대결방에 있는지(본인 포함)."""
+    if a == b:
+        return True
+    other = select(RoomMember.room_id).where(RoomMember.user_id == b)
+    return bool(
+        await session.scalar(
+            select(RoomMember.room_id).where(RoomMember.user_id == a, RoomMember.room_id.in_(other))
+        )
+    )

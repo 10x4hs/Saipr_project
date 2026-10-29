@@ -46,6 +46,8 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     # 시연·로컬 테스트용 최소 체류시간 배율. 운영은 반드시 1.0
     dwell_scale: float = 1.0
+    # 업로드 상한(MB). Vercel은 요청 본문을 4.5MB에서 끊으므로 배포에서는 4로 둔다
+    max_upload_mb: int = 20
 
 
 @lru_cache
