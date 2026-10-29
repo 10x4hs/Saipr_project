@@ -22,8 +22,44 @@ GUTENBERG_TOP = "https://www.gutenberg.org/browse/scores/top"
 OUT = Path(__file__).resolve().parent.parent / "app" / "data" / "catalog.json"
 UA = {"User-Agent": "saipr-catalog/0.1 (+https://github.com/hsK10x2/Saipr_project)"}
 
-GENRES = ["단편소설", "중편소설", "장편소설", "동화", "시집", "수필"]
+GENRES = [
+    "단편소설",
+    "중편소설",
+    "장편소설",
+    "고전소설",
+    "신소설",
+    "동화",
+    "시",
+    "시집",
+    "희곡",
+    "판소리",
+    "수필",
+]
+# 구텐베르크 장르 검색어 → 서가 이름 (다운로드 많은 순 50권씩)
+WORLD = {
+    "detective fiction": "세계 · 추리",
+    "science fiction": "세계 · SF",
+    "fairy tales": "세계 · 동화",
+    "adventure stories": "세계 · 모험",
+    "horror tales": "세계 · 공포",
+    "love stories": "세계 · 로맨스",
+    "poetry": "세계 · 시",
+    "drama": "세계 · 희곡",
+    "philosophy": "세계 · 철학",
+    "children's literature": "세계 · 어린이",
+    "history": "세계 · 역사",
+}
+GUTENBERG_SEARCH = "https://www.gutenberg.org/ebooks/search/"
+_BOOKLINK = re.compile(
+    r'<li class="booklink">.*?href="/ebooks/(\d+)".*?<span class="title">([^<]+)</span>'
+    r'(?:\s*<span class="subtitle">([^<]+)</span>)?',
+    re.S,
+)
 MIN_BODY_CHARS = 800
+MIN_POEM_CHARS = 120  # 시는 짧다
+# 조선 시대 고전소설·판소리는 작자 미상의 수백 년 된 작품이라 그 자체로 퍼블릭 도메인
+ANCIENT_GENRES = {"고전소설", "판소리"}
+PD_TAGS = {"분류:PD-old-70", "분류:PD-old-100", "분류:PD-old"}
 LAST_PD_DEATH_YEAR = 1962
 
 _AUTHOR = re.compile(r"\|\s*저자\s*=\s*\[\[(?:저자:)?[^|\]]*\|?([^\]]*)\]\]")
@@ -36,8 +72,13 @@ _TOP_ITEM = re.compile(r'<li><a href="/ebooks/(\d+)">([^<]+?) by ([^<(]+?) \(\d+
 
 
 async def wiki(client: httpx.AsyncClient, **params) -> dict:
+    """위키미디어 API — 너무 빨리 부르면 빈 응답이 오므로 쉬었다가 다시 시도한다."""
     params |= {"action": "query", "format": "json", "formatversion": 2}
-    r = await client.get(WIKI_API, params=params)
+    for attempt in range(5):
+        r = await client.get(WIKI_API, params=params)
+        if r.status_code == 200 and r.headers.get("content-type", "").startswith("application/json"):
+            return r.json()
+        await asyncio.sleep(2 + attempt * 3)
     r.raise_for_status()
     return r.json()
 
@@ -86,9 +127,9 @@ async def describe(client: httpx.AsyncClient, titles: list[str], genre: str) -> 
             if "revisions" not in p:
                 continue
             src = p["revisions"][0]["slots"]["main"]["content"]
-            if body_chars(src) < MIN_BODY_CHARS:
+            if body_chars(src) < (MIN_POEM_CHARS if genre in ("시", "시집") else MIN_BODY_CHARS):
                 continue
-            if "분류:PD-old-70" not in cats:
+            if genre not in ANCIENT_GENRES and not PD_TAGS & set(cats):
                 page = m.group(1).strip() if (m := _AUTHOR_PAGE.search(src)) else None
                 died = await death_year(client, page) if page else None
                 if "분류:PD-old-50" not in cats or died is None or died > LAST_PD_DEATH_YEAR:
@@ -106,7 +147,7 @@ async def describe(client: httpx.AsyncClient, titles: list[str], genre: str) -> 
                     "lang": "ko",
                 }
             )
-        await asyncio.sleep(0.5)  # 위키미디어 서버 배려
+        await asyncio.sleep(1.0)  # 위키미디어 서버 배려
     return out
 
 
@@ -131,6 +172,31 @@ async def gutenberg(client: httpx.AsyncClient) -> list[dict]:
     return out[:100]
 
 
+async def gutenberg_genre(client: httpx.AsyncClient, query: str, shelf: str, pages: int = 2) -> list[dict]:
+    out = []
+    for page in range(pages):
+        html = (
+            await client.get(
+                GUTENBERG_SEARCH,
+                params={"query": query, "sort_order": "downloads", "start_index": 1 + page * 25},
+            )
+        ).text
+        for gid, title, author in _BOOKLINK.findall(html):
+            out.append(
+                {
+                    "source": "gutendex",
+                    "id": gid,
+                    "title": title.strip(),
+                    "author": (author or "").strip() or None,
+                    "year": None,
+                    "genre": shelf,
+                    "lang": None,
+                }
+            )
+        await asyncio.sleep(1.0)
+    return out
+
+
 async def main() -> None:
     async with httpx.AsyncClient(headers=UA, timeout=30, follow_redirects=True) as client:
         books, seen = [], set()
@@ -143,6 +209,12 @@ async def main() -> None:
             print(f"{genre}: {sum(b['genre'] == genre for b in books)}")
         top = await gutenberg(client)
         print(f"세계 고전: {len(top)}")
+        seen_g = {b["id"] for b in top}
+        for query, shelf in WORLD.items():
+            got = [b for b in await gutenberg_genre(client, query, shelf) if b["id"] not in seen_g]
+            seen_g |= {b["id"] for b in got}
+            top += got
+            print(f"{shelf}: {len(got)}")
     # 카테고리 수집에서 빠지는 유명작(분류가 덜 달린 문서)은 popular.json의 extra로 보탠다
     extra = json.loads((OUT.parent / "popular.json").read_text())["extra"]
     have = {(b["source"], b["id"]) for b in books}

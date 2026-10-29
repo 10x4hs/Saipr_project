@@ -7,8 +7,8 @@
 {% block main %}
 {# ---------- 3D: 책들이 나선 계단처럼 위로·뒤로 감겨 쌓여 있고, 스크롤하면 앞으로 한 권씩 내려온다 ---------- #}
 <section class="helix" id="drum" aria-label="인기 고전">
+  <div class="dotfield" id="dotfield" aria-hidden="true"></div>
   <div class="hx-view">
-    <div class="hx-backdrop" aria-hidden="true"><i class="hx-light"></i><i class="hx-floor"></i><i class="hx-pool"></i></div>
     <div class="hx-stage" id="hxStage">
       {% for b in drum %}
       <a class="hx-book" href="/open/{{ b.source }}/{{ b.id|urlencode }}" data-title="{{ b.title }}" data-author="{{ b.author or '' }}"
@@ -68,4 +68,5 @@
 </section>
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 <script src="/static/helix.js"></script>
+<script src="/static/backdrop.js"></script>
 {% endblock %}

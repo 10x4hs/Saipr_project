@@ -1691,6 +1691,16 @@
  },
  {
   "source": "wikisource",
+  "id": "구운몽",
+  "title": "구운몽",
+  "author": null,
+  "year": 1687,
+  "genre": "장편소설",
+  "lang": "ko",
+  "cover": "/static/covers/8b7c62a66eab27d0.jpg"
+ },
+ {
+  "source": "wikisource",
   "id": "대하",
   "title": "대하",
   "author": "김남천",
@@ -1777,6 +1787,16 @@
   "genre": "장편소설",
   "lang": "ko",
   "cover": "/static/covers/960082742452d281.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "모비딕",
+  "title": "모비딕",
+  "author": null,
+  "year": 1851,
+  "genre": "장편소설",
+  "lang": "ko",
+  "cover": "/static/covers/3ce565cb1a3099e3.jpg"
  },
  {
   "source": "wikisource",
@@ -1936,6 +1956,314 @@
  },
  {
   "source": "wikisource",
+  "id": "국선생전",
+  "title": "국선생전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/113e34b11e4311c4.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "박씨전",
+  "title": "박씨전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/cebcc093a3211b7a.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "설공찬전",
+  "title": "설공찬전",
+  "author": "채수",
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/0a9822f6791ca31c.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "금방울전",
+  "title": "금방울전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/96eda3c4f8cec66b.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "백학선전",
+  "title": "백학선전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/0afef83558ab42ec.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "소대성전",
+  "title": "소대성전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/365b25cdffe930de.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "김원전",
+  "title": "김원전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/3b8f914178829d94.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "설인귀전",
+  "title": "설인귀전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/ac062de2e0d47ba4.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "배시황전",
+  "title": "배시황전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/ea5eae73e0112eb6.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "만복사저포기",
+  "title": "만복사저포기",
+  "author": "김시습",
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/00bf81fcd30a5ba3.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "전운치전 (경판 37장본)",
+  "title": "전운치전",
+  "author": null,
+  "year": 1847,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/3e23e3a2b1ab9f25.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "인현왕후전",
+  "title": "인현왕후전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/6865d0773a5f4760.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "옥주호연",
+  "title": "옥주호연",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/ad62ee477727f73f.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "적성의전",
+  "title": "적성의전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/bdf7a4313199a84f.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "장경전",
+  "title": "장경전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/e032d25f76a432be.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "쌍주기연",
+  "title": "쌍주기연",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "용문전",
+  "title": "용문전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/f104b5ae29b13401.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "홍길동전 (30장 경판본)",
+  "title": "홍길동전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/9c9156c2442bc756.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "최척전",
+  "title": "최척전",
+  "author": "조위한",
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/59f99bb65b96d2ab.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "조웅전",
+  "title": "조웅전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/7b85d9a5ec3a81b7.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "주생전",
+  "title": "주생전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/12ae74b2808204ff.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "정수정전 (판본 미상)",
+  "title": "정수정전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/9c9ee3795e1991d7.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "홍길동전 (36장 완판본)",
+  "title": "홍길동전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/83de3238b07f324d.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "황운전",
+  "title": "황운전",
+  "author": null,
+  "year": null,
+  "genre": "고전소설",
+  "lang": "ko",
+  "cover": "/static/covers/7e86e10854a49a3f.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "귀의 성",
+  "title": "귀의 성",
+  "author": "이인직",
+  "year": 1907,
+  "genre": "신소설",
+  "lang": "ko",
+  "cover": "/static/covers/db1e1273ee02e2fe.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "구마검",
+  "title": "구마검",
+  "author": "이해조",
+  "year": 1908,
+  "genre": "신소설",
+  "lang": "ko",
+  "cover": "/static/covers/61433cf368a35f76.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "원앙도",
+  "title": "원앙도",
+  "author": "이해조",
+  "year": 1909,
+  "genre": "신소설",
+  "lang": "ko",
+  "cover": "/static/covers/a77b4011d9f06c05.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "설중매",
+  "title": "설중매",
+  "author": "구연학",
+  "year": 1908,
+  "genre": "신소설",
+  "lang": "ko",
+  "cover": "/static/covers/1d646a69f97178e3.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "빈상설",
+  "title": "빈상설",
+  "author": "이해조",
+  "year": 1908,
+  "genre": "신소설",
+  "lang": "ko",
+  "cover": "/static/covers/c24a9c2f8278499c.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "모란병",
+  "title": "모란병",
+  "author": "이해조",
+  "year": 1909,
+  "genre": "신소설",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "화의 혈",
+  "title": "화의 혈",
+  "author": "이해조",
+  "year": 1911,
+  "genre": "신소설",
+  "lang": "ko",
+  "cover": "/static/covers/0fa3d967efd23083.jpg"
+ },
+ {
+  "source": "wikisource",
   "id": "이상한 샘물",
   "title": "이상한 샘물",
   "author": null,
@@ -2023,12 +2351,586 @@
  },
  {
   "source": "wikisource",
+  "id": "그 사람에게",
+  "title": "그 사람에게",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/1ac72eb0e826e50d.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "꿈자리",
+  "title": "꿈자리",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/67c0fdc054b6f4c3.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "기원",
+  "title": "기원",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/42bec242cd050648.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "귀안",
+  "title": "귀안",
+  "author": "두보",
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "강촌 (두보)",
+  "title": "강촌",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/df68fbd848ca65c3.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "년보",
+  "title": "년보",
+  "author": "이육사",
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "나는 왕이로소이다",
+  "title": "나는 왕이로소이다",
+  "author": null,
+  "year": 1923,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/9b4eae5da8f85075.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "강남봉이구년",
+  "title": "강남봉이구년",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "고도호총마행",
+  "title": "고도호총마행",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "귀촉도",
+  "title": "귀촉도",
+  "author": "오장환",
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "달밤 모래 위에서",
+  "title": "달밤 모래 위에서",
+  "author": null,
+  "year": 1925,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "눈물이 쉬루르 흘러납니다",
+  "title": "눈물이 쉬루르 흘러납니다",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "둥근 해",
+  "title": "둥근 해",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/b7678522898ddc2e.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "등고",
+  "title": "등고",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/0defaee7f91dbd72.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "만흥 (두보)",
+  "title": "만흥",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/598ded264c244f54.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "매천집",
+  "title": "매천집",
+  "author": "황현",
+  "year": 1911,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/d088958ee4c5b00e.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "눈 올 때마다",
+  "title": "눈 올 때마다",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "마음의 단편",
+  "title": "마음의 단편",
+  "author": null,
+  "year": 1935,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/17eaadb089426beb.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "대지의 찬",
+  "title": "대지의 찬",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "봄철의 바다",
+  "title": "봄철의 바다",
+  "author": null,
+  "year": 1927,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/d88ecb35cde497cc.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "봄하늘에 눈물이 돌다",
+  "title": "봄하늘에 눈물이 돌다",
+  "author": null,
+  "year": 1926,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "병상일기",
+  "title": "병상일기",
+  "author": "오장환",
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "어린 누이야",
+  "title": "어린 누이야",
+  "author": "오장환",
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "신작로",
+  "title": "신작로",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/3a459d6c3c38b64b.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "봄비 (이수복)",
+  "title": "봄비",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/4099326e97cd0eaf.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "사행소곡",
+  "title": "사행소곡",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "생명의 비의",
+  "title": "생명의 비의",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/5d2fa84334ec9f0e.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "야구",
+  "title": "야구",
+  "author": "심훈",
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "절구",
+  "title": "절구",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/13cbcea52bcaf89b.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "절구 (두보)",
+  "title": "절구",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/8e5c6ee9881a9115.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "옥화궁",
+  "title": "옥화궁",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "조약돌",
+  "title": "조약돌",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/11d16f9ddc43f18e.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "인형의 家",
+  "title": "인형의 家",
+  "author": "나혜석",
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "역단",
+  "title": "역단",
+  "author": null,
+  "year": 1936,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/0597dd5b21d3398c.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "위독",
+  "title": "위독",
+  "author": null,
+  "year": 1936,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/66d926d86895b9a7.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "춘망",
+  "title": "춘망",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/9b06de55133910d0.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "청천의 유방",
+  "title": "청천의 유방",
+  "author": null,
+  "year": 1925,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "하일소경",
+  "title": "하일소경",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/7917062746b7fca5.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "춘야희우",
+  "title": "춘야희우",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "효대",
+  "title": "효대",
+  "author": "의천",
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/5babf956249f7fc5.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "황해의 첫봄",
+  "title": "황해의 첫봄",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "해바라기의 비명",
+  "title": "해바라기의 비명",
+  "author": null,
+  "year": 1936,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/326e04d55cc448a6.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "풀 (남궁벽)",
+  "title": "풀",
+  "author": null,
+  "year": null,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/8cdcc418e47ac006.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "크리스마스 (방정환)",
+  "title": "크리스마스",
+  "author": null,
+  "year": 1920,
+  "genre": "시",
+  "lang": "ko",
+  "cover": "/static/covers/d74bd084fe91f72d.jpg"
+ },
+ {
+  "source": "wikisource",
   "id": "박용철 번역시집",
   "title": "박용철 번역시집",
   "author": "박용철",
   "year": null,
   "genre": "시집",
   "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "향수",
+  "title": "향수",
+  "author": null,
+  "year": null,
+  "genre": "시집",
+  "lang": "ko",
+  "cover": "/static/covers/52a2d6beb80dc884.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "진달래꽃 (시집)",
+  "title": "진달래꽃",
+  "author": "김소월(김정식)",
+  "year": 1925,
+  "genre": "시집",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "자연송",
+  "title": "자연송",
+  "author": "황석우",
+  "year": 1929,
+  "genre": "시집",
+  "lang": "ko",
+  "cover": "/static/covers/26969a76f13b5150.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "하늘과 바람과 별과 시 (1955년)",
+  "title": "하늘과 바람과 별과 시",
+  "author": "윤동주",
+  "year": 1955,
+  "genre": "시집",
+  "lang": "ko",
+  "cover": "/static/covers/72ab0e0c9316cb79.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "병자삼인",
+  "title": "병자삼인",
+  "author": "조중환",
+  "year": 1912,
+  "genre": "희곡",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "규한",
+  "title": "규한",
+  "author": "이광수",
+  "year": 1917,
+  "genre": "희곡",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "검사와 여선생",
+  "title": "검사와 여선생",
+  "author": "김춘광",
+  "year": null,
+  "genre": "희곡",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "노래 주머니",
+  "title": "노래 주머니",
+  "author": null,
+  "year": 1923,
+  "genre": "희곡",
+  "lang": "ko",
+  "cover": "/static/covers/8b825ed577ffc223.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "인쇄한 러브레터",
+  "title": "인쇄한 러브레터",
+  "author": "권환",
+  "year": 1927,
+  "genre": "희곡",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "제석",
+  "title": "제석",
+  "author": "홍사용",
+  "year": null,
+  "genre": "희곡",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "흰 젖",
+  "title": "흰 젖",
+  "author": "홍사용",
+  "year": null,
+  "genre": "희곡",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "수궁가",
+  "title": "수궁가",
+  "author": null,
+  "year": null,
+  "genre": "판소리",
+  "lang": "ko",
+  "cover": "/static/covers/e92f4f6d9d1705c5.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "심청가",
+  "title": "심청가",
+  "author": null,
+  "year": null,
+  "genre": "판소리",
+  "lang": "ko",
+  "cover": "/static/covers/27332307f1b2ba38.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "적벽가",
+  "title": "적벽가",
+  "author": null,
+  "year": null,
+  "genre": "판소리",
+  "lang": "ko",
+  "cover": "/static/covers/8d69b23234203e87.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "춘향가",
+  "title": "춘향가",
+  "author": null,
+  "year": null,
+  "genre": "판소리",
+  "lang": "ko",
+  "cover": "/static/covers/29a63080023cc1f4.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "흥보가",
+  "title": "흥보가",
+  "author": null,
+  "year": null,
+  "genre": "판소리",
+  "lang": "ko",
+  "cover": "/static/covers/fc648c7057aef191.jpg"
  },
  {
   "source": "wikisource",
@@ -2082,6 +2984,15 @@
   "title": "공원정조",
   "author": null,
   "year": 1922,
+  "genre": "수필",
+  "lang": "ko"
+ },
+ {
+  "source": "wikisource",
+  "id": "괴토실설",
+  "title": "괴토실설",
+  "author": null,
+  "year": null,
   "genre": "수필",
   "lang": "ko"
  },
@@ -2279,6 +3190,16 @@
   "genre": "수필",
   "lang": "ko",
   "cover": "/static/covers/5422a57f9809daea.jpg"
+ },
+ {
+  "source": "wikisource",
+  "id": "슬견설",
+  "title": "슬견설",
+  "author": null,
+  "year": null,
+  "genre": "수필",
+  "lang": "ko",
+  "cover": "/static/covers/d0fcdd9dbcd4b82b.jpg"
  },
  {
   "source": "wikisource",
@@ -3757,5 +4678,3621 @@
   "genre": "세계 고전",
   "lang": null,
   "cover": "/static/covers/314833ca619f2c7d.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2147",
+  "title": "The Works of Edgar Allan Poe — Volume 1",
+  "author": "Edgar Allan Poe",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "108",
+  "title": "The Return of Sherlock Holmes",
+  "author": "Arthur Conan Doyle",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/c0cc3e3eca042b1c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "204",
+  "title": "The innocence of Father Brown",
+  "author": "G. K. Chesterton",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/d8f3c271cac23494.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2097",
+  "title": "The Sign of the Four",
+  "author": "Arthur Conan Doyle",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/bacbca41f8903d5f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "69087",
+  "title": "The murder of Roger Ackroyd",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/5cabe63d2e9b353c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "863",
+  "title": "The Mysterious Affair at Styles",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/3fb856e1aaa78dbe.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "834",
+  "title": "The Memoirs of Sherlock Holmes",
+  "author": "Arthur Conan Doyle",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "6133",
+  "title": "The Extraordinary Adventures of Arsène Lupin, Gentleman-Burglar",
+  "author": "Maurice Leblanc",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/d574138494b06760.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1695",
+  "title": "The Man Who Was Thursday: A Nightmare",
+  "author": "G. K. Chesterton",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "223",
+  "title": "The wisdom of Father Brown",
+  "author": "G. K. Chesterton",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/feccf194406cbfbf.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "65238",
+  "title": "The Secret of Chimneys",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/72576a5b7b7581a7.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "155",
+  "title": "The Moonstone",
+  "author": "Wilkie Collins",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/150e305e73c23a15.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "48320",
+  "title": "Adventures of Sherlock Holmes",
+  "author": "Arthur Conan Doyle",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/6b82edc070397241.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1155",
+  "title": "The Secret Adversary",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/40b05581a1c5cfd8.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "61851",
+  "title": "El crimen y el castigo (Spanish)",
+  "author": "Fyodor Dostoyevsky",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "70175",
+  "title": "The secret of Father Brown",
+  "author": "G. K. Chesterton",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/7a108fc17c734e84.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "3289",
+  "title": "The Valley of Fear",
+  "author": "Arthur Conan Doyle",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/5fb5b99daa8482b0.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2868",
+  "title": "The Green Mummy",
+  "author": "Fergus Hume",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/09ac047b6474fad6.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "61262",
+  "title": "Poirot Investigates",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/9868e8e488db7167.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "58866",
+  "title": "The Murder on the Links",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/d1c17bbe72f73d30.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "69700",
+  "title": "The case-book of Sherlock Holmes",
+  "author": "Arthur Conan Doyle",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/525ed2ace1e501aa.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2350",
+  "title": "His last bow :  Some later reminiscences of Sherlock Holmes",
+  "author": "Arthur Conan Doyle",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "32854",
+  "title": "Arsène Lupin, gentleman-cambrioleur (French)",
+  "author": "Maurice Leblanc",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "221",
+  "title": "The Return of Sherlock Holmes",
+  "author": "Arthur Conan Doyle",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/04310c98920d5af4.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1685",
+  "title": "The Mystery of the Yellow Room",
+  "author": "Gaston Leroux",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/46a203027a02030b.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "61168",
+  "title": "The Man in the Brown Suit",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/bf316c61dc344a08.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "70114",
+  "title": "The Big Four",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/db3c39762763c8e4.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1872",
+  "title": "The Red House Mystery",
+  "author": "A. A. Milne",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/be9be55f15f22915.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "23078",
+  "title": "Murder at Bridge",
+  "author": "Anne Austin",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "26468",
+  "title": "The Middle Temple Murder",
+  "author": "J. S. Fletcher",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/165d3187237f32db.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2038",
+  "title": "The Lock and Key Library: Classic Mystery and Detective Stories: Modern English",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "72824",
+  "title": "The mystery of the Blue Train",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/3104e0bc1616de0a.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "58820",
+  "title": "Whose Body? A Lord Peter Wimsey Novel",
+  "author": "Dorothy L. Sayers",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "3070",
+  "title": "The Hound of the Baskervilles",
+  "author": "Arthur Conan Doyle",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/50c4a822d913c8e3.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "57669",
+  "title": "The problem of Cell 13",
+  "author": "Jacques Futrelle",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/1dbf9618cc122c00.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "75288",
+  "title": "The Seven Dials mystery",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/d500c8d87cb97f3e.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "173",
+  "title": "The Insidious Dr. Fu Manchu",
+  "author": "Sax Rohmer",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/87e92ff69ead08b2.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "172",
+  "title": "The Haunted Bookshop",
+  "author": "Christopher Morley",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/dd5db7eca24dc818.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "67173",
+  "title": "The Missing Will",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "27209",
+  "title": "The La Chance Mine Mystery",
+  "author": "Susan Morrow Jones",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/abaff9ff11b11725.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "70008",
+  "title": "Unnatural death",
+  "author": "Dorothy L. Sayers",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/5da9816617e89662.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "66446",
+  "title": "The Plymouth Express Affair",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/78d2c971b58a35b5.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "28733",
+  "title": "The Adventures of Sherlock Holmes",
+  "author": "Arthur Conan Doyle",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null,
+  "cover": "/static/covers/44343a11e4412312.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "67160",
+  "title": "The Hunter's Lodge Case",
+  "author": "Agatha Christie",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "38983",
+  "title": "The Camp Fire Girls Solve a Mystery; Or, The Christmas Adventure at Carver House",
+  "author": "Hildegard G. Frey",
+  "year": null,
+  "genre": "세계 · 추리",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "164",
+  "title": "Twenty Thousand Leagues under the Sea",
+  "author": "Jules Verne",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/eefd5498dba94f62.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "23962",
+  "title": "西遊記 (Chinese)",
+  "author": "Cheng'en Wu",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "60976",
+  "title": "Rip Van Winkle",
+  "author": "Washington Irving",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/52c4389cde2ca1d4.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "86",
+  "title": "A Connecticut Yankee in King Arthur's Court",
+  "author": "Mark Twain",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/6fb316a57de9eb32.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1250",
+  "title": "Anthem",
+  "author": "Ayn Rand",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/3f5335f292cd39f4.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "68283",
+  "title": "The call of Cthulhu",
+  "author": "H. P. Lovecraft",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/2c87872801f10359.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "18857",
+  "title": "A Journey to the Centre of the Earth",
+  "author": "Jules Verne",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/ab45d353a3cdae0e.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "932",
+  "title": "The Fall of the House of Usher",
+  "author": "Edgar Allan Poe",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/09737406c832d834.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1514",
+  "title": "A Midsummer Night's Dream",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/e23b19e302ac8143.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "5230",
+  "title": "The Invisible Man: A Grotesque Romance",
+  "author": "H. G. Wells",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "62",
+  "title": "A princess of Mars",
+  "author": "Edgar Rice Burroughs",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/95d2e70aa8cde589.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "159",
+  "title": "The island of Doctor Moreau",
+  "author": "H. G. Wells",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/12d1f43682dc21d3.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "6087",
+  "title": "The Vampyre; a Tale",
+  "author": "John William Polidori",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "42",
+  "title": "The strange case of Dr. Jekyll and Mr. Hyde",
+  "author": "Robert Louis Stevenson",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "45839",
+  "title": "Dracula",
+  "author": "Bram Stoker",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "72",
+  "title": "Thuvia, maid of Mars",
+  "author": "Edgar Rice Burroughs",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "139",
+  "title": "The Lost World",
+  "author": "Arthur Conan Doyle",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/6a44540ddd9324b1.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "59112",
+  "title": "R.U.R. (Rossum's Universal Robots)",
+  "author": "Karel Čapek",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "2488",
+  "title": "Twenty Thousand Leagues Under the Seas: An Underwater Tour of the World",
+  "author": "Jules Verne",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "1268",
+  "title": "The Mysterious Island",
+  "author": "Jules Verne",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "201",
+  "title": "Flatland: A Romance of Many Dimensions",
+  "author": "Edwin Abbott Abbott",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "70652",
+  "title": "At the mountains of madness",
+  "author": "H. P. Lovecraft",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "3189",
+  "title": "Sketches New and Old",
+  "author": "Mark Twain",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "20000",
+  "title": "Twenty Thousand Leagues Under the Sea",
+  "author": "Jules Verne",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "17157",
+  "title": "Gulliver's Travels into Several Remote Regions of the World",
+  "author": "Jonathan Swift",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "32",
+  "title": "Herland",
+  "author": "Charlotte Perkins Gilman",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "22541",
+  "title": "The Misplaced Battleship",
+  "author": "Harry Harrison",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "57426",
+  "title": "Baron Trump's Marvellous Underground Journey",
+  "author": "Ingersoll Lockwood",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "40284",
+  "title": "The Sex Life of the Gods",
+  "author": "M. E. Knerr",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "19476",
+  "title": "A Honeymoon in Space",
+  "author": "George Chetwynd Griffith",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "61963",
+  "title": "We",
+  "author": "Evgenii Ivanovich Zamiatin",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "2825",
+  "title": "Undine",
+  "author": "Freiherr de Friedrich Heinrich Karl La Motte-Fouqué",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "10002",
+  "title": "The House on the Borderland",
+  "author": "William Hope Hodgson",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "16921",
+  "title": "Plague Ship",
+  "author": "Andre Norton",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/8c48c0d5c479710f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "28885",
+  "title": "Alice's Adventures in Wonderland",
+  "author": "Lewis Carroll",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/4fa54d8dc8410ce3.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "64",
+  "title": "The gods of Mars",
+  "author": "Edgar Rice Burroughs",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/460ae5e51d67ba8c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "50133",
+  "title": "The Dunwich horror",
+  "author": "H. P. Lovecraft",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/a14bc425bc6a003a.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "21279",
+  "title": "2 B R 0 2 B",
+  "author": "Kurt Vonnegut",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null,
+  "cover": "/static/covers/3febbaa6a03909f0.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "5097",
+  "title": "Vingt mille Lieues Sous Les Mers — Complete (French)",
+  "author": "Jules Verne",
+  "year": null,
+  "genre": "세계 · SF",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "26296",
+  "title": "Les mille et une nuits, tome premier (French)",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "28942",
+  "title": "The Junior Classics, Volume 1: Fairy and wonder tales",
+  "author": "William Allan Neilson",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "902",
+  "title": "The Happy Prince, and Other Tales",
+  "author": "Oscar Wilde",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/c34275683a4e45ef.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1597",
+  "title": "Andersen's Fairy Tales",
+  "author": "H. C. Andersen",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/d0fbad12078c7570.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "500",
+  "title": "The Adventures of Pinocchio",
+  "author": "Carlo Collodi",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/8f0fa2ad1aee5f5c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "20051",
+  "title": "Märchen der Gebrüder Grimm 2 (German)",
+  "author": "Jacob Grimm and Wilhelm Grimm",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "20027",
+  "title": "Grimms' Fairy Tales",
+  "author": "Jacob Grimm and Wilhelm Grimm",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/b9b4f90f12ef6128.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "27200",
+  "title": "Fairy Tales of Hans Christian Andersen",
+  "author": "H. C. Andersen",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/88dda6e6618fdd6d.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "5314",
+  "title": "Household Tales by Brothers Grimm",
+  "author": "Jacob Grimm and Wilhelm Grimm",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/99083108db96e5e7.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "503",
+  "title": "The Blue Fairy Book",
+  "author": "Andrew Lang",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/8ad4359f586e910c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "51252",
+  "title": "The Book of the Thousand Nights and a Night — Volume 01 (of 10)",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "7439",
+  "title": "English Fairy Tales",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/7f3141f72297c12f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "22373",
+  "title": "Russian Fairy Tales: A Choice Collection of Muscovite Folk-lore",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "34206",
+  "title": "The Thousand and One Nights, Vol. I.",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "128",
+  "title": "The Arabian Nights Entertainments",
+  "author": "Andrew Lang",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "26460",
+  "title": "English Fairy Tales",
+  "author": "Joseph Jacobs",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/2b2e8a61b1ef358f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "19516",
+  "title": "The Adventures of Pinocchio",
+  "author": "Carlo Collodi",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/aba790230e77abd0.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "4018",
+  "title": "Japanese Fairy Tales",
+  "author": "Yei Theodora Ozaki",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/d8d10d0b76eb179c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "29021",
+  "title": "The Fairy Tales of Charles Perrault",
+  "author": "Charles Perrault",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/bcdbb8055b02f519.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "20050",
+  "title": "Märchen der Gebrüder Grimm 1 (German)",
+  "author": "Jacob Grimm and Wilhelm Grimm",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "708",
+  "title": "The Princess and the Goblin",
+  "author": "George MacDonald",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/bd722b7b2278bf70.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "24737",
+  "title": "The Children of Odin: The Book of Northern Myths",
+  "author": "Padraic Colum",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "25502",
+  "title": "Hero-Myths &amp; Legends of the British Race",
+  "author": "M. I. Ebbutt",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "23759",
+  "title": "Sagen van Koning Arthur en de Ridders van de Tafelronde (Dutch)",
+  "author": "Nelly Montijn-de Fouw",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "23393",
+  "title": "Japanische Märchen (German)",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "11027",
+  "title": "Grimm's Fairy Stories",
+  "author": "Jacob Grimm and Wilhelm Grimm",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/5886e75c5c6331fd.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "28737",
+  "title": "At the Back of the North Wind",
+  "author": "George MacDonald",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/1995d9088bb58bf2.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "19517",
+  "title": "Le avventure di Pinocchio (Italian)",
+  "author": "Carlo Collodi",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "52484",
+  "title": "Le avventure di Pinocchio: Storia di un burattino (Italian)",
+  "author": "Carlo Collodi",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "540",
+  "title": "The Red Fairy Book",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/c991344069ab43d1.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "41006",
+  "title": "The Fairy Mythology",
+  "author": "Thomas Keightley",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/9ce7b855b5120fa1.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "30120",
+  "title": "The Happy Prince, and Other Tales",
+  "author": "Oscar Wilde",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/4ab58596f7f81688.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "21526",
+  "title": "The Master Key",
+  "author": "L. Frank Baum",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/f407f43e76272ee7.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "52521",
+  "title": "Grimm's Fairy Tales",
+  "author": "Jacob Grimm and Wilhelm Grimm",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/3cbfc9ac875c8650.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "7074",
+  "title": "Beauty and the Beast",
+  "author": "Jeanne-Marie Leprince de Beaumont",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/659b927b4bdcb569.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "18155",
+  "title": "The Story of the Three Little Pigs",
+  "author": "L. Leslie Brooke",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "3435",
+  "title": "The Book of the Thousand Nights and a Night — Volume 01 (of 10)",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "20916",
+  "title": "The Arabian Nights: Their Best-known Tales",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/b7e13d0c4fef9972.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "19574",
+  "title": "Andersen's Fairy Tales",
+  "author": "H. C. Andersen",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/37b4e427e42930e6.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "25564",
+  "title": "The Water-Babies: A Fairy Tale for a Land-Baby",
+  "author": "Charles Kingsley",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/0b9cd8946ee56d40.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "19993",
+  "title": "Childhood's Favorites and Fairy Stories",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "7128",
+  "title": "Indian Fairy Tales",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/2e3338a732379221.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "27826",
+  "title": "The Olive Fairy Book",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/faf0ec7ab61ee316.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2435",
+  "title": "The Crimson Fairy Book",
+  "author": "Andrew Lang",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/86ebb114f2819248.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "33887",
+  "title": "Fairy and Folk Tales of the Irish Peasantry",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/a1bf75238df209f4.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "62940",
+  "title": "Mrs. Spring Fragrance",
+  "author": "Sui Sin Far",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/09f436224133994c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "66688",
+  "title": "Hans Andersen's Fairy Tales",
+  "author": "H. C. Andersen",
+  "year": null,
+  "genre": "세계 · 동화",
+  "lang": null,
+  "cover": "/static/covers/baff35054e84dd31.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "215",
+  "title": "The call of the wild",
+  "author": "Jack London",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null,
+  "cover": "/static/covers/bf0b7739f3e8c324.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "236",
+  "title": "The Jungle Book",
+  "author": "Rudyard Kipling",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null,
+  "cover": "/static/covers/316ff4b167276cba.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "521",
+  "title": "The Life and Adventures of Robinson Crusoe",
+  "author": "Daniel Defoe",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null,
+  "cover": "/static/covers/3505a673edb03989.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "103",
+  "title": "Around the World in Eighty Days",
+  "author": "Jules Verne",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "910",
+  "title": "White Fang",
+  "author": "Jack London",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null,
+  "cover": "/static/covers/ff216d38c2a997d1.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "19640",
+  "title": "Adventures of Huckleberry Finn",
+  "author": "Mark Twain",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null,
+  "cover": "/static/covers/2e96fd24ad1a1f5c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "17989",
+  "title": "Le comte de Monte-Cristo, Tome I (French)",
+  "author": "Alexandre Dumas and Auguste Maquet",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "940",
+  "title": "The Last of the Mohicans; A narrative of 1757",
+  "author": "James Fenimore Cooper",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "28794",
+  "title": "Moby Dick; Or, The Whale",
+  "author": "Herman Melville",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "19033",
+  "title": "Alice's Adventures in Wonderland",
+  "author": "Lewis Carroll",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null,
+  "cover": "/static/covers/c3cb7e75fac66825.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "558",
+  "title": "The Thirty-Nine Steps",
+  "author": "John Buchan",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null,
+  "cover": "/static/covers/780832c97c3c5aa1.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "60",
+  "title": "The Scarlet Pimpernel",
+  "author": "Baroness Emmuska Orczy Orczy",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null,
+  "cover": "/static/covers/5b160d7bb9d5d098.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "5199",
+  "title": "South: The Story of Shackleton's Last Expedition, 1914-1917",
+  "author": "Sir Ernest Henry Shackleton",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "15",
+  "title": "Moby-Dick; or, The Whale",
+  "author": "Herman Melville",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "23712",
+  "title": "Tarzan of the Apes",
+  "author": "Edgar Rice Burroughs",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null,
+  "cover": "/static/covers/3c435957d759abde.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "393",
+  "title": "The Blue Lagoon: A Romance",
+  "author": "H. De Vere Stacpoole",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "28944",
+  "title": "Captain Blood",
+  "author": "Rafael Sabatini",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null,
+  "cover": "/static/covers/505f24d730322f30.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "23969",
+  "title": "Typee",
+  "author": "Herman Melville",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null,
+  "cover": "/static/covers/5ae8ec37cf1f4db7.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "21440",
+  "title": "Allan Quatermain",
+  "author": "H. Rider Haggard",
+  "year": null,
+  "genre": "세계 · 모험",
+  "lang": null,
+  "cover": "/static/covers/e7ea5110d5c41018.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "121",
+  "title": "Northanger Abbey",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/d50f8a775096cfa8.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1063",
+  "title": "The Cask of Amontillado",
+  "author": "Edgar Allan Poe",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/54ab008004dabe89.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "12122",
+  "title": "The Monkey's Paw",
+  "author": "W. W. Jacobs",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/2bd8e47e7f2caad1.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "175",
+  "title": "The Phantom of the Opera",
+  "author": "Gaston Leroux",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "3268",
+  "title": "The Mysteries of Udolpho",
+  "author": "Ann Ward Radcliffe",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/ba382b7d059245d2.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "601",
+  "title": "The Monk: A Romance",
+  "author": "M. G. Lewis",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/e5414893974912ab.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "696",
+  "title": "The Castle of Otranto",
+  "author": "Horace Walpole",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/35e53ed9a4abb95f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1064",
+  "title": "The Masque of the Red Death",
+  "author": "Edgar Allan Poe",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/8013e1cd4ed62cfe.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "62215",
+  "title": "Le Fantôme de l'Opéra (French)",
+  "author": "Gaston Leroux",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "59828",
+  "title": "The String of Pearls; Or, The Barber of Fleet Street. A Domestic Romance.",
+  "author": "Thomas Peckett Prest and James Malcolm Rymer",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "389",
+  "title": "The Great God Pan",
+  "author": "Arthur Machen",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/b5a12ac8c8afbc08.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "8486",
+  "title": "Ghost Stories of an Antiquary",
+  "author": "M. R. James",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/a4c76aba850d10d3.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "10897",
+  "title": "The Wendigo",
+  "author": "Algernon Blackwood",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/c678d623a80ca337.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "25525",
+  "title": "The Works of Edgar Allan Poe, The Raven Edition",
+  "author": "Edgar Allan Poe",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/a9894306555d13da.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "20682",
+  "title": "Northanger Abbey",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/6b00fafb68b1764f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "19797",
+  "title": "Dracula",
+  "author": "Bram Stoker",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/4784c9ee1998efac.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "25948",
+  "title": "Fifty-Two Stories For Girls",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "11438",
+  "title": "The Willows",
+  "author": "Algernon Blackwood",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/e0940d8f314c74e6.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "31469",
+  "title": "The Shunned House",
+  "author": "H. P. Lovecraft",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/7ae7fd5029abed73.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2151",
+  "title": "The Works of Edgar Allan Poe — Volume 5",
+  "author": "Edgar Allan Poe",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/3b760376f261d5fe.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "537",
+  "title": "Tales of Terror and Mystery",
+  "author": "Arthur Conan Doyle",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/9249e5d8772d1947.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "23172",
+  "title": "The Damned Thing",
+  "author": "Ambrose Bierce",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/8878ec70f3ee268f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2149",
+  "title": "The Works of Edgar Allan Poe — Volume 3",
+  "author": "Edgar Allan Poe",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "14833",
+  "title": "Varney the vampyre; or, the feast of blood",
+  "author": "Thomas Peckett Prest and James Malcolm Rymer",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "68957",
+  "title": "Weird Tales, Volume 1, Number 1, March 1923: The unique magazine",
+  "author": "Various",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "10150",
+  "title": "Dracula's Guest",
+  "author": "Bram Stoker",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/9ade32b73869f80c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2150",
+  "title": "The Works of Edgar Allan Poe — Volume 4",
+  "author": "Edgar Allan Poe",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/9dcfbd44a9c69cdd.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "20038",
+  "title": "Frankenstein; or, The modern Prometheus",
+  "author": "Mary Wollstonecraft Shelley",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/7001f760cb19b7a8.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "34318",
+  "title": "Life Blood",
+  "author": "Thomas Hoover",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/5ca3192cf809afaf.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "69608",
+  "title": "Weird Tales, Volume 1, Number 4, June, 1923: The unique magazine",
+  "author": "Various",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "68236",
+  "title": "The colour out of space",
+  "author": "H. P. Lovecraft",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/9dc5b4a98137345d.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "20039",
+  "title": "Ghost Stories of an Antiquary",
+  "author": "M. R. James",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null,
+  "cover": "/static/covers/fc8a3d82e15c37ab.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "792",
+  "title": "Wieland; Or, The Transformation: An American Tale",
+  "author": "Charles Brockden Brown",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "13334",
+  "title": "The Collected Works of Ambrose Bierce, Volume 02",
+  "author": "Ambrose Bierce",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "79842",
+  "title": "The temple",
+  "author": "H. P. Lovecraft",
+  "year": null,
+  "genre": "세계 · 공포",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "105",
+  "title": "Persuasion",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/8b5f6febe063ca33.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "141",
+  "title": "Mansfield Park",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/a539b75a3b08741f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "42671",
+  "title": "Pride and Prejudice",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/4d31e22c007e58c6.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "583",
+  "title": "The Woman in White",
+  "author": "Wilkie Collins",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/7140e14f0fe8b9dd.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "19839",
+  "title": "Emma",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/7076c52243c2b1af.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "26301",
+  "title": "Pride and Prejudice",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/1da65604c4717182.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "541",
+  "title": "The Age of Innocence",
+  "author": "Edith Wharton",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/418b504769d50069.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "26264",
+  "title": "The Return of the Native",
+  "author": "Thomas Hardy",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/d5839e99ef35dae4.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "22964",
+  "title": "Sense and Sensibility",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/432cf27ff7664c16.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "22962",
+  "title": "Mansfield Park",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/8122469697c9d292.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2776",
+  "title": "The Four Million",
+  "author": "O. Henry",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/6c53587d07e1dd28.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "82",
+  "title": "Ivanhoe: A Romance",
+  "author": "Walter Scott",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "21839",
+  "title": "Sense and Sensibility",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/263811be75dcf3ac.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "23077",
+  "title": "Jane Eyre",
+  "author": "Charlotte Brontë",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/2ef37ae3243449e3.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "19771",
+  "title": "Henrietta Temple: A Love Story",
+  "author": "Earl of Beaconsfield Benjamin Disraeli",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/3469facb590ed0fc.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "28",
+  "title": "The Fables of Aesop",
+  "author": "Aesop",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "31100",
+  "title": "The Complete Project Gutenberg Works of Jane Austen",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "883",
+  "title": "Our Mutual Friend",
+  "author": "Charles Dickens",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/33bac8f2091747ef.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "21181",
+  "title": "Villette",
+  "author": "Charlotte Brontë",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/2e4a5a3c5ac109b7.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "107",
+  "title": "Far from the Madding Crowd",
+  "author": "Thomas Hardy",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/e55e31c959ef0335.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2833",
+  "title": "The Portrait of a Lady — Volume 1",
+  "author": "Henry James",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/924c7c65b943496a.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1608",
+  "title": "Camille (La Dame aux Camilias)",
+  "author": "Alexandre Dumas",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "9715",
+  "title": "Little Dorrit",
+  "author": "Charles Dickens",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/e5ed76f931d42575.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "76178",
+  "title": "I am a woman",
+  "author": "Ann Bannon",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/833bf82ead19625b.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "6688",
+  "title": "The Mill on the Floss",
+  "author": "George Eliot",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/8140b7cffde2d17c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "963",
+  "title": "Little Dorrit",
+  "author": "Charles Dickens",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/0a805a887aae03a1.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "26458",
+  "title": "Age of Innocence",
+  "author": "Edith Wharton",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/483e4d5931d68718.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "20687",
+  "title": "Pride and Prejudice",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/a86bdbb9f4d6a66d.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "25946",
+  "title": "Gevoel en verstand (Dutch)",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "26584",
+  "title": "Night and Day",
+  "author": "Virginia Woolf",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/91f9a5e6e5fcd0c5.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "28945",
+  "title": "Scaramouche: A Romance of the French Revolution",
+  "author": "Rafael Sabatini",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/243d92593e6c10de.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "153",
+  "title": "Jude the Obscure",
+  "author": "Thomas Hardy",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/4526cc33d7e453f0.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "9182",
+  "title": "Villette",
+  "author": "Charlotte Brontë",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/015530fb304c69e5.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "20686",
+  "title": "Pride and Prejudice",
+  "author": "Jane Austen",
+  "year": null,
+  "genre": "세계 · 로맨스",
+  "lang": null,
+  "cover": "/static/covers/47763358238270f2.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "16328",
+  "title": "Beowulf: An Anglo-Saxon Epic Poem",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "26471",
+  "title": "Spoon River Anthology",
+  "author": "Edgar Lee Masters",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/bde0b5da7e81d691.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "26",
+  "title": "Paradise Lost",
+  "author": "John Milton",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/ed82a7c12c428854.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "6130",
+  "title": "The Iliad",
+  "author": "Homer",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/5f53c5498e9bf97c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1322",
+  "title": "Leaves of Grass",
+  "author": "Walt Whitman",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/ca5c60c5f0518b33.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "58585",
+  "title": "The Prophet",
+  "author": "Kahlil Gibran",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/a616a92690e87324.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "216",
+  "title": "The Tao Teh King, or the Tao and its Characteristics",
+  "author": "Laozi",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "1934",
+  "title": "Songs of Innocence and of Experience",
+  "author": "William Blake",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/5bcca71e4ae68e8b.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2017",
+  "title": "Dhammapada, a Collection of Verses; Being One of the Canonical Books of the Buddhists",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "20968",
+  "title": "Three Hundred Tang Poems, Volume 1 (Chinese)",
+  "author": "Various",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "21765",
+  "title": "The Metamorphoses of Ovid, Books I-VII",
+  "author": "Ovid",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "14591",
+  "title": "Faust [part 1]. Translated Into English in the Original Metres",
+  "author": "Johann Wolfgang von Goethe",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "1974",
+  "title": "The Poetics of Aristotle",
+  "author": "Aristotle",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/d4baacb04056b856.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2199",
+  "title": "The Iliad",
+  "author": "Homer",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/3729f9187c3a089b.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "21436",
+  "title": "Poems Every Child Should Know",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/8efbf7917fa32988.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "24869",
+  "title": "The Rámáyan of Válmíki, translated into English verse",
+  "author": "Valmiki",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/c58e5d4976a7dc16.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "12242",
+  "title": "Poems by Emily Dickinson, Three Series, Complete",
+  "author": "Emily Dickinson",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "20",
+  "title": "Paradise Lost",
+  "author": "John Milton",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/2725a236188b4c9f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2383",
+  "title": "The Canterbury Tales, and Other Poems",
+  "author": "Geoffrey Chaucer",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/40d2bdc21f0d8d72.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "15272",
+  "title": "Spenser's The Faerie Queene, Book I",
+  "author": "Edmund Spenser",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "2388",
+  "title": "The Song Celestial; Or, Bhagavad-Gîtâ (from the Mahâbhârata)",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "228",
+  "title": "The Aeneid",
+  "author": "Virgil",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/54e89ddc8c08f4fa.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "45315",
+  "title": "The Marriage of Heaven and Hell",
+  "author": "William Blake",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/1eabc02b419df101.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "21700",
+  "title": "Don Juan",
+  "author": "Baron George Gordon Byron Byron",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/3c50e5c234d3c431.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2229",
+  "title": "Faust: Der Tragödie erster Teil (German)",
+  "author": "Johann Wolfgang von Goethe",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "47476",
+  "title": "Poems of American History",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/b6e02695fa617941.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "24571",
+  "title": "Der Struwwelpeter (German)",
+  "author": "Heinrich Hoffmann",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "1001",
+  "title": "Divine Comedy, Longfellow's Translation, Hell",
+  "author": "Dante Alighieri",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "3011",
+  "title": "The Lady of the Lake",
+  "author": "Walter Scott",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/a2baa595a65c31f8.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "348",
+  "title": "Hesiod, the Homeric Hymns, and Homerica",
+  "author": "Hesiod",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/0de0c4028561c225.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "5131",
+  "title": "Childe Harold's Pilgrimage",
+  "author": "Baron George Gordon Byron Byron",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/772ff276ef6534bd.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "31591",
+  "title": "Language of Flowers",
+  "author": "Kate Greenaway",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/c283ba0b802154b7.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1719",
+  "title": "The Ballad of the White Horse",
+  "author": "G. K. Chesterton",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/3d6bb13ce8c92844.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1041",
+  "title": "Shakespeare's Sonnets",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/5bb46b2877cae330.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "6081",
+  "title": "Biographia Literaria",
+  "author": "Samuel Taylor Coleridge",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/6a4f85cfef5bf085.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "18947",
+  "title": "The Younger Edda; Also called Snorre's Edda, or The Prose Edda",
+  "author": "Snorri Sturluson",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/36e78a61ef2b0922.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2620",
+  "title": "The Home Book of Verse — Volume 2",
+  "author": "Burton Egbert Stevenson",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "12116",
+  "title": "Struwwelpeter: Merry Stories and Funny Pictures",
+  "author": "Heinrich Hoffmann",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/bebf84aed4c88bc1.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "21300",
+  "title": "Cowboy songs, and other frontier ballads",
+  "author": null,
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/bca68725cb86a59f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2002",
+  "title": "Sonnets from the Portuguese",
+  "author": "Elizabeth Barrett Browning",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/f97045963cfe5059.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "41537",
+  "title": "The Divine Comedy of Dante Alighieri: The Inferno",
+  "author": "Dante Alighieri",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "785",
+  "title": "On the Nature of Things",
+  "author": "Titus Lucretius Carus",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/3aa6dfae269f6b1d.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1012",
+  "title": "La Divina Commedia di Dante (Italian)",
+  "author": "Dante Alighieri",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/8662afd15ba65809.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "7889",
+  "title": "Erotica Romana",
+  "author": "Johann Wolfgang von Goethe",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "151",
+  "title": "The Rime of the Ancient Mariner",
+  "author": "Samuel Taylor Coleridge",
+  "year": null,
+  "genre": "세계 · 시",
+  "lang": null,
+  "cover": "/static/covers/9c21bbd21fcae65f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "49297",
+  "title": "The Works of William Shakespeare [Cambridge Edition] [Vol. 5 of 9]",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "27673",
+  "title": "Oedipus King of Thebes",
+  "author": "Sophocles",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/cea60a412c572a71.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1524",
+  "title": "Hamlet",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/023d5f34ecdb8870.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "779",
+  "title": "The Tragical History of Doctor Faustus",
+  "author": "Christopher Marlowe",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/20925f32f71bc074.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1533",
+  "title": "Macbeth",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/bd3ee5e3c751f30a.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "3825",
+  "title": "Pygmalion",
+  "author": "Bernard Shaw",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/cfdef3e7bd39d05a.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "47715",
+  "title": "The Works of William Shakespeare [Cambridge Edition] [Vol. 7 of 9]",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "10623",
+  "title": "Plays",
+  "author": "Susan Glaspell",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/4852e3441c7fafe7.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "51356",
+  "title": "The Birth of Tragedy; or, Hellenism and Pessimism",
+  "author": "Friedrich Wilhelm Nietzsche",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/f7f116287e6d0cb7.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "7700",
+  "title": "Lysistrata",
+  "author": "Aristophanes",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/45235b71ab74110c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1112",
+  "title": "Romeo and Juliet",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/e35813b7ea2e0be4.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "31",
+  "title": "Plays of Sophocles: Oedipus the King; Oedipus at Colonus; Antigone",
+  "author": "Sophocles",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "23042",
+  "title": "The Tempest",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/0f1c853662181e2e.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1754",
+  "title": "The sea-gull",
+  "author": "Anton Pavlovich Chekhov",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "790",
+  "title": "Lady Windermere's Fan",
+  "author": "Oscar Wilde",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/a91b8e2b80f6450f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "4093",
+  "title": "Hedda Gabler",
+  "author": "Henrik Ibsen",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/758dcb537b337b9a.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1523",
+  "title": "As You Like It",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/71052f87ce672e56.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "7986",
+  "title": "Plays by Anton Chekhov, Second Series",
+  "author": "Anton Pavlovich Chekhov",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "2232",
+  "title": "The Duchess of Malfi",
+  "author": "John Webster",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/e460d94a016fcc7a.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2162",
+  "title": "Anarchism and Other Essays",
+  "author": "Emma Goldman",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/28a6c7041c84e632.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "55487",
+  "title": "Sämmtliche Werke 5: Dramatische Werke (German)",
+  "author": "Nikolai Vasilevich Gogol",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "35451",
+  "title": "Medea of Euripides",
+  "author": "Euripides",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "1254",
+  "title": "Cyrano de Bergerac",
+  "author": "Edmond Rostand",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/0f0cce304c63aa89.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1519",
+  "title": "Much Ado about Nothing",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/a0d9ccb9655cab1e.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "23475",
+  "title": "The Works of Lord Byron. Vol. 5",
+  "author": "Baron George Gordon Byron Byron",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "2446",
+  "title": "An Enemy of the People",
+  "author": "Henrik Ibsen",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/22a76e59f3a9fcb2.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "22188",
+  "title": "The Comedies of Terence",
+  "author": "Terence",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/e00d3e12ae0c044e.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2264",
+  "title": "Macbeth",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/8c2e93dbd44c1463.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "885",
+  "title": "An ideal husband",
+  "author": "Oscar Wilde",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/d26cb2f7d91545d6.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "994",
+  "title": "Riders to the Sea",
+  "author": "J. M. Synge",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/bb41dba787a845c8.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1522",
+  "title": "Julius Caesar",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/f6f03718aa5f7727.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1756",
+  "title": "Uncle Vanya: Scenes from Country Life in Four Acts",
+  "author": "Anton Pavlovich Chekhov",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "1515",
+  "title": "The Merchant of Venice",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/c6ddce2f3367dd73.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1531",
+  "title": "Othello",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/18e1f65c2e1ccd21.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1532",
+  "title": "King Lear",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/f55a5334b6d06b29.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1526",
+  "title": "Twelfth Night",
+  "author": "William Shakespeare",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/571d42d8ecbfd830.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "887",
+  "title": "Intentions",
+  "author": "Oscar Wilde",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/638e3e45dfb9923f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "42704",
+  "title": "Salomé: A Tragedy in One Act",
+  "author": "Oscar Wilde",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "21000",
+  "title": "Faust: Eine Tragödie [erster Teil] (German)",
+  "author": "Johann Wolfgang von Goethe",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "4081",
+  "title": "The Alchemist",
+  "author": "Ben Jonson",
+  "year": null,
+  "genre": "세계 · 희곡",
+  "lang": null,
+  "cover": "/static/covers/3e802af9476da984.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "45109",
+  "title": "The Enchiridion",
+  "author": "Epictetus",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/845f15b6caf3e081.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "8438",
+  "title": "The Nicomachean ethics of Aristotle",
+  "author": "Aristotle",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/16f0415aea1ae4a6.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "4280",
+  "title": "The Critique of Pure Reason",
+  "author": "Immanuel Kant",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/bb5c5e7ca41b9f6c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "5827",
+  "title": "The Problems of Philosophy",
+  "author": "Bertrand Russell",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/d07c9a7869529c35.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "52319",
+  "title": "The Genealogy of Morals",
+  "author": "Friedrich Wilhelm Nietzsche",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/152dadcab06e4bfd.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "4507",
+  "title": "As a man thinketh",
+  "author": "James Allen",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/25ed49b1e3a31d83.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "57628",
+  "title": "The Principles of Psychology, Volume 1 (of 2)",
+  "author": "William James",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "61",
+  "title": "The Communist Manifesto",
+  "author": "Karl Marx and Friedrich Engels",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/970f15880e51870c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "16643",
+  "title": "Essays by Ralph Waldo Emerson",
+  "author": "Ralph Waldo Emerson",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/3461f6d4dba8d204.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1656",
+  "title": "Apology",
+  "author": "Plato",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/e684502dce5d52e1.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1600",
+  "title": "Symposium",
+  "author": "Plato",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/33bca09445efa393.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "3800",
+  "title": "Ethics",
+  "author": "Benedictus de Spinoza",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/3d0f2cd6a55ed1b5.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "29433",
+  "title": "Nature",
+  "author": "Ralph Waldo Emerson",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/315ae392f523c31e.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "10615",
+  "title": "An Essay Concerning Humane Understanding, Volume 1",
+  "author": "John Locke",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/276d0fc1d31089d4.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1946",
+  "title": "On War",
+  "author": "Carl von Clausewitz",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "2944",
+  "title": "Essays — First Series",
+  "author": "Ralph Waldo Emerson",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/c8044933a9f0fda0.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "852",
+  "title": "Democracy and Education: An Introduction to the Philosophy of Education",
+  "author": "John Dewey",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "59",
+  "title": "Discourse on the Method of Rightly Conducting One's Reason and of Seeking Truth in the Sciences",
+  "author": "René Descartes",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/fc01258406400b3b.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "18269",
+  "title": "Pascal's Pensées",
+  "author": "Blaise Pascal",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/8128ce18997bf040.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1636",
+  "title": "Phaedrus",
+  "author": "Plato",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/7ad8abd738f5beff.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "9662",
+  "title": "An Enquiry Concerning Human Understanding",
+  "author": "David Hume",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "1",
+  "title": "The Declaration of Independence of the United States of America",
+  "author": "Thomas Jefferson",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "15877",
+  "title": "Thoughts of Marcus Aurelius Antoninus",
+  "author": "Emperor of Rome Marcus Aurelius",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/e872593329358c27.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "52263",
+  "title": "The Twilight of the Idols; or, How to Philosophize with the Hammer. The Antichrist",
+  "author": "Friedrich Wilhelm Nietzsche",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "11224",
+  "title": "Utilitarianism",
+  "author": "John Stuart Mill",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/dc20e55284466f1d.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2500",
+  "title": "Siddhartha",
+  "author": "Hermann Hesse",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/e76c1d3368d4cc63.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "46333",
+  "title": "The social contract &amp; discourses",
+  "author": "Jean-Jacques Rousseau",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "5682",
+  "title": "Fundamental Principles of the Metaphysic of Morals",
+  "author": "Immanuel Kant",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/9abb3c153f3949b5.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1658",
+  "title": "Phaedo",
+  "author": "Plato",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/42d7238e6a04cc21.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "37423",
+  "title": "How We Think",
+  "author": "John Dewey",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/7b4b54823c72eed9.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "14328",
+  "title": "The Consolation of Philosophy",
+  "author": "Boethius",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/c70d9ee27a44f9eb.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "10661",
+  "title": "A Selection from the Discourses of Epictetus with the Encheiridion",
+  "author": "Epictetus",
+  "year": null,
+  "genre": "세계 · 철학",
+  "lang": null,
+  "cover": "/static/covers/464a3a41b48c483e.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "209",
+  "title": "The Turn of the Screw",
+  "author": "Henry James",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/a18590f09fc1d6ba.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "113",
+  "title": "The Secret Garden",
+  "author": "Frances Hodgson Burnett",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/5373fde8fe371dc5.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1023",
+  "title": "Bleak House",
+  "author": "Charles Dickens",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/4872b6e8974f3c16.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "14838",
+  "title": "The Tale of Peter Rabbit",
+  "author": "Beatrix Potter",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/3e4ee1894e018b4f.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "289",
+  "title": "The Wind in the Willows",
+  "author": "Kenneth Grahame",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/3801b1e58cf4504a.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "17396",
+  "title": "The Secret Garden",
+  "author": "Frances Hodgson Burnett",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/3e2fd5be19fd3079.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "271",
+  "title": "Black Beauty :  The autobiography of a horse",
+  "author": "Anna Sewell",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/e81101232d794f17.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1837",
+  "title": "The Prince and the Pauper",
+  "author": "Mark Twain",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/1b7355d3e6495c1d.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "110",
+  "title": "Tess of the d'Urbervilles: A Pure Woman",
+  "author": "Thomas Hardy",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "33",
+  "title": "The Scarlet Letter",
+  "author": "Nathaniel Hawthorne",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/516f3d7fc4c46c62.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "146",
+  "title": "A Little Princess",
+  "author": "Frances Hodgson Burnett",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/f97757448061b087.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "1874",
+  "title": "The Railway Children",
+  "author": "E. Nesbit",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/60a0d001fb3ee6d7.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "421",
+  "title": "Kidnapped",
+  "author": "Robert Louis Stevenson",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/234ac3881154d49a.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "2781",
+  "title": "Just so stories",
+  "author": "Rudyard Kipling",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null,
+  "cover": "/static/covers/111c7f0c33384d9c.jpg"
+ },
+ {
+  "source": "gutendex",
+  "id": "4276",
+  "title": "North and South",
+  "author": "Elizabeth Cleghorn Gaskell",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "43936",
+  "title": "The Wonderful Wizard of Oz",
+  "author": "L. Frank Baum",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "20265",
+  "title": "Anne of the Island",
+  "author": "L. M. Montgomery",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "21605",
+  "title": "Uncle Remus, his songs and his sayings",
+  "author": "Joel Chandler Harris",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "550",
+  "title": "Silas Marner",
+  "author": "George Eliot",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "19637",
+  "title": "Black Beauty :  The autobiography of a horse",
+  "author": "Anna Sewell",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "47",
+  "title": "Anne of Avonlea",
+  "author": "L. M. Montgomery",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "27805",
+  "title": "The Wind in the Willows",
+  "author": "Kenneth Grahame",
+  "year": null,
+  "genre": "세계 · 어린이",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "15399",
+  "title": "The Interesting Narrative of the Life of Olaudah Equiano, Or Gustavus Vassa, The African",
+  "author": "Olaudah Equiano",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "26184",
+  "title": "Simple Sabotage Field Manual",
+  "author": "United States. Office of Strategic Services",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "147",
+  "title": "Common Sense",
+  "author": "Thomas Paine",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "245",
+  "title": "Life on the Mississippi",
+  "author": "Mark Twain",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "25717",
+  "title": "The History of the Decline and Fall of the Roman Empire",
+  "author": "Edward Gibbon",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "2848",
+  "title": "Antiquities of the Jews",
+  "author": "Flavius Josephus",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "10636",
+  "title": "The Travels of Marco Polo — Volume 1",
+  "author": "Marco Polo and da Pisa Rusticiano",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "7142",
+  "title": "The History of the Peloponnesian War",
+  "author": "Thucydides",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "20228",
+  "title": "Noli Me Tangere (Tagalog)",
+  "author": "José Rizal",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "815",
+  "title": "Democracy in America — Volume 1",
+  "author": "Alexis de Tocqueville",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "1257",
+  "title": "The three musketeers",
+  "author": "Alexandre Dumas and Auguste Maquet",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "24264",
+  "title": "紅樓夢 (Chinese)",
+  "author": "Xueqin Cao",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "17450",
+  "title": "The Part Borne by the Dutch in the Discovery of Australia 1606-1765",
+  "author": "J. E. Heeres",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "2707",
+  "title": "The History of Herodotus — Volume 1",
+  "author": "Herodotus",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "27279",
+  "title": "Southern Literature From 1579-1895",
+  "author": "Louise Manly",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "2376",
+  "title": "Up from Slavery: An Autobiography",
+  "author": "Booker T. Washington",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
+ },
+ {
+  "source": "gutendex",
+  "id": "851",
+  "title": "Narrative of the Captivity and Restoration of Mrs. Mary Rowlandson",
+  "author": "Mary White Rowlandson",
+  "year": null,
+  "genre": "세계 · 역사",
+  "lang": null
  }
 ]

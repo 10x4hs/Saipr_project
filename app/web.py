@@ -33,7 +33,11 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 # 서가 카탈로그 — scripts/build_catalog.py로 만든다 (퍼블릭 도메인 확인된 작품만)
 CATALOG: list[dict] = json.loads((Path(__file__).parent / "data" / "catalog.json").read_text())
-GENRE_ORDER = ["단편소설", "장편소설", "중편소설", "동화", "수필", "시집", "세계 고전"]
+GENRE_ORDER = [
+    "단편소설", "장편소설", "중편소설", "고전소설", "신소설", "판소리", "시", "시집", "희곡", "동화", "수필",
+    "세계 고전", "세계 · 추리", "세계 · SF", "세계 · 판타지", "세계 · 동화", "세계 · 모험", "세계 · 공포",
+    "세계 · 로맨스", "세계 · 시", "세계 · 희곡", "세계 · 철학", "세계 · 어린이", "세계 · 역사",
+]  # fmt: skip
 SHELVES = {g: [b for b in CATALOG if b["genre"] == g] for g in GENRE_ORDER}
 SHELVES = {g: books for g, books in SHELVES.items() if books}
 CATALOG_INDEX = {(b["source"], b["id"]): b for b in CATALOG}
