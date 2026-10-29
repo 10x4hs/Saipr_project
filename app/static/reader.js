@@ -14,6 +14,7 @@ let chunk = Math.min(+stage.dataset.start || 0, total - 1);
 let chunkData = null, minMs = 0, dwellMs = 0, pageFlip = null, pageCount = 0, lead = 0;
 const cache = new Map();
 let lastOpened = -1, sentVerify = false;
+let mode = local.get('flip', '3d');   // '3d' = 책장 넘김, 'scroll' = 넘김 효과 끄기
 
 function fetchChunk(i) {
   if (!cache.has(i)) cache.set(i, fetch(`/api/v1/books/${bookId}/chunks/${i}`).then(r => {
@@ -96,6 +97,7 @@ async function open(i, { atEnd = false } = {}) {
   await document.fonts.ready;
   minMs = chunkData.min_dwell_ms; dwellMs = 0; sentVerify = false;
 
+  if (mode === 'scroll') return openScroll();
   const pages = paginate(chunkData.text).map(h => pageEl(h));
   // 청크 경계에 '넘김용' 페이지를 붙여, 그 페이지에 닿으면 이웃 청크를 불러온다
   lead = chunk > 0 ? 1 : 0;
@@ -148,6 +150,11 @@ setInterval(() => {
 }, 250);
 
 addEventListener('keydown', e => {
+  if (mode === 'scroll' && chunkData) {
+    if (e.key === 'ArrowRight' && chunk < total - 1) open(chunk + 1);
+    if (e.key === 'ArrowLeft' && chunk > 0) open(chunk - 1);
+    return;
+  }
   if (!pageFlip) return;
   if (e.key === 'ArrowRight') pageFlip.flipNext();
   if (e.key === 'ArrowLeft') pageFlip.flipPrev();
@@ -206,10 +213,12 @@ function paintReactions() {
 let down = null;
 stage.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY }; });
 stage.addEventListener('click', e => {
-  if (!pageFlip || !down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) return;
-  const r = stage.getBoundingClientRect(), x = (e.clientX - r.left) / r.width;
-  if (x > .82) return pageFlip.flipNext();
-  if (x < .18) return pageFlip.flipPrev();
+  if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) return;
+  if (pageFlip) {                                     // 3D 넘김일 때만 가장자리 탭으로 넘긴다
+    const r = stage.getBoundingClientRect(), x = (e.clientX - r.left) / r.width;
+    if (x > .82) return pageFlip.flipNext();
+    if (x < .18) return pageFlip.flipPrev();
+  }
   const p = e.target.closest('p[data-a]');
   if (p) openSheet(+p.dataset.a, p.textContent.replace(/[❤️😂😮😢👏💬\d\s]+$/u, ''));
 });
@@ -318,3 +327,29 @@ function connect() {
 }
 
 social();
+
+// ---------------- 넘김 효과 끄기: 한 쪽을 위아래로 스크롤해 읽는다 ----------------
+function openScroll() {
+  if (pageFlip) { pageFlip.destroy(); pageFlip = null; }
+  const col = document.createElement('article');
+  col.className = 'pg scroll-col';
+  col.innerHTML = chunkData.text.split(/\n\s*\n/).map((p, a) => `<p data-a="${a}">${esc(p)}</p>`).join('')
+    + `<nav class="scroll-nav">${chunk > 0 ? '<button class="btn ghost" data-go="-1">‹ 앞 쪽</button>' : '<span></span>'}`
+    + (chunk < total - 1 ? '<button class="btn primary" data-go="1">다음 쪽 ›</button>' : '<a class="btn primary" href="/library">끝 · 서재로</a>') + '</nav>';
+  stage.replaceChildren(col);
+  col.scrollTop = 0;
+  col.querySelectorAll('[data-go]').forEach(b => b.onclick = () => open(chunk + +b.dataset.go));
+  $('pos').textContent = `${chunk + 1}/${total}쪽`;
+  paintDwell();
+  if (lastOpened !== chunk) { lastOpened = chunk; save(false); }
+  loadReactions(chunk);
+  if (chunk + 1 < total) fetchChunk(chunk + 1).catch(() => {});
+}
+
+const applyMode = () => document.querySelectorAll('#modes button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === mode));
+applyMode();
+document.querySelectorAll('#modes button').forEach(b => b.onclick = () => {
+  if (mode === b.dataset.mode) return;
+  mode = b.dataset.mode; local.set('flip', mode); applyMode();
+  if (chunkData) open(chunk);
+});

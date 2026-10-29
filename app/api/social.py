@@ -10,6 +10,13 @@ from app.services import books as book_service
 from app.services import races as race_service
 from app.services import social
 
+
+def avatar_url(user: User) -> str | None:
+    from app.web import avatar_url as _url  # 화면과 같은 주소 규칙
+
+    return _url(user)
+
+
 router = APIRouter(prefix="/api/v1", tags=["social"])
 
 
@@ -87,7 +94,14 @@ async def standings(
         "book_id": room.book_id,
         "over": race_service.is_over(room),
         "board": [
-            {"user_id": s.user.id, "nickname": s.user.nickname, "pages": s.pages, "pct": s.pct, "me": s.is_me}
+            {
+                "user_id": s.user.id,
+                "nickname": s.user.nickname,
+                "avatar": avatar_url(s.user),
+                "pages": s.pages,
+                "pct": s.pct,
+                "me": s.is_me,
+            }
             for s in board
         ],
     }

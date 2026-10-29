@@ -1,5 +1,5 @@
 {% extends "app.html" %}
-{% from "_ui.html" import book_cover %}
+{% from "_ui.html" import book_cover, avatar %}
 {% block title %}{{ book.title }} 레이스 — 함께읽기{% endblock %}
 {% block heading %}<small>{{ '끝난 대결' if over else '진행 중' }}</small>{{ book.title }}{% endblock %}
 {% block main %}
@@ -18,7 +18,7 @@
     {% for s in board %}
     <li class="{{ 'me' if s.is_me }}" data-uid="{{ s.user.id }}">
       <span class="pos mono">{{ loop.index }}</span>
-      <span class="avatar">{{ s.user.nickname[:1] }}</span>
+      {{ avatar(s.user) }}
       <div class="who"><b>{{ s.user.nickname }}{% if s.is_me %} <em>나</em>{% endif %}</b><span class="track"><i style="width:{{ s.pct }}%"></i></span></div>
       <span class="mono">{{ s.pages }}쪽</span>
     </li>
@@ -62,7 +62,7 @@
       li.dataset.uid = s.user_id; if (s.me) li.className = 'me';
       li.innerHTML = '<span class="pos mono"></span><span class="avatar"></span><div class="who"><b></b><span class="track"><i></i></span></div><span class="mono pages"></span>';
       li.querySelector('.pos').textContent = i + 1;
-      li.querySelector('.avatar').textContent = s.nickname.slice(0, 1);
+      const av = li.querySelector('.avatar'); if (s.avatar) { const im = new Image(); im.src = s.avatar; av.appendChild(im); } else av.textContent = s.nickname.slice(0, 1);
       li.querySelector('b').textContent = s.nickname;
       if (s.me) { const em = document.createElement('em'); em.textContent = '나'; li.querySelector('b').append(' ', em); }
       li.querySelector('.track i').style.width = s.pct + '%';

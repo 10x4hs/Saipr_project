@@ -1,15 +1,17 @@
 {% extends "base.html" %}
-{% from "_ui.html" import icon %}
+{% from "_ui.html" import icon, video_list %}
 {% block title %}{{ book.title }} — 함께읽기{% endblock %}
 {% block body_class %}reading{% endblock %}
 {% block body %}
 <header class="r-top glass">
   <a href="/library" class="pill-btn" aria-label="서재로">{{ icon('back') }}</a>
   <div class="r-title"><b>{{ book.title }}</b><span>{{ book.author or '' }}</span></div>
+  {% if videos %}<button class="pill-btn" id="vidBtn" aria-label="책 소개 영상">▶</button>{% endif %}
   <button class="pill-btn" id="aa" aria-label="보기 설정" aria-expanded="false">Aa</button>
 </header>
 <div class="r-sheet glass" id="sheet" hidden>
   <div class="r-row"><span>글자 크기</span><div class="seg mini"><button id="smaller" aria-label="작게">가−</button><button id="bigger" aria-label="크게">가+</button></div></div>
+  <div class="r-row"><span>넘김</span><div class="seg mini" id="modes"><button data-mode="3d">3D 넘김</button><button data-mode="scroll">스크롤</button></div></div>
   <div class="r-row"><span>종이</span><div class="seg mini" id="tones"><button data-tone="">기본</button><button data-tone="paper">종이</button><button data-tone="night">밤</button></div></div>
 </div>
 
@@ -24,6 +26,21 @@
   <span class="friends" id="friends" aria-label="같이 읽는 친구"></span>
 </footer>
 
+{% if videos %}
+<div class="sheet-wrap" id="vids" hidden>
+  <section class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="vidsTitle">
+    <header class="sheet-h"><h2 id="vidsTitle">이 책을 소개하는 영상</h2><button class="x" data-close aria-label="닫기">×</button></header>
+    {{ video_list(videos) }}
+  </section>
+</div>
+<script>
+(() => {
+  const s = document.getElementById('vids');
+  document.getElementById('vidBtn').onclick = () => { s.hidden = false; };
+  s.addEventListener('click', e => { if (e.target === s || e.target.closest('[data-close]')) { s.hidden = true; s.querySelectorAll('iframe').forEach(f => f.src = 'about:blank'); } });
+})();
+</script>
+{% endif %}
 <div class="r-toast glass" id="toast" role="status" aria-live="polite" hidden></div>
 
 <div class="sheet-wrap" id="react" hidden>

@@ -168,3 +168,41 @@ def test_catalog_has_no_duplicate_titles():
 
     keys = [(b["title"].strip().lower(), (b.get("author") or "").strip().lower()) for b in CATALOG]
     assert len(keys) == len(set(keys))
+
+
+async def test_profile_nickname_and_photo(api):
+    jpeg = b"\xff\xd8\xff\xe0" + b"0" * 2000
+    async with api(upstream) as c, api(upstream) as other:
+        await signup(c, email="me@example.com", nickname="처음이름")
+        page = await c.get("/me")
+        token = page.text.split('name="csrf" value="')[1].split('"')[0]
+        r = await c.post(
+            "/me/profile",
+            data={"csrf": token, "nickname": "  새이름 "},
+            files={"photo": ("a.jpg", jpeg, "image/jpeg")},
+        )
+        me = await c.get("/me")
+        src = me.text.split('<span class="avatar xl"><img src="')[1].split('"')[0]
+        img = await c.get(src)
+        bad = await c.post(
+            "/me/profile",
+            data={"csrf": token, "nickname": "새이름"},
+            files={"photo": ("a.png", b"\x89PNG....", "image/png")},
+        )
+        empty = await c.post("/me/profile", data={"csrf": token, "nickname": "   "})
+        anon = await other.get(src)
+    assert r.headers["location"] == "/me?saved=1" and "새이름" in me.text
+    assert img.status_code == 200 and img.content == jpeg and img.headers["content-type"] == "image/jpeg"
+    assert "error=" in bad.headers["location"] and "error=" in empty.headers["location"]
+    assert anon.status_code == 303  # 로그인해야 볼 수 있다
+
+
+async def test_store_page_shows_review_videos(api):
+    from app.web import STORE, VIDEOS
+
+    item = next(b for b in STORE if VIDEOS.get(f"store:{b['id']}"))
+    async with api(upstream) as c:
+        await signup(c)
+        page = await c.get(f"/store/{item['id']}")
+    first = VIDEOS[f"store:{item['id']}"][0]
+    assert "이 책을 소개하는 영상" in page.text and f'data-yt="{first["id"]}"' in page.text

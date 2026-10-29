@@ -64,3 +64,33 @@
 {%- elif name == 'theme' %}<path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/>
 {%- endif %}</svg>
 {%- endmacro %}
+
+{# 프로필 사진(없으면 이름 첫 글자) #}
+{% macro avatar(u, cls='') -%}
+{% set src = avatar_url(u) -%}
+<span class="avatar {{ cls }}">{% if src %}<img src="{{ src }}" alt="">{% else %}{{ u.nickname[:1] }}{% endif %}</span>
+{%- endmacro %}
+
+{# 책 소개 영상: 썸네일만 보이다가 누르면 그 자리에서 YouTube가 재생된다 #}
+{% macro video_list(videos) -%}
+<ul class="videos">
+  {% for v in videos %}
+  <li>
+    <button type="button" class="yt" data-yt="{{ v.id }}" aria-label="{{ v.title }} 재생">
+      <img src="https://i.ytimg.com/vi/{{ v.id }}/hqdefault.jpg" alt="" loading="lazy">
+      <span class="yt-play">▶</span>{% if v.length %}<span class="yt-len mono">{{ v.length }}</span>{% endif %}
+    </button>
+    <b>{{ v.title }}</b>
+    <span>{{ v.channel or '' }}{% if v.views %} · {{ v.views|replace('조회수 ', '') }}{% endif %}</span>
+  </li>
+  {% endfor %}
+</ul>
+<script>
+document.querySelectorAll('.yt').forEach(b => b.addEventListener('click', () => {
+  const f = document.createElement('iframe');
+  f.src = `https://www.youtube-nocookie.com/embed/${b.dataset.yt}?autoplay=1&playsinline=1&rel=0`;
+  f.allow = 'autoplay; encrypted-media; picture-in-picture'; f.allowFullscreen = true; f.title = b.getAttribute('aria-label');
+  b.replaceWith(f);
+}, { once: true }));
+</script>
+{%- endmacro %}

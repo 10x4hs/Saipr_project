@@ -160,7 +160,9 @@ a:hover .bk,a:focus-visible .bk,.now:hover .bk,.pick:hover .bk{transform:rotateY
 .form-err{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad);border-radius:12px;padding:12px 14px;margin:0;font-size:14px}
 
 /* ---------- app shell ---------- */
-.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:8px;padding:calc(12px + env(safe-area-inset-top)) 20px 12px}
+.top{position:relative;z-index:30;display:flex;align-items:center;gap:8px;padding:calc(12px + env(safe-area-inset-top)) 72px 12px 20px}
+/* 제목은 스크롤하면 그냥 위로 사라지고, 메뉴 버튼만 오른쪽 위에 떠 있다 */
+.top .menu-pill{position:fixed;z-index:31;top:calc(14px + env(safe-area-inset-top));right:max(20px,calc(50% - var(--app) / 2 + 20px))}
 .top-title{flex:1;min-width:0;margin:0;font:700 24px/1.2 var(--f-ui);letter-spacing:-.04em}
 .top-title small{display:block;font-size:14px;font-weight:500;color:var(--dim);letter-spacing:-.01em}
 .content{padding:4px 20px calc(var(--tab) + 40px + env(safe-area-inset-bottom))}
@@ -488,3 +490,33 @@ h3.sub,.sheet h3{font-size:14px;font-weight:600;color:var(--dim);margin:22px 0 1
 .for-book div{display:grid}
 .for-book .mono{color:var(--accent)}
 .for-book span{font-size:13px;color:var(--dim)}
+
+/* ---------- 프로필 ---------- */
+.avatar{overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-edit{display:grid;grid-template-columns:auto 1fr;gap:16px 18px;align-items:center;padding:18px;margin-top:4px}
+.avatar-pick{position:relative}
+.avatar-pick .cam{position:absolute;right:-4px;bottom:-2px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--text);color:var(--bg)}
+.profile-fields{display:grid;gap:4px;min-width:0}
+.profile-fields input{height:44px;font:inherit;font-size:17px;font-weight:600;color:var(--text);background:var(--sunken);border:1px solid var(--glass-line);border-radius:12px;padding:0 12px;min-width:0}
+.profile-fields input:focus{outline:none;border-color:var(--accent)}
+.profile-actions{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end}
+.profile-actions .btn{height:42px;padding:0 18px;font-size:14px}
+
+/* ---------- 리더: 넘김 효과 끄기(스크롤) ---------- */
+.pg.scroll-col{position:absolute;inset:0;overflow-y:auto;border-radius:14px;overscroll-behavior:contain;padding-bottom:40px}
+.scroll-nav{display:flex;justify-content:space-between;gap:10px;margin-top:28px}
+.scroll-nav .btn{height:44px;padding:0 18px;font-size:14px;text-indent:0}
+
+/* ---------- 책 소개 영상 ---------- */
+.videos{list-style:none;margin:0;padding:0;display:grid;gap:18px}
+.videos li{display:grid;gap:6px}
+.yt{position:relative;display:block;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000}
+.yt img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s var(--ease)}
+.yt:hover img{transform:scale(1.03)}
+.yt-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:56px;height:56px;border-radius:50%;font-size:20px;color:#fff;background:rgba(0,0,0,.55);backdrop-filter:blur(6px)}
+.yt-len{position:absolute;right:8px;bottom:8px;padding:1px 6px;border-radius:5px;color:#fff;background:rgba(0,0,0,.75)}
+.videos iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:14px}
+.videos b{font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.videos span{font-size:12px;color:var(--dim)}
+.r-top #vidBtn{font-size:13px}

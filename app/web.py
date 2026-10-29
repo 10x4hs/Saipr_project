@@ -55,6 +55,10 @@ CATALOG: list[dict] = _load_catalog()
 # 저작권이 살아 있는 유명 도서 — 본문 없이 정보·표지와 알라딘 전자책 구매 링크만 (scripts/build_store.py)
 STORE: list[dict] = json.loads((DATA / "store.json").read_text())
 STORE_INDEX = {b["id"]: b for b in STORE}
+# 책 소개 유튜브 영상 — scripts/build_videos.py ("store:<알라딘 id>" 또는 "<source>:<id>" → 영상 목록)
+VIDEOS: dict[str, list[dict]] = (
+    json.loads((DATA / "videos.json").read_text()) if (DATA / "videos.json").exists() else {}
+)
 GENRE_ORDER = [
     "단편소설", "장편소설", "중편소설", "고전소설", "신소설", "판소리", "시", "시집", "희곡", "동화", "수필",
     "세계 고전", "세계 · 추리", "세계 · SF", "세계 · 판타지", "세계 · 동화", "세계 · 모험", "세계 · 공포",
@@ -261,7 +265,7 @@ async def store_item(request: Request, item_id: str, user: User = Depends(auth.r
     book = STORE_INDEX.get(item_id)
     if book is None:
         raise HTTPException(404, "책을 찾을 수 없어요")
-    return _render(request, "store.html", user, book=book)
+    return _render(request, "store.html", user, book=book, videos=VIDEOS.get(f"store:{item_id}", []))
 
 
 @router.get("/shelf/{genre}")
@@ -362,7 +366,14 @@ async def me(
         "done": sum(e.shelf == Shelf.DONE for e, _ in entries),
         "pages": sum(e.verified_chunk + 1 for e, _ in entries),
     }
-    return _render(request, "me.html", user, stats=stats)
+    return _render(
+        request,
+        "me.html",
+        user,
+        stats=stats,
+        error=request.query_params.get("error"),
+        saved=bool(request.query_params.get("saved")),
+    )
 
 
 @router.get("/open/{source}/{external_id:path}")
@@ -401,7 +412,8 @@ async def reader(
     if book is None or not book_service.can_read(book, user.id):
         raise HTTPException(404, "책을 찾을 수 없어요")
     entry = await book_service.shelve(session, user.id, book.id)
-    return _render(request, "reader.html", user, book=book, entry=entry)
+    videos = VIDEOS.get(f"{book.source}:{book.external_id}", [])
+    return _render(request, "reader.html", user, book=book, entry=entry, videos=videos)
 
 
 # --- 친구 대결 ---
@@ -533,3 +545,60 @@ async def join(
         return RedirectResponse(f"/races?error={reason}", status_code=303)
     await book_service.shelve(session, user.id, room.book_id)
     return RedirectResponse(f"/races/{room.id}", status_code=303)
+
+
+# --- 프로필 ---
+
+MAX_AVATAR_BYTES = 300_000
+
+
+def avatar_url(user: User | None) -> str | None:
+    if user is None or not user.avatar:
+        return None
+    return f"/avatars/{user.id}?v={hashlib.sha1(user.avatar).hexdigest()[:8]}"
+
+
+templates.env.globals["avatar_url"] = avatar_url
+
+
+@router.get("/avatars/{user_id}")
+async def avatar(
+    user_id: int, session: AsyncSession = Depends(get_session), _: User = Depends(auth.require_user)
+):
+    from fastapi.responses import Response
+
+    u = await session.get(User, user_id)
+    if u is None or not u.avatar:
+        raise HTTPException(404)
+    return Response(
+        u.avatar, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=31536000, immutable"}
+    )
+
+
+@router.post("/me/profile")
+async def update_profile(
+    request: Request,
+    nickname: str = Form(""),
+    photo: UploadFile | None = File(None),
+    remove_photo: str = Form(""),
+    csrf: str = Form(""),
+    session: AsyncSession = Depends(get_session),
+    user: User = Depends(auth.require_user),
+) -> RedirectResponse:
+    auth.check_csrf(request, csrf)
+    name = nickname.strip()
+    if not 1 <= len(name) <= 40:
+        return RedirectResponse("/me?error=이름은 1~40자로 입력해 주세요", status_code=303)
+    user.nickname = name
+    if remove_photo:
+        user.avatar = None
+    elif photo is not None and photo.filename:
+        data = await photo.read(MAX_AVATAR_BYTES + 1)
+        # 브라우저가 줄여 보낸 JPEG만 받는다 (매직 넘버 확인)
+        if len(data) > MAX_AVATAR_BYTES or not data.startswith(b"\xff\xd8\xff"):
+            return RedirectResponse(
+                "/me?error=사진을 읽지 못했어요. 다른 사진으로 해 주세요", status_code=303
+            )
+        user.avatar = data
+    await session.commit()
+    return RedirectResponse("/me?saved=1", status_code=303)

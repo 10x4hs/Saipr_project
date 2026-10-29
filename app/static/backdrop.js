@@ -7,9 +7,14 @@
   host.appendChild(canvas);
   const ctx = canvas.getContext('2d');
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const DPR = Math.min(devicePixelRatio || 1, 2);
+  const DPR = 1;                   // 점 배경은 선명할 필요가 없다 — 휴대폰에서 그리는 양을 1/4로
   const GAP = 18;                  // 화면 위 점 간격(px)
-  let W = 0, H = 0, raf = 0, grid = [];
+  let W = 0, H = 0, raf = 0, grid = [], ink = '255,255,255';
+  // 점 색 = 지금 테마의 글자색. 매 프레임 읽으면 느려서 테마가 바뀔 때만 다시 읽는다
+  const readInk = () => { ink = (getComputedStyle(document.body).color.match(/\d+/g) || [255, 255, 255]).slice(0, 3).join(','); };
+  readInk();
+  new MutationObserver(readInk).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'style'] });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readInk);
   const pointer = { x: -9999, y: -9999, k: 0 };   // k: 닿아 있는 정도(부드럽게 0↔1)
 
   function size() {
@@ -32,8 +37,6 @@
     const t = ms / 1000 + scrollY * .006;
     pointer.k += ((pointer.x > -999 ? 1 : 0) - pointer.k) * .08;
     ctx.clearRect(0, 0, W, H);
-    // 점 색 = 지금 테마의 글자색 (밝은 테마면 검은 점, 어두운 테마면 흰 점)
-    const ink = (getComputedStyle(document.body).color.match(/\d+/g) || [255, 255, 255]).slice(0, 3).join(',');
     ctx.fillStyle = `rgb(${ink})`;
     for (const p of grid) {
       // 부드러운 물결: 대각선으로 흐르는 두 겹의 파도

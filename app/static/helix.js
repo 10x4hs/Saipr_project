@@ -22,7 +22,8 @@
     v === 'drum' ? start() : stop();
     scrollTo(0, 0);
   }
-  document.querySelectorAll('[data-view-toggle]').forEach(b => b.addEventListener('click', () => setView(view === 'drum' ? 'list' : 'drum')));
+  // 메뉴는 이 스크립트보다 뒤에 그려지므로, 문서 전체에서 클릭을 받아 처리한다
+  document.addEventListener('click', e => { if (e.target.closest('[data-view-toggle]')) setView(view === 'drum' ? 'list' : 'drum'); });
 
   function layout() {
     R = Math.min(innerWidth, 480) * .42;                 // 나선 반지름
@@ -78,15 +79,21 @@
     else scrollTo({ top: target, behavior: 'smooth' });
   }));
 
-  // 스크롤이 멈추면 가장 가까운 책에 부드럽게 맞춘다
+  // 스크롤이 멈추면 가장 가까운 책에 부드럽게 맞춘다.
+  // 손가락이 화면에 닿아 있는 동안에는 맞추지 않는다 — 멈칫할 때마다 끌어당기면 손과 싸운다
+  let touching = false;
+  addEventListener('touchstart', () => { touching = true; clearTimeout(snapTimer); }, { passive: true });
+  addEventListener('touchend', () => { touching = false; snap(); }, { passive: true });
+  addEventListener('touchcancel', () => { touching = false; }, { passive: true });
   function snap() {
     clearTimeout(snapTimer);
+    if (touching) return;
     snapTimer = setTimeout(() => {
       const target = Math.round(scrollY / PER) * PER;
       if (Math.abs(target - scrollY) < 2) return;
       if (lenis) lenis.scrollTo(target, { duration: .9, easing: t => 1 - Math.pow(1 - t, 4) });
       else scrollTo({ top: target, behavior: 'smooth' });
-    }, 160);
+    }, matchMedia('(pointer: coarse)').matches ? 260 : 160);   // 터치는 관성 스크롤이 끝난 뒤에
   }
 
   function start() {
