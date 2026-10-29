@@ -36,7 +36,7 @@
 
 {% macro catalog_card(b, flat=False) -%}
 <a class="card" href="/open/{{ b.source }}/{{ b.id|urlencode }}">
-  {% if flat %}{{ flat_cover(b.title, b.author, b.cover|small_cover) }}{% else %}{{ book_cover(b.title, b.author, img=b.cover) }}{% endif %}
+  {% if flat %}{{ flat_cover(b.title, b.author, b.cover|small_cover) }}{% else %}{{ book_cover(b.title, b.author, img=b.cover|small_cover) }}{% endif %}
   <b>{{ b.title }}</b>
   <span>{{ b.author or b.genre }}</span>
 </a>
