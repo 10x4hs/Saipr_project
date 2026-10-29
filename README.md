@@ -9,9 +9,11 @@
 
 [**앱 열기 →**](https://saipr-reading.vercel.app) · [PRD](docs/PRD.md) · [완료 기준](GOAL.md) · [구조](docs/architecture.md)
 
-<img src="docs/images/app/2-home.jpg" width="165" alt="홈"> <img src="docs/images/app/5-reader.jpg" width="165" alt="리더"> <img src="docs/images/app/6-react.jpg" width="165" alt="반응"> <img src="docs/images/app/7-race.jpg" width="165" alt="대결">
-
 </div>
+
+| 3D로 쌓인 홈 | 3D 책장 넘김 | 문단 반응 | 친구와 대결 |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/images/app/2-home.jpg" alt="홈"> | <img src="docs/images/app/5-reader.jpg" alt="리더"> | <img src="docs/images/app/6-react.jpg" alt="반응"> | <img src="docs/images/app/7-race.jpg" alt="대결"> |
 
 ---
 
