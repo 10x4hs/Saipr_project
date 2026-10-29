@@ -17,6 +17,8 @@ let lastOpened = -1, sentVerify = false;
 let mode = local.get('flip', '3d');   // '3d' = 책장 넘김, 'scroll' = 넘김 효과 끄기
 
 function fetchChunk(i) {
+  // 지금 쪽 근처만 기억한다 — 긴 책을 끝까지 넘겨도 메모리가 쌓이지 않게
+  for (const k of cache.keys()) if (Math.abs(k - chunk) > 3) cache.delete(k);
   if (!cache.has(i)) cache.set(i, fetch(`/api/v1/books/${bookId}/chunks/${i}`).then(r => {
     if (!r.ok) throw new Error(r.status);
     return r.json();

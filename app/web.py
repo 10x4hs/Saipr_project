@@ -87,6 +87,14 @@ def cover_of(book: Book) -> str | None:
     return meta.get("cover") if meta else None
 
 
+def small_cover(url: str | None) -> str | None:
+    """같은 표지의 작은 판(알라딘 cover200, Open Library -M) — 쌓인 책처럼 작게 보일 때 쓴다."""
+    if not url:
+        return url
+    return url.replace("/cover500/", "/cover200/").replace("-L.jpg", "-M.jpg")
+
+
+templates.env.filters["small_cover"] = small_cover
 templates.env.globals["cover"] = cover
 templates.env.globals["cover_of"] = cover_of
 templates.env.globals["APPEARANCE"] = appearance
@@ -204,8 +212,21 @@ async def login(
     session: AsyncSession = Depends(get_session),
 ) -> HTMLResponse | RedirectResponse:
     auth.check_csrf(request, csrf)
+    ip = request.headers.get("x-forwarded-for", "").split(",")[0].strip() or (
+        request.client.host if request.client else ""
+    )
+    if auth.too_many_failures(email, ip):
+        return _render(
+            request,
+            "login.html",
+            None,
+            email=auth.normalize_email(email),
+            error="비밀번호를 여러 번 틀렸어요. 10분 뒤에 다시 시도해 주세요",
+            next=_safe_next(next),
+        )
     user = await auth.authenticate(session, email, password)
     if user is None:
+        auth.record_failure(email, ip)
         return _render(
             request,
             "login.html",
@@ -214,6 +235,7 @@ async def login(
             error="이메일 또는 비밀번호가 맞지 않아요",
             next=_safe_next(next),
         )
+    auth.clear_failures(email, ip)
     auth.login(request, user)
     return RedirectResponse(_safe_next(next), status_code=303)
 

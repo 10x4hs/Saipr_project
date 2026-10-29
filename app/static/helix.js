@@ -13,12 +13,17 @@
   document.body.classList.add('in-drum');
 
   function layout() {
+    lastPos = -1;
     R = Math.min(innerWidth, 480) * .42;                 // 나선 반지름
     $('drumSpacer').style.height = ((books.length - 1) * PER + innerHeight) + 'px';
   }
 
+  let lastPos = -1;
   function frame() {
     const pos = scrollY / PER;
+    // 스크롤이 그대로면 아무것도 다시 계산하지 않는다 — 가만히 있을 때 휴대폰 배터리·발열을 아낀다
+    if (Math.abs(pos - lastPos) < 0.0005) { raf = requestAnimationFrame(frame); return; }
+    lastPos = pos;
     let best = null;
     books.forEach((el, i) => {
       const t = i - pos;                                 // 0 = 맨 앞, + = 위·뒤에서 기다리는 책
@@ -55,6 +60,12 @@
   function hud(el) {
     focusEl = el;
     books.forEach(b => b.classList.toggle('focus', b === el));
+    // 앞에 선 책과 다음 책만 선명한 큰 표지로 바꾼다 (나머지는 작은 판으로 메모리를 아낀다)
+    const i = books.indexOf(el);
+    [books[i], books[i + 1]].forEach(b => {
+      const img = b && b.dataset.hi && b.querySelector('.bk-front img');
+      if (img && img.src !== new URL(b.dataset.hi, location.href).href) img.src = b.dataset.hi;
+    });
   }
 
   // 맨 앞 책을 누르면 열고, 뒤에 있는 책을 누르면 그 책을 앞으로 데려온다

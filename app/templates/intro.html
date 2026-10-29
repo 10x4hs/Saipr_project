@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>함께읽기 — 같은 책을, 각자의 속도로, 함께 읽어요</title>
+  <meta name="description" content="같은 책을 각자의 속도로 읽고, 문장마다 반응을 나누는 함께읽기 앱을 소개해요.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="/static/intro.css">
+</head>
+<body>
+  <header class="hero wrap">
+    <p class="eyebrow">📖 함께읽기</p>
+    <h1>같은 책을, 각자의 속도로, 함께 읽어요.</h1>
+    <p class="lead">고전 원문을 바로 읽고, 친구가 남긴 반응을 문장 옆에서 만나요. 스포일러 걱정 없이요.</p>
+    <div class="cta">
+      <a class="btn primary" href="/">앱 열기</a>
+      <a class="btn" href="https://github.com/10x4hs/Saipr_project" rel="noopener">GitHub</a>
+    </div>
+    <img class="hero-shot" src="/static/intro/2-home.jpg" alt="함께읽기 홈 화면" width="390" height="844">
+  </header>
+
+  <main>
+    <section class="wrap">
+      <h2>왜 함께읽기인가요</h2>
+      <div class="grid three">
+        <article class="card"><span class="ico">⏱️</span><h3>내 속도대로</h3><p>모두가 같은 페이지에 있을 필요 없어요. 각자 읽은 만큼만 보여요.</p></article>
+        <article class="card"><span class="ico">💬</span><h3>문장 옆의 대화</h3><p>마음에 남은 문장에 바로 반응을 남기고 나눠요.</p></article>
+        <article class="card"><span class="ico">📚</span><h3>바로 읽는 고전</h3><p>저작권이 끝난 고전은 원문을 그대로, 최신 책은 정보와 구매 링크로요.</p></article>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <h2>이렇게 읽어요</h2>
+      <ol class="steps">
+        <li class="card"><b>1</b><h3>고르기</h3><p>고전 서가나 서점에서 읽을 책을 골라요.</p></li>
+        <li class="card"><b>2</b><h3>읽기</h3><p>편한 리더에서 내 속도로 읽어요.</p></li>
+        <li class="card"><b>3</b><h3>반응</h3><p>문장마다 느낌을 남기고 친구 반응을 봐요.</p></li>
+        <li class="card"><b>4</b><h3>대결</h3><p>친구와 같은 책 읽기 레이스를 펼쳐요.</p></li>
+      </ol>
+    </section>
+
+    <section class="wrap">
+      <h2>화면으로 보기</h2>
+      <div class="shots">
+        {% for f, cap in [("1-login","로그인"),("2-home","홈"),("3-explore","둘러보기"),("4-store","서점"),("5-reader","리더"),("6-react","반응"),("7-race","대결"),("8-look","보기 설정")] %}
+        <figure class="shot"><img src="/static/intro/{{ f }}.jpg" alt="{{ cap }} 화면" loading="lazy" width="390" height="844"><figcaption>{{ cap }}</figcaption></figure>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="wrap">
+      <h2>세 가지 약속</h2>
+      <div class="grid three">
+        <article class="card"><span class="ico">⚖️</span><h3>합법 본문만</h3><p>퍼블릭 도메인 원문만 보여주고, 나머지는 정식 구매 링크로 안내해요.</p></article>
+        <article class="card"><span class="ico">🛡️</span><h3>읽은 시간은 서버가</h3><p>읽은 시간과 진도는 서버가 판정해요. 대결도 공정하게요.</p></article>
+        <article class="card"><span class="ico">🙈</span><h3>스포일러 가드</h3><p>내가 아직 안 읽은 부분의 반응은 가려져요.</p></article>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <h2>숫자로 보기</h2>
+      <div class="grid three nums">
+        <div class="card"><strong>{{ "{:,}".format(counts.classics) }}</strong><span>권의 고전</span></div>
+        <div class="card"><strong>{{ "{:,}".format(counts.store) }}</strong><span>권의 서점 도서</span></div>
+        <div class="card"><strong>{{ "{:,}".format(counts.videos) }}</strong><span>권은 소개 영상까지</span></div>
+      </div>
+      <p class="stack">Python · FastAPI · Postgres · Vercel</p>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <a class="btn primary" href="/">지금 읽으러 가기</a>
+    <p>© 함께읽기 · <a href="https://github.com/10x4hs/Saipr_project" rel="noopener">GitHub</a></p>
+  </footer>
+</body>
+</html>

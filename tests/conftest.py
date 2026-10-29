@@ -101,3 +101,13 @@ async def read_chunk(client: httpx.AsyncClient, book_id, index: int, token: str,
         f"/api/v1/books/{book_id}/progress", json={"chunk_index": index, "verified": True}, headers=headers
     )
     return r.json()
+
+
+@pytest.fixture(autouse=True)
+def _reset_login_failures():
+    """로그인 실패 기록은 프로세스 메모리라 테스트끼리 섞이지 않게 비운다."""
+    from app import auth
+
+    auth._failures.clear()
+    yield
+    auth._failures.clear()
