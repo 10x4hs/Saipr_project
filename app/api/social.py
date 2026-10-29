@@ -70,6 +70,24 @@ async def post_reaction(
     return social._out(r, user.nickname, user.id)
 
 
+@router.delete("/books/{book_id}/reactions/{reaction_id}", status_code=204)
+async def delete_reaction(
+    book_id: int,
+    reaction_id: int,
+    request: Request,
+    x_csrf_token: str | None = Header(None),
+    session: AsyncSession = Depends(get_session),
+    user: User = Depends(require_api_user),
+) -> None:
+    check_csrf(request, x_csrf_token)
+    book = await _readable(session, book_id, user)
+    removed = await social.delete_reaction(session, user, book, reaction_id)
+    if removed is None:
+        raise HTTPException(404, "reaction not found")  # 남의 반응도 같은 응답 — 있는지조차 알리지 않는다
+    others = await social.circle(session, user.id, book.id) - {user.id}
+    await broker.publish(book.id, others, {"type": "reaction.removed", "chunk": removed.chunk_index})
+
+
 @router.get("/books/{book_id}/social")
 async def book_social(
     book_id: int, session: AsyncSession = Depends(get_session), user: User = Depends(require_api_user)

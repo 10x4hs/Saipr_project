@@ -12,7 +12,7 @@
     {% for b in picks[:5] %}<div class="l-book" style="--i:{{ loop.index0 - 2 }}">{{ book_cover(b.title, b.author, 'lg', img=b.cover) }}</div>{% endfor %}
   </section>
   <section class="l-copy">
-    <p class="eyebrow mono">{{ total }} BOOKS · FREE</p>
+    <p class="eyebrow mono">고전 {{ total }}권 · 무료</p>
     <h1>같은 책을<br>각자의 속도로<br><em>함께</em> 읽어요</h1>
     <p class="l-lede">고전 {{ total }}권을 처음부터 끝까지. 내 EPUB·PDF도 같은 리더로 넘겨 읽어요.</p>
   </section>

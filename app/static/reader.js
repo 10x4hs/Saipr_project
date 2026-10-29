@@ -240,6 +240,13 @@ function renderSheetList() {
   list.forEach(x => {
     const li = document.createElement('li');
     li.innerHTML = `<span class="avatar sm"></span><div><b></b><p></p></div>`;
+    if (x.mine) {                                         // 내가 남긴 반응은 지울 수 있다
+      const del = document.createElement('button');
+      del.type = 'button'; del.className = 'r-del'; del.textContent = '삭제';
+      del.setAttribute('aria-label', '이 반응 삭제');
+      del.onclick = () => removeReaction(x.id, del);
+      li.appendChild(del);
+    }
     li.querySelector('.avatar').textContent = x.nickname.slice(0, 1);
     li.querySelector('b').textContent = x.mine ? `${x.nickname} (나)` : x.nickname;
     li.querySelector('p').textContent = x.body;
@@ -258,6 +265,14 @@ async function sendReaction(payload) {
   paintReactions(); renderSheetList();
   if (payload.comment) $('reactText').value = '';   // 이모지를 보낼 때는 쓰던 글을 지우지 않는다
   $('reactMsg').textContent = '남겼어요';
+}
+async function removeReaction(id, btn) {
+  btn.disabled = true; btn.textContent = '…';
+  const r = await fetch(`/api/v1/books/${bookId}/reactions/${id}`, { method: 'DELETE', headers: { 'X-CSRF-Token': csrf } }).catch(() => null);
+  if (!r || !r.ok) { btn.disabled = false; btn.textContent = '삭제'; $('reactMsg').textContent = '지우지 못했어요'; return; }
+  reacts.items = reacts.items.filter(x => x.id !== id);
+  paintReactions(); renderSheetList();
+  $('reactMsg').textContent = '지웠어요';
 }
 $('reactForm').addEventListener('submit', e => { e.preventDefault(); const t = $('reactText').value.trim(); if (t) sendReaction({ comment: t }); });
 
@@ -316,6 +331,8 @@ function connect() {
         const passed = before && before.verified_chunk <= verifiedUpTo && m.verified_chunk > verifiedUpTo;
         toast(passed ? `🏃 ${m.nickname}님이 나를 앞질렀어요` : `${m.nickname}님이 ${m.verified_chunk + 1}쪽을 다 읽었어요`);
       }
+    } else if (m.type === 'reaction.removed') {
+      if (m.chunk === chunk) loadReactions(chunk);
     } else if (m.type === 'reaction.added') {
       toast(`${m.nickname}님이 ${m.chunk + 1}쪽에 반응을 남겼어요`);
       if (m.chunk === chunk) loadReactions(chunk);

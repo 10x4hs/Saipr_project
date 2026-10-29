@@ -534,3 +534,21 @@ h3.sub,.sheet h3{font-size:14px;font-weight:600;color:var(--dim);margin:22px 0 1
 /* 밝은 테마: 강조색으로 쓴 글자는 진한 쪽으로 */
 .eyebrow,.ranklist .mono,.hud-text .mono,.drum-rank,.list em,.row-h .mono.muted+a{color:var(--accent-strong)}
 .eyebrow{color:var(--accent-strong)}
+
+/* ---------- 소개 화면: 테마와 상관없이 어두운 화면, 한 화면 안에 시작 버튼까지 ---------- */
+/* 밝은 테마 기기에서 회색으로 바래 보이고, 키 작은 화면에서는 시작 버튼이 화면 밖으로 밀렸다 */
+body.landing{--bg:#0a0a0a;--surface:rgba(28,30,36,.55);--sunken:rgba(255,255,255,.06);--text:#fafafa;--body:#d6d8dd;--dim:#9a9ca3;--line:#24272e;
+  --glass:rgba(255,255,255,.08);--glass-line:rgba(255,255,255,.18);--accent:#ffb3c7;--accent-strong:#ffb3c7;--accent-ink:#2a1119;color-scheme:dark;background:#0a0a0a;color:#fafafa}
+body.landing .fx{filter:none!important}
+.landing .phone{min-height:100dvh;display:flex;flex-direction:column}
+.l-stage{height:clamp(170px,30dvh,300px);margin-top:clamp(4px,2dvh,20px)}
+.l-book{width:clamp(96px,26dvh,132px)}
+.l-copy h1{font-size:clamp(30px,5.2dvh,40px)}
+.l-lede{font-size:15px;margin-top:10px}
+.landing .marquee{margin-top:clamp(6px,2dvh,20px);padding:10px 0 14px}
+.l-cta{position:sticky;bottom:0;margin-top:auto;padding:16px 0 calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent,#0a0a0a 28%)}
+@media (max-height:700px){.landing .marquee{display:none}}
+.react-list li{position:relative}
+.react-list li>div{flex:1;min-width:0}
+.r-del{flex:none;align-self:center;height:30px;padding:0 12px;border-radius:999px;font-size:12px;color:var(--dim);border:1px solid var(--glass-line)}
+.r-del:hover{color:var(--bad);border-color:var(--bad)}
