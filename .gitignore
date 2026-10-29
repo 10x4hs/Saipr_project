@@ -20,3 +20,5 @@ dist/
 scratch-dev.db
 app/static/covers/
 docs/demo/*.mp4
+.vercel
+.env*

@@ -18,6 +18,7 @@ dependencies = [
     "lxml>=5.0",
     "bcrypt>=4.1",
     "itsdangerous>=2.1",
+    "aiosqlite>=0.20",  # 로컬 시연·임시 배포용 SQLite
 ]
 
 [project.optional-dependencies]
@@ -25,7 +26,6 @@ dev = [
     "pytest>=8",
     "pytest-asyncio>=0.23",
     "respx>=0.21",
-    "aiosqlite>=0.20",
     "ruff>=0.5",
 ]
 

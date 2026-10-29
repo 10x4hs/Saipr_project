@@ -18,6 +18,14 @@ USER_AGENT = "saipr/0.1 (+https://github.com/hsK10x2/Saipr_project)"  # Wikimedi
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
+    if settings.database_url.startswith("sqlite"):
+        # 임시 배포(서버리스 /tmp SQLite)·로컬 시연용: 테이블이 없으면 만든다. Postgres는 Alembic이 맡는다
+        from app import models  # noqa: F401
+        from app.db.base import Base
+        from app.db.session import engine
+
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
     async with httpx.AsyncClient(
         timeout=settings.http_timeout_seconds,
         follow_redirects=True,
