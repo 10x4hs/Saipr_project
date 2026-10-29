@@ -12,7 +12,7 @@
   const store = { get: () => { try { return localStorage.getItem('homeView'); } catch (e) { return null; } },
                   set: v => { try { localStorage.setItem('homeView', v); } catch (e) {} } };
   let view = store.get() === 'list' ? 'list' : 'drum';
-  let lenis = null, raf = 0, focusEl = null, R = 160;
+  let lenis = null, raf = 0, focusEl = null, R = 160, hudTimer = 0, snapTimer = 0;
 
   function setView(v) {
     view = v; store.set(v);
@@ -47,8 +47,9 @@
         a = Math.max(0, 1 - Math.max(0, t - 6) / 3);     // 아주 먼 책은 안개 속으로
       } else {                                           // 맨 앞을 지나 화면 앞으로 빠져나간다
         const k = -t;
-        x = k * 140; y = k * 300; z = k * 320; ry = 26 - k * 30; rx = 4 - k * 24;
-        a = Math.max(0, 1 - k * 4.5);                    // 금방 사라져 다음 책을 가리지 않는다
+        // 아래로 지나가지 않고 제자리에서 살짝 다가오며 조용히 사라진다(글씨 위를 지나지 않게)
+        x = 0; y = -k * 24; z = k * 120; ry = 26 - k * 8; rx = 4;
+        a = Math.max(0, 1 - k * 4);                     // 한 걸음의 1/4 안에 사라져 겹침이 짧다
       }
       el.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${ry}deg) rotateX(${rx}deg)`;
       el.style.setProperty('--a', a.toFixed(3));
@@ -67,18 +68,34 @@
     focusEl = el;
     books.forEach(b => b.classList.toggle('focus', b === el));
     const rank = el.dataset.rank, readers = +el.dataset.readers;
-    $('hudRank').textContent = rank ? `인기 ${rank}위${readers ? ` · 독자 ${readers}명` : ''}` : '오늘의 추천';
-    $('hudTitle').textContent = el.dataset.title;
-    $('hudAuthor').textContent = el.dataset.author;
+    const text = $('drumHud').querySelector('.hud-text');
+    text.classList.add('fading');
+    clearTimeout(hudTimer);
+    hudTimer = setTimeout(() => {                        // 흐려진 뒤 바꾸고 다시 선명하게
+      $('hudRank').textContent = rank ? `인기 ${rank}위${readers ? ` · 독자 ${readers}명` : ''}` : '오늘의 추천';
+      $('hudTitle').textContent = el.dataset.title;
+      $('hudAuthor').textContent = el.dataset.author || '\u00a0';
+      text.classList.remove('fading');
+    }, 140);
     $('hudRead').href = el.getAttribute('href');
     $('hudRaceForm').action = el.dataset.race;
-    const h = $('drumHud'); h.classList.remove('swap'); void h.offsetWidth; h.classList.add('swap');
+  }
+
+  // 스크롤이 멈추면 가장 가까운 책에 부드럽게 맞춘다
+  function snap() {
+    clearTimeout(snapTimer);
+    snapTimer = setTimeout(() => {
+      const target = Math.round(scrollY / PER) * PER;
+      if (Math.abs(target - scrollY) < 2) return;
+      if (lenis) lenis.scrollTo(target, { duration: .9, easing: t => 1 - Math.pow(1 - t, 4) });
+      else scrollTo({ top: target, behavior: 'smooth' });
+    }, 160);
   }
 
   function start() {
     layout();
     if (window.Lenis && !lenis && !reduced) {
-      lenis = new Lenis({ lerp: 0.075, wheelMultiplier: 0.7, touchMultiplier: 1.2 });
+      lenis = new Lenis({ lerp: 0.06, wheelMultiplier: 0.6, touchMultiplier: 1.1 });
       const loop = t => { if (lenis) { lenis.raf(t); requestAnimationFrame(loop); } };
       requestAnimationFrame(loop);
     }
@@ -86,6 +103,7 @@
   }
   function stop() { cancelAnimationFrame(raf); if (lenis) { lenis.destroy(); lenis = null; } }
 
+  addEventListener('scroll', () => view === 'drum' && snap(), { passive: true });
   addEventListener('resize', () => view === 'drum' && layout());
   setView(view);
 })();
