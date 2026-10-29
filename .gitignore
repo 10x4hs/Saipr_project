@@ -1,5 +1,4 @@
-# Java / Spring Boot (src/, Gradle)
-.gradle/
+# Build output
 build/
 out/
 .idea/

@@ -1,7 +1,0 @@
-<!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>내 계정 · SAIPR</title><link rel="stylesheet" th:href="@{/css/auth.css}"></head>
-<body><main class="card"><p class="brand">SAIPR</p><h1><span th:text="${member.name}"></span>님, 환영합니다</h1>
-<p class="muted">로그인되었습니다.</p><dl><dt>이메일</dt><dd th:text="${member.email}"></dd></dl>
-<form th:action="@{/logout}" method="post"><button type="submit">로그아웃</button></form>
-</main></body></html>
