@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -8,6 +9,18 @@ class Settings(BaseSettings):
 
     app_name: str = "saipr"
     database_url: str = "postgresql+asyncpg://saipr:saipr@localhost:5432/saipr"
+
+    @field_validator("database_url")
+    @classmethod
+    def _asyncpg_url(cls, v: str) -> str:
+        """호스팅 Postgres(Neon 등)가 주는 postgres://…?sslmode=require 를 asyncpg 형식으로 바꾼다."""
+        if v.startswith("postgres://"):
+            v = "postgresql://" + v.removeprefix("postgres://")
+        if v.startswith("postgresql://"):
+            v = "postgresql+asyncpg://" + v.removeprefix("postgresql://")
+        if v.startswith("postgresql+asyncpg://"):
+            v = v.replace("sslmode=require", "ssl=require").replace("&channel_binding=require", "")
+        return v
 
     # 외부 소스별 타임아웃. 한 소스가 느려도 통합 검색 전체가 막히지 않도록 짧게 둔다.
     http_timeout_seconds: float = 3.0

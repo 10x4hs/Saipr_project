@@ -1,0 +1,10 @@
+.venv
+.git
+scratch-dev.db
+app/static/covers
+docs/demo
+tests
+migrations
+scripts
+*.pyc
+__pycache__

@@ -77,14 +77,16 @@
     document.querySelector('.race-hero h2').textContent = `${data.board.length}명이 달리는 중`;
   };
   const refresh = () => fetch(`/api/v1/races/${board.dataset.room}/standings`).then(r => r.ok && r.json()).then(d => d && render(d)).catch(() => {});
+  let retry = 3000;
   const connect = () => {
     const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/api/v1/ws/books/${board.dataset.book}`);
     const ping = setInterval(() => ws.readyState === 1 && ws.send('ping'), 25000);
     ws.onmessage = ev => { const m = JSON.parse(ev.data); if (m.type === 'progress.updated' && m.advanced) refresh(); };
-    ws.onclose = () => { clearInterval(ping); setTimeout(connect, 3000); };
+    ws.onopen = () => { retry = 3000; };
+    ws.onclose = () => { clearInterval(ping); setTimeout(connect, retry); retry = Math.min(retry * 2, 60000); };
   };
   connect();
-  setInterval(refresh, 60000);  // 새로 참가한 친구까지 반영
+  setInterval(refresh, 15000);  // WebSocket이 없어도 순위가 따라오게
 })();
 </script>
 {% endblock %}

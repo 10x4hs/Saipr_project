@@ -293,6 +293,7 @@ async function social() {
   connect();
 }
 
+let retry = 3000;
 function connect() {
   const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/api/v1/ws/books/${bookId}`);
   const ping = setInterval(() => ws.readyState === 1 && ws.send('ping'), 25000);
@@ -311,7 +312,9 @@ function connect() {
       if (m.chunk === chunk) loadReactions(chunk);
     }
   };
-  ws.onclose = () => { clearInterval(ping); setTimeout(connect, 3000); };
+  // 서버리스 배포처럼 WebSocket이 없는 곳에서는 점점 드물게 다시 시도한다
+  ws.onopen = () => { retry = 3000; };
+  ws.onclose = () => { clearInterval(ping); setTimeout(connect, retry); retry = Math.min(retry * 2, 60000); };
 }
 
 social();

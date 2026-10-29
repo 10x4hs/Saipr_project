@@ -1,0 +1,27 @@
+{% extends "app.html" %}
+{% from "_ui.html" import book_cover %}
+{% block title %}{{ book.title }} — 함께읽기{% endblock %}
+{% block heading %}<small>{{ book.author or '' }}</small>{{ book.title }}{% endblock %}
+{% block main %}
+<section class="store-hero">
+  <div class="store-cover">{{ book_cover(book.title, book.author, 'lg', img=book.cover) }}</div>
+  <div class="store-info">
+    <span class="eyebrow mono">전자책 · 알라딘</span>
+    <h2>{{ book.title }}</h2>
+    <p class="muted">{{ book.author or '' }}</p>
+    {% if book.price %}<p class="store-price"><b>{{ '{:,}'.format(book.price) }}원</b></p>{% endif %}
+  </div>
+</section>
+
+<ol class="steps-guide">
+  <li><span class="mono">1</span><div><b>알라딘에서 전자책 사기</b><p>구매·다운로드는 알라딘에서 해요.</p></div></li>
+  <li><span class="mono">2</span><div><b>받은 파일 올리기</b><p>DRM 없는 EPUB·PDF면 여기로 올려 친구와 함께 읽어요.</p></div></li>
+  <li><span class="mono">3</span><div><b>친구에게 초대 코드 보내기</b><p>같은 책을 산 친구와 대결·반응을 나눠요.</p></div></li>
+</ol>
+
+<div class="store-actions">
+  <a class="btn primary wide" id="buy" href="{{ book.url }}" target="_blank" rel="noopener">알라딘에서 전자책 사기 ↗</a>
+  <a class="btn ghost wide" id="toUpload" href="/upload?store={{ book.id }}">산 파일 올리기</a>
+</div>
+<p class="drm-note">알라딘에서 산 전자책은 대부분 복제 방지(DRM)가 걸려 알라딘 앱에서만 열려요. DRM이 걸린 파일은 올려도 열 수 없고, DRM을 푸는 건 법으로 금지돼 있어요. 출판사 직판 등 DRM 없는 파일만 열 수 있어요.</p>
+{% endblock %}

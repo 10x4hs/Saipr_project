@@ -137,3 +137,34 @@ def test_catalog_entries_are_well_formed():
     assert len(CATALOG) > 300
     assert {b["source"] for b in CATALOG} <= {"wikisource", "gutendex"}
     assert len({(b["source"], b["id"]) for b in CATALOG}) == len(CATALOG)
+
+
+async def test_store_book_links_to_aladin_and_upload(api):
+    from app.web import STORE
+
+    item = STORE[0]
+    async with api(upstream) as c:
+        await signup(c)
+        page = await c.get(f"/store/{item['id']}")
+        shelf = await c.get("/discover", params={"g": "서점"})
+        form = await c.get("/upload", params={"store": item["id"]})
+        token = form.text.split('name="csrf" value="')[1].split('"')[0]
+        up = await c.post(
+            "/upload",
+            files={"file": ("mybook.txt", ("가나다라 마바사 " * 30).encode(), "text/plain")},
+            data={"csrf": token, "store": item["id"]},
+        )
+        library = await c.get("/library")
+        missing = await c.get("/store/0")
+    assert page.status_code == 200 and item["url"].replace("&", "&amp;") in page.text and "DRM" in page.text
+    assert shelf.text.count('class="card"') == len(STORE)
+    assert "이 책의 파일을 올려요" in form.text
+    assert up.status_code == 303 and item["cover"] in library.text  # 올린 책에 서점 표지가 붙는다
+    assert missing.status_code == 404
+
+
+def test_catalog_has_no_duplicate_titles():
+    from app.web import CATALOG
+
+    keys = [(b["title"].strip().lower(), (b.get("author") or "").strip().lower()) for b in CATALOG]
+    assert len(keys) == len(set(keys))

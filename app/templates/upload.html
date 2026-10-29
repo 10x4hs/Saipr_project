@@ -2,8 +2,12 @@
 {% block title %}파일 올리기 — 함께읽기{% endblock %}
 {% block heading %}내 책 올리기{% endblock %}
 {% block main %}
+{% if for_book %}
+<a class="for-book" href="/store/{{ for_book.id }}"><img src="{{ for_book.cover }}" alt=""><div><span class="mono">이 책의 파일을 올려요</span><b>{{ for_book.title }}</b><span>{{ for_book.author or '' }}</span></div></a>
+{% endif %}
 <form class="drop" id="drop" action="/upload" method="post" enctype="multipart/form-data">
   <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden" name="store" value="{{ for_book.id if for_book else '' }}">
   <input type="file" id="file" name="file" accept=".epub,.pdf,.txt" required>
   <label for="file">
     <span class="drop-ic">＋</span>

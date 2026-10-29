@@ -32,7 +32,29 @@ router = APIRouter(include_in_schema=False)
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 # 서가 카탈로그 — scripts/build_catalog.py로 만든다 (퍼블릭 도메인 확인된 작품만)
-CATALOG: list[dict] = json.loads((Path(__file__).parent / "data" / "catalog.json").read_text())
+DATA = Path(__file__).parent / "data"
+STATIC = Path(__file__).parent / "static"
+
+
+def _load_catalog() -> list[dict]:
+    """같은 작품이 여러 번(판본·문서명 차이) 실려 있으면 하나만 남기고, 표지 파일이 없는 환경(배포)에서는
+    원본 표지 주소를 쓴다."""
+    seen, out = set(), []
+    for b in json.loads((DATA / "catalog.json").read_text()):
+        key = (b["title"].strip().lower(), (b.get("author") or "").strip().lower())
+        if key in seen:
+            continue
+        seen.add(key)
+        if b.get("cover") and not (STATIC / b["cover"].removeprefix("/static/")).exists():
+            b["cover"] = b.get("cover_src")
+        out.append(b)
+    return out
+
+
+CATALOG: list[dict] = _load_catalog()
+# 저작권이 살아 있는 유명 도서 — 본문 없이 정보·표지와 알라딘 전자책 구매 링크만 (scripts/build_store.py)
+STORE: list[dict] = json.loads((DATA / "store.json").read_text())
+STORE_INDEX = {b["id"]: b for b in STORE}
 GENRE_ORDER = [
     "단편소설", "장편소설", "중편소설", "고전소설", "신소설", "판소리", "시", "시집", "희곡", "동화", "수필",
     "세계 고전", "세계 · 추리", "세계 · SF", "세계 · 판타지", "세계 · 동화", "세계 · 모험", "세계 · 공포",
@@ -41,9 +63,7 @@ GENRE_ORDER = [
 SHELVES = {g: [b for b in CATALOG if b["genre"] == g] for g in GENRE_ORDER}
 SHELVES = {g: books for g, books in SHELVES.items() if books}
 CATALOG_INDEX = {(b["source"], b["id"]): b for b in CATALOG}
-POPULAR_ORDER = [
-    tuple(k) for k in json.loads((Path(__file__).parent / "data" / "popular.json").read_text())["order"]
-]
+POPULAR_ORDER = [tuple(k) for k in json.loads((DATA / "popular.json").read_text())["order"]]
 
 COVER_PALETTES = 8
 
@@ -55,7 +75,9 @@ def cover(title: str, author: str | None = None) -> dict:
 
 
 def cover_of(book: Book) -> str | None:
-    """가져온 책의 실제 표지 경로 (카탈로그에 있고 표지를 받아 둔 경우만)."""
+    """책의 실제 표지: 올릴 때 고른 서점 표지 → 카탈로그 표지 순."""
+    if book.cover_url:
+        return book.cover_url
     meta = CATALOG_INDEX.get((book.source, book.external_id))
     return meta.get("cover") if meta else None
 
@@ -127,7 +149,8 @@ async def home(
         picks=_daily_picks(10),
         marquee=_daily_picks(16),
         popular=(top := await popular(session, 30)),
-        drum=_fill(top, 40),
+        drum=[b | {"store": True} for b in STORE[:14]] + _fill(top, 30),
+        store=STORE,
         shelves={g: books[:14] for g, books in SHELVES.items()},
     )
 
@@ -208,11 +231,37 @@ async def logout(request: Request, csrf: str = Form("")) -> RedirectResponse:
 async def discover(
     request: Request, g: str | None = None, user: User = Depends(auth.require_user)
 ) -> HTMLResponse:
+    if g == "서점":
+        return _render(
+            request,
+            "discover.html",
+            user,
+            genres=SHELVES,
+            genre="서점",
+            books=[],
+            store=STORE,
+            total=len(CATALOG),
+        )
     genre = g if g in SHELVES else None
     books = SHELVES[genre] if genre else CATALOG
     return _render(
-        request, "discover.html", user, genres=SHELVES, genre=genre, books=books, total=len(CATALOG)
+        request,
+        "discover.html",
+        user,
+        genres=SHELVES,
+        genre=genre,
+        books=books,
+        store=STORE,
+        total=len(CATALOG),
     )
+
+
+@router.get("/store/{item_id}", response_class=HTMLResponse)
+async def store_item(request: Request, item_id: str, user: User = Depends(auth.require_user)) -> HTMLResponse:
+    book = STORE_INDEX.get(item_id)
+    if book is None:
+        raise HTTPException(404, "책을 찾을 수 없어요")
+    return _render(request, "store.html", user, book=book)
 
 
 @router.get("/shelf/{genre}")
@@ -270,8 +319,10 @@ async def search(
 
 
 @router.get("/upload", response_class=HTMLResponse)
-async def upload_form(request: Request, user: User = Depends(auth.require_user)) -> HTMLResponse:
-    return _render(request, "upload.html", user, error=None)
+async def upload_form(
+    request: Request, store: str | None = None, user: User = Depends(auth.require_user)
+) -> HTMLResponse:
+    return _render(request, "upload.html", user, error=None, for_book=STORE_INDEX.get(store or ""))
 
 
 @router.post("/upload", response_class=HTMLResponse, response_model=None)
@@ -279,18 +330,23 @@ async def upload(
     request: Request,
     file: UploadFile = File(...),
     csrf: str = Form(""),
+    store: str = Form(""),
     session: AsyncSession = Depends(get_session),
     user: User = Depends(auth.require_user),
 ) -> HTMLResponse | RedirectResponse:
     auth.check_csrf(request, csrf)
+    for_book = STORE_INDEX.get(store)
     data = await file.read(MAX_UPLOAD_BYTES + 1)
     try:
         parsed = parse_upload(file.filename or "untitled.txt", data)
     except SourceError as e:
-        resp = _render(request, "upload.html", user, error=str(e))
+        resp = _render(request, "upload.html", user, error=str(e), for_book=for_book)
         resp.status_code = 422
         return resp
     book = await book_service.save_upload(session, parsed, user.id)
+    if for_book and not book.cover_url:  # 서점에서 고른 책이면 그 표지를 붙인다
+        book.cover_url = for_book.get("cover")
+        await session.commit()
     return RedirectResponse(f"/books/{book.id}", status_code=303)
 
 

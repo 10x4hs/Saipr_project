@@ -459,3 +459,32 @@ h3.sub,.sheet h3{font-size:14px;font-weight:600;color:var(--dim);margin:22px 0 1
 .dotfield canvas{display:block}
 .in-drum #fx{opacity:.35}
 .hx-book.focus .book3d::after{opacity:.9}
+
+/* ---------- 목록용 가벼운 표지 (탐색 격자 렉 줄이기) ---------- */
+.flatbook{position:relative;aspect-ratio:2/3;margin-bottom:10px;border-radius:2px 6px 6px 2px;overflow:hidden;background:var(--c1,#1d2a44);
+  box-shadow:inset 3px 0 0 rgba(255,255,255,.14),inset 8px 0 10px -6px rgba(0,0,0,.5),4px 6px 0 -2px #e3dccb,4px 6px 0 -1px rgba(0,0,0,.25),0 14px 24px -14px rgba(0,0,0,.7)}
+.flatbook.p1{--c1:#6b1f2a}.flatbook.p2{--c1:#2f4a2b}.flatbook.p3{--c1:#c48a2c}.flatbook.p4{--c1:#4b2a4f}.flatbook.p5{--c1:#384250}.flatbook.p6{--c1:#0f5257}.flatbook.p7{--c1:#a1461f}
+.flatbook img{width:100%;height:100%;object-fit:cover;display:block}
+.flatbook .cover{height:100%;font-size:12px}
+.flatbook::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.3),rgba(255,255,255,.18) 3%,transparent 9%)}
+.grid>div{content-visibility:auto;contain-intrinsic-size:auto 230px}
+.card:hover .flatbook{transform:translateY(-3px)}
+.flatbook{transition:transform .4s var(--ease)}
+
+/* ---------- 서점 책 ---------- */
+.store-hero{display:grid;grid-template-columns:130px 1fr;gap:20px;align-items:center;margin-top:6px}
+.store-info h2{font-size:22px;letter-spacing:-.03em;margin:6px 0 2px}
+.store-info p{margin:0}
+.store-price b{display:inline-block;margin-top:10px;font:500 18px var(--f-mono)}
+.steps-guide{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:10px}
+.steps-guide li{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:18px;background:var(--surface);border:1px solid var(--glass-line);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.steps-guide .mono{display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:50%;font-size:12px;background:var(--accent);color:var(--accent-ink)}
+.steps-guide b{font-size:15px}
+.steps-guide p{margin:2px 0 0;font-size:13px;color:var(--dim)}
+.store-actions{display:grid;gap:10px;margin-top:22px}
+.drm-note{margin:16px 2px 0;font-size:12px;line-height:1.7;color:var(--dim)}
+.for-book{display:flex;gap:14px;align-items:center;padding:12px;margin-bottom:14px;border-radius:18px;background:var(--surface);border:1px solid var(--accent)}
+.for-book img{width:48px;aspect-ratio:2/3;object-fit:cover;border-radius:2px 5px 5px 2px}
+.for-book div{display:grid}
+.for-book .mono{color:var(--accent)}
+.for-book span{font-size:13px;color:var(--dim)}

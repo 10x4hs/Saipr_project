@@ -11,7 +11,7 @@
   <div class="hx-view">
     <div class="hx-stage" id="hxStage">
       {% for b in drum %}
-      <a class="hx-book" href="/open/{{ b.source }}/{{ b.id|urlencode }}" data-title="{{ b.title }}" data-author="{{ b.author or '' }}"
+      <a class="hx-book" href="{{ '/store/' ~ b.id if b.store else '/open/' ~ b.source ~ '/' ~ (b.id|urlencode) }}" data-title="{{ b.title }}" data-author="{{ b.author or '' }}"
          data-rank="{{ b.rank or '' }}" data-readers="{{ b.readers or 0 }}" data-race="/races/start/{{ b.source }}/{{ b.id|urlencode }}">
         {% if b.rank %}<span class="hx-rank mono">{{ b.rank }}</span>{% endif %}
         {{ book_cover(b.title, b.author, 'solid', img=b.cover) }}

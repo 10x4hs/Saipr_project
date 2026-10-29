@@ -17,9 +17,26 @@
 </div>
 {%- endmacro %}
 
-{% macro catalog_card(b) -%}
+{% macro flat_cover(title, author, img=None) -%}
+{# 목록용 가벼운 표지: 3D 면 대신 앞표지 하나와 그림자로 책등을 흉내 낸다(수백 권을 한 화면에 그려도 가볍게) #}
+{% set c = cover(title, author) -%}
+<div class="flatbook p{{ c.palette }}" aria-hidden="true">
+  {%- if img %}<img src="{{ img }}" alt="" loading="lazy" decoding="async">
+  {%- else %}<div class="cover p{{ c.palette }} m{{ c.pattern }}"><span class="cv-art"></span><span class="cv-t">{{ title }}</span><span class="cv-a">{{ author or '' }}</span></div>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro store_card(b) -%}
+<a class="card" href="/store/{{ b.id }}">
+  {{ flat_cover(b.title, b.author, b.cover) }}
+  <b>{{ b.title }}</b>
+  <span>{{ b.author or '' }}</span>
+</a>
+{%- endmacro %}
+
+{% macro catalog_card(b, flat=False) -%}
 <a class="card" href="/open/{{ b.source }}/{{ b.id|urlencode }}">
-  {{ book_cover(b.title, b.author, img=b.cover) }}
+  {% if flat %}{{ flat_cover(b.title, b.author, b.cover) }}{% else %}{{ book_cover(b.title, b.author, img=b.cover) }}{% endif %}
   <b>{{ b.title }}</b>
   <span>{{ b.author or b.genre }}</span>
 </a>
