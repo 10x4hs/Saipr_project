@@ -5,7 +5,7 @@
 > 🧑‍💼 **에픽 소유자:** PM (Claude)
 > ✅ **승인권자:** 프로젝트 오너 · 테크 리드
 > 🎯 **대상 마일스톤:** MVP Release v0.1.0 (웹)
-> 🔗 **관련 문서:** [디자인 시스템](design-system.md) · [아키텍처](architecture.md) · [인터뷰 로그](../.grill/reading-together-mvp.md) · [GOAL](../GOAL.md)
+> 🔗 **관련 문서:** [예전 디자인 시안(보관)](archive/README.md) · [아키텍처](architecture.md) · [인터뷰 로그](../.grill/reading-together-mvp.md) · [GOAL](../GOAL.md)
 
 ---
 

@@ -44,13 +44,9 @@
 | 7 | ✅ | `tests/test_social.py::test_spoiler_guard_hides_reactions_ahead_of_me` |
 | 8 | ✅ | 외부 소스는 퍼블릭 도메인만, 올린 파일은 올린 사람만 (`tests/test_uploads.py`) |
 
-## Design decision (Phase 2 착수 전 게이트)
+## Design decision — 완료
 
-~~팀 투표로 시안 A 또는 B 확정~~ → 2026-10-29 두 시안 모두 폐기, 모바일 앱 기준 글래스 디자인으로 새로 설계(아래 README). 원래 계획: 팀 투표로 **시안 A(Glass v2) 또는 B(종이 서재) 중 하나를 확정**하고, 선택안의 토큰을 `docs/design-system.md`에 단일 기준으로 남긴다.
-
-- 근거 자료: README의 테마 선택 표, `docs/mockups/glass-v2.html` · `docs/mockups/paper-b.html` (두 시안 6화면씩)
-- 완료 판정: 팀원 과반 득표안 결정 → 탈락안 목업은 `docs/mockups/archive/`로 이동 → 리더 화면 가독성 기준(본문 16px 이상 · 대비 AA) 통과
-- 동률이면: 리더 화면 한 장만 두 시안으로 5분 실사용 테스트 후 재투표
+2026-10-29 시안 A(Glass v2)·B(종이 서재)를 모두 폐기하고 모바일 앱 기준 글래스 디자인으로 새로 만들었다. 지금 화면은 README, 예전 시안은 [`docs/archive/`](docs/archive/README.md).
 
 ## Scope
 

@@ -1,105 +1,131 @@
 <div align="center">
 
-# 제목: 미정
+# 함께읽기
 
-**쉬운 독서를 위해**
+**같은 책을, 각자의 속도로, 함께 읽어요.**
 
-같은 책을 각자의 속도로 읽으면서 친구의 진행률과 문단 반응이 실시간으로 겹쳐 보이고,
-팀을 짜서 공정한 페이지 레이스로 경쟁합니다.
+친구와 같은 책을 읽으면 서로 어디까지 읽었는지, 어느 문단에 어떤 반응을 남겼는지 보여요.<br>
+초대 코드 하나로 페이지 레이스를 열고, 대충 넘긴 쪽은 점수가 되지 않아요.
 
- **[PRD](docs/PRD.md)** · [아키텍처](docs/architecture.md) · [GOAL](GOAL.md) · [Figma](https://www.figma.com/design/mp2nKNmBdJ7Dg2rc2p9rht)
+[**앱 열기 →**](https://saipr-reading.vercel.app) · [PRD](docs/PRD.md) · [완료 기준](GOAL.md) · [구조](docs/architecture.md)
 
-<img src="docs/images/01-home.png" width="200" alt="홈"> <img src="docs/images/03-reader.png" width="200" alt="리더"> <img src="docs/images/b-03-reader.png" width="200" alt="리더 시안 B">
+<img src="docs/images/app/2-home.jpg" width="190" alt="홈"> <img src="docs/images/app/5-reader.jpg" width="190" alt="리더"> <img src="docs/images/app/6-react.jpg" width="190" alt="반응"> <img src="docs/images/app/7-race.jpg" width="190" alt="대결">
 
 </div>
 
 ---
 
-## 왜 만드나
+## 한눈에
 
-| 기존 | 한계 | 함께읽기 |
+| 읽기 | 함께 | 어디서나 |
 |---|---|---|
-| 밀리의서재 | 개인 챌린지뿐, 유저 간 대결 없음 | 친구·팀 대항 페이지 레이스 |
-| 실시간 함께읽기 서비스 | 같은 시간에 접속해야 함 | **비동기 기본** — 먼저 읽은 친구의 반응이 문단 옆에 남음 |
-| 독서 기록 SNS | 다 읽은 뒤 피드 공유에 그침 | **읽는 도중**의 동행 |
-| 공통 | 콘텐츠 라이선싱이 진입장벽 | 본문은 퍼블릭 도메인만, 나머지는 메타데이터 + 진행률 |
+| 저작권이 끝난 고전 **866권**은 앱에서 전문을 3D로 넘겨 읽어요 | 같은 방 친구의 진행과 **문단 반응**이 보여요. 아직 안 읽은 곳의 반응은 가려져요 | 모바일 웹 앱이라 설치 없이 열려요. 읽던 위치·설정은 계정에 저장돼요 |
+| 유명한 신간 **130권**은 알라딘 전자책으로 연결하고, 산 파일을 올려 읽어요 | **초대 코드**로 대결을 열고, 검증된 쪽 수로 순위를 매겨요 | 배경 30종·강조색 12종으로 화면을 꾸며요 |
 
-타깃: 독서모임은 부담스럽고 혼자 읽기는 지속이 안 되는 대학생·2030. 자세한 페르소나·사용자 스토리·기능 명세·성공 지표는 **[PRD](docs/PRD.md)**.
+## 사용 흐름
 
-## 핵심 개념
+```mermaid
+flowchart TB
+    subgraph 고르기
+        A[가입 · 로그인] --> B[홈 · 3D로 쌓인 인기 도서]
+        B --> C{어떤 책?}
+        C -->|고전 866권| D[바로 열기]
+        C -->|유명 신간 130권| E[서점 · 소개 영상] --> F[알라딘 구매 → 파일 올리기]
+    end
+    subgraph 읽기
+        H[3D 책장 넘김] --> V[서버가 읽은 시간 확인] --> R[문단 반응]
+    end
+    subgraph 함께
+        I[대결 열기 · 초대 코드] --> K[친구 참가 · 실시간 순위]
+    end
+    D --> H
+    F --> H
+    R --> I
+```
 
-- **하이브리드 콘텐츠** — 저작권 만료작(위키문헌·Gutendex)은 앱 안 리더로 전문을 읽고, 시판 도서는 카카오·네이버·Google Books 메타데이터와 수동 진행률로 기록합니다. 본문 제공 소스는 코드에서 화이트리스트로 강제합니다.
-- **청크 = 공통 위치** — 판본·기기마다 달라지는 "페이지" 대신 본문을 결정적으로 나눈 청크를 좌표로 씁니다. 그래서 반응이 모든 사람에게 같은 문단에 겹칩니다.
-- **스포일러 가드** — 내가 아직 안 읽은 위치의 반응은 내용 없이 "앞에서 N개의 반응이 기다리고 있어요"로만 보입니다.
-- **체류시간 검증** — 청크 글자 수 대비 최소 체류시간을 서버가 판정해, 넘기기만 한 구간은 레이스 점수에서 빠집니다.
+<details>
+<summary><b>화면 전체 보기</b></summary>
+<br>
 
-## 지금 되는 것
+| 로그인 | 홈 | 탐색 | 서점 |
+|---|---|---|---|
+| <img src="docs/images/app/1-login.jpg" width="180"> | <img src="docs/images/app/2-home.jpg" width="180"> | <img src="docs/images/app/3-explore.jpg" width="180"> | <img src="docs/images/app/4-store.jpg" width="180"> |
+| **리더 (3D 넘김)** | **문단 반응** | **대결** | **화면 꾸미기** |
+| <img src="docs/images/app/5-reader.jpg" width="180"> | <img src="docs/images/app/6-react.jpg" width="180"> | <img src="docs/images/app/7-race.jpg" width="180"> | <img src="docs/images/app/8-look.jpg" width="180"> |
 
-> 배포: **https://saipr-reading.vercel.app** (Vercel + Neon Postgres). 서버리스라 WebSocket 대신 대결 순위는 15초마다 새로고침되고, 4.5MB 넘는 파일은 올릴 수 없어요.
+</details>
 
-> 시연 영상: `docs/demo/함께읽기-시연.mp4` (56초, 저장소에는 올리지 않음 — 아래 "시연 영상 만들기"로 다시 만들 수 있어요)
+## 꼭 지키는 규칙 세 가지
 
-| 화면 | 기능 |
+1. **본문은 합법적인 것만** — 앱이 직접 보여 주는 본문은 저작권이 끝난 작품(위키문헌·구텐베르크)뿐이에요. 신간은 정보와 구매 링크만 두고, 사용자가 올린 파일은 올린 사람만 열 수 있어요.
+2. **읽은 시간은 서버가 잰다** — 쪽을 펼친 시각부터 서버가 재서, 글자 수에 맞는 최소 시간을 채워야 "읽음"이 돼요. 넘기기만 해서는 레이스 점수가 오르지 않아요.
+3. **스포일러는 버그** — 내가 아직 읽지 않은 쪽의 친구 반응은 "🔒 N개"로 개수만 보여요. 실시간 알림에도 반응 내용은 싣지 않아요.
+
+## 구조
+
+```mermaid
+flowchart LR
+    U[휴대폰 브라우저] <-->|화면 · API · 실시간| S[FastAPI · Vercel]
+    S <--> D[(Neon Postgres)]
+    S -->|고전 본문| W[위키문헌 · 구텐베르크]
+    X[수집 스크립트] -->|서가 · 서점 · 영상 목록| S
+    O[위키문헌 · 구텐베르크<br/>알라딘 · YouTube] --> X
+```
+
+| 층 | 쓰는 것 |
 |---|---|
-| 로그인 · 가입 | 사진 한 장 위 유리 입력칸 하나씩 (이메일 → 비밀번호). BCrypt·CSRF·30분 세션 |
-| 홈 | 인기 고전이 나선을 따라 **3D로 감겨 쌓이고** 스크롤하면 한 권씩 앞으로. 책을 누르면 열림. 뒤에는 손에 반응하는 점 물결 배경 |
-| 탐색 · 검색 | 퍼블릭 도메인 866권 · 24개 서가 — 한국(단편·장편·중편·고전소설·신소설·판소리·시·희곡·동화·수필)과 세계(고전·추리·SF·동화·모험·공포·로맨스·시·희곡·철학·어린이·역사), 장르 칩·필터, 외부 검색 |
-| 리더 | 화면 크기로 쪽을 나눠 **3D 페이지 넘김**, 서버가 잰 체류시간으로만 "읽음", 문단을 눌러 반응(이모지 5종·한 줄 글) |
-| 대결 | 6자리 초대 코드·공유, 검증된 쪽 수로 순위, WebSocket으로 실시간 갱신·추월 애니메이션 |
-| 함께 읽기 | 같은 방 친구의 진행·반응 알림, **스포일러 가드**(내가 아직 못 읽은 쪽의 반응은 개수만) |
-| 서재 · 올리기 | 읽는 중·다 읽음·내 파일, DRM 없는 EPUB·PDF·TXT 올리기(본문은 나만) |
-| 서점 | 저작권이 살아 있는 유명 도서 130권 — 표지·정보와 알라딘 전자책 링크, 산 파일(DRM 없는 것) 올리기 연결, 북튜버 소개 영상 |
-| 나 | 프로필 사진 · 닉네임 · 읽은 쪽 통계 · 화면 꾸미기 |
-| 화면 꾸미기 | 자동·밝게·어둡게, 배경 30종(기본·책·자연·날씨·우주, 캔버스 비·눈·별), 강조 색 12종 — 계정에 저장 |
+| 서버 | Python 3.12 · FastAPI · SQLAlchemy(async) · Alembic |
+| 화면 | Jinja2 서버 렌더링 + 바닐라 JS (빌드 단계 없음) · 3D는 CSS transform · 책장 넘김은 StPageFlip |
+| 데이터 | Postgres(Neon) · 로컬은 SQLite |
+| 실시간 | 로컬은 WebSocket, 배포(서버리스)는 20초 폴링 |
+| 배포 | Vercel · CI는 GitHub Actions (테스트 + 실제 Postgres 마이그레이션) |
 
-## 저장소 구성
+## 지금까지
 
-| 경로 | 내용 |
+| 단계 | 한 일 |
 |---|---|
-| `app/api/` | JSON API · WebSocket (`books`, `me`, `social`) |
-| `app/web.py`, `app/templates/`, `app/static/` | 서버 렌더링 모바일 웹 앱 (Jinja2 + 작은 바닐라 JS) |
-| `app/services/` | 검색 · 청크화 · 체류시간 · 서재 · 업로드 파싱 · 대결 · 반응 |
-| `app/realtime.py` | 책 단위 인메모리 브로커 (여러 대로 늘리면 Redis Pub/Sub로 교체) |
-| `app/data/` | 서가 카탈로그 · 인기 고전 순서 |
-| `scripts/` | `build_catalog.py`(퍼블릭 도메인 수집), `fetch_covers.py`(표지 이미지 — 프로토타입 전용) |
-| `migrations/`, `tests/` | Alembic · pytest (네트워크 0) |
+| 기획 | PRD · 완료 기준(GOAL) · 결정 기록(`.grill/`) |
+| 기반 | Java 인증 서버를 걷어내고 Python 하나로 통일 (#5) |
+| 읽기 | 도서 검색·청크 나누기 → 리더 → 3D 책장 넘김 · 스크롤 모드 |
+| 계정 | 이메일 로그인(BCrypt·CSRF·세션 만료) · 프로필 사진 · 화면 꾸미기 |
+| 서가 | 퍼블릭 도메인 866권(24개 서가) · 서점 130권 · 북튜버 소개 영상 |
+| 함께 | 대결방·초대 코드 · 문단 반응 · 스포일러 가드 · 실시간 알림 |
+| 품질 | 코드 리뷰로 10건 수정(체류시간 우회·업로드 DoS·오픈 리다이렉트 등) · 테스트 86개 |
+| 배포 | Vercel + Neon, main 머지 (#7) |
 
-## 빠른 시작
+## 다음 할 일
+
+- [ ] 실제 iPhone·Android에서 3D 홈·책장 넘김 손맛 확인
+- [ ] 소셜 로그인(카카오·구글) · 신간 수동 진행률(트래커 모드)
+- [ ] 한줄평 배틀 · 포인트 · 팀 리그 · 푸시 알림
+- [ ] 배포판 실시간 알림을 공유 브로커(Postgres LISTEN/NOTIFY 등)로
+
+## 개발하기
 
 ```bash
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-python scripts/fetch_covers.py      # 선택: 표지 이미지 (없으면 생성 표지)
-cp .env.example .env                # SECRET_KEY는 운영에서 반드시 바꾸기
-docker compose up --build           # Postgres + 앱 (http://localhost:8000)
+export DATABASE_URL="sqlite+aiosqlite:///$PWD/scratch-dev.db" DWELL_SCALE=0.06   # 시연용: 최소 읽기 시간 6%
+uvicorn app.main:app --port 8011          # http://localhost:8011 (SQLite면 테이블 자동 생성)
+pytest -q && ruff check .                  # 테스트는 네트워크 없이 돌아요
 ```
 
-DB 없이 바로 보기(SQLite):
+<details>
+<summary><b>폴더 · 데이터 · 배포 메모</b></summary>
+<br>
 
-```bash
-export DATABASE_URL="sqlite+aiosqlite:///$PWD/scratch-dev.db" DWELL_SCALE=0.06   # 시연용: 체류시간 6%
-python -c "import asyncio;from sqlalchemy.ext.asyncio import create_async_engine;from app import models;from app.db.base import Base
-async def m():
-    e=create_async_engine('$DATABASE_URL')
-    async with e.begin() as c: await c.run_sync(Base.metadata.create_all)
-asyncio.run(m())"
-uvicorn app.main:app --port 8011
-```
+| 경로 | 내용 |
+|---|---|
+| `app/web.py` · `templates/` · `static/` | 화면 (홈 3D, 탐색, 서점, 리더, 대결, 나) |
+| `app/api/` | JSON API · WebSocket |
+| `app/services/` | 체류시간 · 서재 · 업로드 파싱 · 대결 · 반응(스포일러 가드) |
+| `app/data/` | 서가·서점·인기 순서·소개 영상 목록 |
+| `scripts/` | `build_catalog` · `build_store` · `build_videos` · `fetch_covers` |
+| `migrations/` · `tests/` | Alembic · pytest 86개 |
 
-검증: `pytest -q` · `ruff check .` — 완료 기준과 현재 상태는 [GOAL.md](GOAL.md).
+- 환경 변수: `DATABASE_URL`, `SECRET_KEY`(배포 필수), `COOKIE_SECURE`, `MAX_UPLOAD_MB`(Vercel은 4), `DWELL_SCALE`(시연용, 기본 1.0)
+- 스키마를 바꾸면 배포 **전에** Neon에 `alembic upgrade head`
+- 표지 이미지는 시연용으로만 받고 저장소에 올리지 않아요. 알라딘 전자책은 DRM 때문에 앱에서 열 수 없고, 앱에도 그렇게 안내해요.
+- 예전 디자인 시안은 [`docs/archive/`](docs/archive/)에 있어요.
 
-## 로드맵
-
-- [x] Phase 0–1 — 스캐폴딩 · 도서 소스 · 통합 검색 · 청크화
-- [x] 계정 · 서재 · 리더(3D 넘김) · 업로드 · 화면 꾸미기
-- [x] Phase 3 — 대결방 · 초대 코드 · 실시간 · 문단 반응 · 스포일러 가드
-- [ ] 소셜 로그인 · 트래커 모드(상용 도서 수동 진행률)
-- [ ] 한줄평 배틀 · 포인트 · 팀 리그 · 푸시 · 배포
-
-## 콘텐츠·약관 원칙
-
-- 본문은 두 경로로만 들어옵니다: 퍼블릭 도메인 소스(위키문헌·구텐베르크), 그리고 사용자가 직접 올린 DRM 없는 EPUB·PDF·TXT. 올린 파일의 본문은 올린 브라우저에서만 열리고, 다른 사람에게는 위치·진행률·반응만 공유됩니다. DRM 해제나 웹 크롤링으로 본문을 모으지 않습니다.
-- 퍼블릭 도메인이 아닌 본문은 저장·배포하지 않습니다.
-- 알라딘 Open API는 법인 사업자의 도서정보 서비스 이용 제한 조항 때문에 사용하지 않습니다.
-- 외부 검색 결과에는 원 출처 링크를 함께 제공합니다.
-- 책 표지 이미지(`scripts/fetch_covers.py`)는 출시하지 않는 시연용으로만 받아 두고 저장소에 올리지 않습니다. 출시 전에는 라이선스가 있는 표지 API로 바꿔야 합니다.
+</details>
