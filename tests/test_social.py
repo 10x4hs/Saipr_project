@@ -182,3 +182,26 @@ def test_websocket_rejects_anonymous(live_client):
     with pytest.raises(WebSocketDisconnect) as e, c.websocket_connect("/api/v1/ws/books/1") as ws:
         ws.receive_json()
     assert e.value.code == 4401
+
+
+async def test_only_author_can_delete_a_reaction(api, clock):
+    async with api(upstream) as host, api(upstream) as friend:
+        book_id = await _race_pair(host, friend)
+        ht = token_of((await host.get(f"/books/{book_id}")).text)
+        ft = token_of((await friend.get(f"/books/{book_id}")).text)
+        r = await host.post(
+            f"/api/v1/books/{book_id}/reactions",
+            json={"chunk_index": 0, "emoji": "😂"},
+            headers={"X-CSRF-Token": ht},
+        )
+        rid = r.json()["id"]
+        by_friend = await friend.delete(
+            f"/api/v1/books/{book_id}/reactions/{rid}", headers={"X-CSRF-Token": ft}
+        )
+        no_csrf = await host.delete(f"/api/v1/books/{book_id}/reactions/{rid}")
+        by_author = await host.delete(
+            f"/api/v1/books/{book_id}/reactions/{rid}", headers={"X-CSRF-Token": ht}
+        )
+        left = (await host.get(f"/api/v1/books/{book_id}/reactions", params={"chunk": 0})).json()
+    assert by_friend.status_code == 404 and no_csrf.status_code == 403
+    assert by_author.status_code == 204 and left["items"] == []

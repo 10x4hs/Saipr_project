@@ -130,3 +130,13 @@ def _out(r: Reaction, nickname: str, me: int) -> dict:
         "nickname": nickname,
         "mine": r.user_id == me,
     }
+
+
+async def delete_reaction(session: AsyncSession, user: User, book: Book, reaction_id: int) -> Reaction | None:
+    """내가 남긴 반응만 지운다. 남의 것이거나 없으면 None."""
+    r = await session.get(Reaction, reaction_id)
+    if r is None or r.book_id != book.id or r.user_id != user.id:
+        return None
+    await session.delete(r)
+    await session.commit()
+    return r
