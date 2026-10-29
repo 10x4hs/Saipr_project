@@ -86,6 +86,34 @@ async def create_user(session: AsyncSession, form: SignupForm) -> User | None:
     return user
 
 
+# 비밀번호 대입 막기: (이메일, IP)별로 10분에 5번까지 틀릴 수 있다.
+# 서버리스에서는 인스턴스마다 따로 세지만, 한 인스턴스에 몰아 대입하는 공격은 막는다
+MAX_FAILURES = 5
+FAILURE_WINDOW_S = 600
+_failures: dict[tuple[str, str], list[float]] = {}
+
+
+def too_many_failures(email: str, ip: str) -> bool:
+    now = time.time()
+    key = (normalize_email(email), ip)
+    recent = [t for t in _failures.get(key, []) if now - t < FAILURE_WINDOW_S]
+    if recent:
+        _failures[key] = recent
+    else:
+        _failures.pop(key, None)  # 오래된 기록은 지워 메모리가 쌓이지 않게
+    return len(recent) >= MAX_FAILURES
+
+
+def record_failure(email: str, ip: str) -> None:
+    _failures.setdefault((normalize_email(email), ip), []).append(time.time())
+    if len(_failures) > 10_000:  # 아주 많은 이메일로 흩뿌려도 무한히 커지지 않게
+        _failures.clear()
+
+
+def clear_failures(email: str, ip: str) -> None:
+    _failures.pop((normalize_email(email), ip), None)
+
+
 async def authenticate(session: AsyncSession, email: str, password: str) -> User | None:
     user = await session.scalar(select(User).where(User.email == normalize_email(email)))
     ok = verify_password(password, user.password_hash if user else None)

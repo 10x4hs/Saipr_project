@@ -23,12 +23,12 @@
 {% endif %}
 
 <div class="marquee" aria-hidden="true"><div class="marquee-track">
-  {% for b in marquee + marquee %}{{ book_cover(b.title, b.author, 'sm', img=b.cover) }}{% endfor %}
+  {% for b in marquee + marquee %}{{ book_cover(b.title, b.author, 'sm', img=b.cover|small_cover) }}{% endfor %}
 </div></div>
 
 <section class="row">
   <div class="row-h"><h2>인기 순위</h2><span class="mono muted">유명 고전 + 함께읽기 독자 수</span></div>
-  <ol class="ranklist">{% for b in popular[:10] %}<li><a href="/open/{{ b.source }}/{{ b.id|urlencode }}"><span class="mono">{{ b.rank }}</span>{{ book_cover(b.title, b.author, 'xs', img=b.cover) }}<div><b>{{ b.title }}</b><span>{{ b.author or '' }}</span></div></a></li>{% endfor %}</ol>
+  <ol class="ranklist">{% for b in popular[:10] %}<li><a href="/open/{{ b.source }}/{{ b.id|urlencode }}"><span class="mono">{{ b.rank }}</span>{{ book_cover(b.title, b.author, 'xs', img=b.cover|small_cover) }}<div><b>{{ b.title }}</b><span>{{ b.author or '' }}</span></div></a></li>{% endfor %}</ol>
 </section>
 
 {% if reading %}

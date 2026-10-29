@@ -118,3 +118,25 @@ async def test_avatar_only_visible_to_self_and_race_mates(api):
         mine = await a.get(src)
         theirs = await stranger.get(src)
     assert mine.status_code == 200 and theirs.status_code == 404
+
+
+async def test_security_headers_on_every_page(api):
+    async with api(upstream) as c:
+        r = await c.get("/login")
+    assert r.headers["x-frame-options"] == "DENY" and r.headers["x-content-type-options"] == "nosniff"
+    assert "camera=()" in r.headers["permissions-policy"]
+
+
+async def test_login_pauses_after_repeated_wrong_passwords(api):
+    async with api(upstream) as c:
+        await signup(c, email="brute@example.com")
+        c.cookies.clear()
+        token = await csrf_of(c, "/login")
+        for _ in range(5):
+            await c.post(
+                "/login", data={"email": "brute@example.com", "password": "wrongpass1", "csrf": token}
+            )
+        blocked = await c.post(
+            "/login", data={"email": "brute@example.com", "password": "password123", "csrf": token}
+        )
+    assert blocked.status_code == 200 and "10분 뒤에" in blocked.text  # 맞는 비밀번호여도 잠시 멈춘다

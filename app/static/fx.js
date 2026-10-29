@@ -34,8 +34,13 @@
     }
   }
 
+  let lastDraw = 0;
+  const FRAME_MS = matchMedia('(pointer: coarse)').matches ? 1000 / 30 : 0;   // 휴대폰은 30fps로
   function draw(time) {
-    const dt = Math.min(2, (time - t0) / 16.7 || 1); t0 = time;
+    if (document.hidden) return;
+    if (time - lastDraw < FRAME_MS) { raf = requestAnimationFrame(draw); return; }
+    lastDraw = time;
+    const dt = Math.min(3, (time - t0) / 16.7 || 1); t0 = time;
     ctx.clearRect(0, 0, W, H);
     if (kind === 'rain' || kind === 'storm') {
       const wind = kind === 'storm' ? .32 : .16;

@@ -145,7 +145,8 @@ class LibraryEntry(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    book_id: Mapped[int] = mapped_column(ForeignKey("books.id", ondelete="CASCADE"))
+    # 인기 순위(책별 독자 수)를 홈마다 센다
+    book_id: Mapped[int] = mapped_column(ForeignKey("books.id", ondelete="CASCADE"), index=True)
     shelf: Mapped[Shelf] = mapped_column(_enum(Shelf), default=Shelf.WANT)
     progress_pct: Mapped[int] = mapped_column(SmallInteger, default=0)
     # 체류시간 검증을 통과한 최대 청크 인덱스 (-1 = 아직 없음). 트래커 모드는 사용 안 함
@@ -174,7 +175,7 @@ class Room(Base):
     __tablename__ = "rooms"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    book_id: Mapped[int] = mapped_column(ForeignKey("books.id"))
+    book_id: Mapped[int] = mapped_column(ForeignKey("books.id"), index=True)  # 책별 대결방 찾기(친구 범위)
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     name: Mapped[str] = mapped_column(String(80))
     mode: Mapped[RoomMode] = mapped_column(_enum(RoomMode), default=RoomMode.ASYNC)
@@ -187,7 +188,10 @@ class RoomMember(Base):
     __tablename__ = "room_members"
 
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id", ondelete="CASCADE"), primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    # 기본 키는 (room_id, user_id) 순이라 '내 방들'을 찾는 조회를 돕지 못한다
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True, index=True
+    )
     joined_at: Mapped[datetime] = _now()
 
 

@@ -9,7 +9,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
-from app import auth, web
+from app import auth, intro, web
 from app.api import books, me, social
 from app.core.config import Settings, get_settings
 
@@ -51,6 +51,24 @@ app.add_middleware(
 )
 
 
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",  # 다른 사이트가 이 앱을 iframe에 넣어 클릭을 가로채지 못하게
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+}
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    for key, value in SECURITY_HEADERS.items():
+        response.headers.setdefault(key, value)
+    if _settings.cookie_secure:
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    return response
+
+
 @app.exception_handler(auth.LoginRequired)
 async def to_login(request: Request, exc: auth.LoginRequired) -> RedirectResponse:
     return RedirectResponse(f"/login?next={request.url.path}", status_code=303)
@@ -60,6 +78,7 @@ app.include_router(books.router)
 app.include_router(me.router)
 app.include_router(social.router)
 app.include_router(web.router)
+app.include_router(intro.router)
 app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 
 

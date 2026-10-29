@@ -28,7 +28,7 @@
 
 {% macro store_card(b) -%}
 <a class="card" href="/store/{{ b.id }}">
-  {{ flat_cover(b.title, b.author, b.cover) }}
+  {{ flat_cover(b.title, b.author, b.cover|small_cover) }}
   <b>{{ b.title }}</b>
   <span>{{ b.author or '' }}</span>
 </a>
@@ -36,7 +36,7 @@
 
 {% macro catalog_card(b, flat=False) -%}
 <a class="card" href="/open/{{ b.source }}/{{ b.id|urlencode }}">
-  {% if flat %}{{ flat_cover(b.title, b.author, b.cover) }}{% else %}{{ book_cover(b.title, b.author, img=b.cover) }}{% endif %}
+  {% if flat %}{{ flat_cover(b.title, b.author, b.cover|small_cover) }}{% else %}{{ book_cover(b.title, b.author, img=b.cover) }}{% endif %}
   <b>{{ b.title }}</b>
   <span>{{ b.author or b.genre }}</span>
 </a>
@@ -44,7 +44,7 @@
 
 {% macro book_card(book, entry=None) -%}
 <a class="card" href="/books/{{ book.id }}">
-  {{ book_cover(book.title, book.author, img=cover_of(book)) }}
+  {{ book_cover(book.title, book.author, img=cover_of(book)|small_cover) }}
   <b>{{ book.title }}</b>
   {% if entry %}<span class="meter"><i style="width:{{ entry.progress_pct }}%"></i></span><span class="mono">{{ entry.progress_pct }}%</span>
   {% else %}<span>{{ book.author or '' }}</span>{% endif %}

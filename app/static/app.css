@@ -552,3 +552,33 @@ body.landing .fx{filter:none!important}
 .react-list li>div{flex:1;min-width:0}
 .r-del{flex:none;align-self:center;height:30px;padding:0 12px;border-radius:999px;font-size:12px;color:var(--dim);border:1px solid var(--glass-line)}
 .r-del:hover{color:var(--bad);border-color:var(--bad)}
+
+/* ---------- 가로 넘침 방지 ---------- */
+/* iOS 사파리는 화면 밖으로 커진 고정 레이어(로그인 배경 확대 애니메이션)만큼 페이지 폭을 넓혀
+   입력칸이 옆으로 밀려 보였다. 확대는 틀 안에서만 일어나게 하고, 문서 전체도 가로로는 넘치지 않게 한다 */
+html,body{overflow-x:clip;max-width:100%}
+.auth-bg{inset:0;overflow:hidden;transform:none;animation:none;background:none}
+.auth-bg::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 45%,transparent,rgba(10,6,3,.55)),linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,0) 40%,rgba(0,0,0,.5)),url("/static/img/auth.jpg") 62% center/cover no-repeat;
+  transform:scale(1.04);animation:breathe 24s ease-in-out infinite alternate}
+.auth{width:100%}
+.auth-main{width:100%;min-width:0}
+.steps{width:100%;max-width:560px;min-width:0}
+.pill-field{min-width:0;max-width:100%}
+.pill-field input{width:100%;font-size:17px}   /* 16px 이상이라 iOS가 확대하지 않는다 */
+
+/* ---------- 휴대폰 성능 ---------- */
+/* 배경(캔버스)이 움직이는 동안 유리 블러는 매 프레임 다시 계산된다. 터치 기기에서는 내용 카드의 블러를 빼고
+   불투명도로 대신하고, 떠 있는 탭 바·메뉴·시트만 가벼운 블러를 남긴다 */
+@media (pointer:coarse){
+  .now,.stats div,.settings,.chips a,.seg,.filter,.big-search input,.drop label,.field input,.glass-card,.board li,
+  .steps-guide li,.code-card,.race-hero,.invite,.lp-card,.react-form input{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:color-mix(in srgb,var(--bg) 82%,var(--text) 6%)}
+  .tabbar,.menu-list,.sheet,.glass,.pill-btn,.menu-pill,.r-foot,.r-top{backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important}
+  .menu{backdrop-filter:none;-webkit-backdrop-filter:none;background:color-mix(in srgb,var(--bg) 70%,transparent)}
+  .marquee-track{animation-duration:90s}
+  .now::before{display:none}
+}
+/* 보이지 않는 면은 그리지 않는다 (뒤표지는 책이 뒤집히지 않는 한 안 보인다) */
+.bk-back{display:none}
+.hx-book{contain:layout style}
+.l-about{justify-self:center;font-size:13px;color:var(--dim);padding:4px}
+.l-about:hover{color:var(--text)}

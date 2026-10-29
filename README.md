@@ -7,7 +7,7 @@
 친구와 같은 책을 읽으면 서로 어디까지 읽었는지, 어느 문단에 어떤 반응을 남겼는지 보여요.<br>
 초대 코드 하나로 페이지 레이스를 열고, 대충 넘긴 쪽은 점수가 되지 않아요.
 
-[**앱 열기 →**](https://saipr-reading.vercel.app) · [PRD](docs/PRD.md) · [완료 기준](GOAL.md) · [구조](docs/architecture.md)
+[**앱 열기 →**](https://saipr-reading.vercel.app) · [소개 페이지](https://saipr-reading.vercel.app/intro) · [PRD](docs/PRD.md) · [완료 기준](GOAL.md) · [구조](docs/architecture.md)
 
 </div>
 
@@ -92,7 +92,7 @@ flowchart LR
 | 계정 | 이메일 로그인(BCrypt·CSRF·세션 만료) · 프로필 사진 · 화면 꾸미기 |
 | 서가 | 퍼블릭 도메인 825권(24개 서가) · 서점 130권 · 북튜버 소개 영상 |
 | 함께 | 대결방·초대 코드 · 문단 반응 · 스포일러 가드 · 실시간 알림 |
-| 품질 | 코드 리뷰로 10건 수정(체류시간 우회·업로드 DoS·오픈 리다이렉트 등) · 테스트 86개 |
+| 품질 | 코드 리뷰로 10건 수정(체류시간 우회·업로드 DoS·오픈 리다이렉트 등) · 보안 헤더 · 로그인 시도 제한 · DB 인덱스 · 휴대폰 최적화 · 테스트 90개 |
 | 배포 | Vercel + Neon, main 머지 (#7) |
 
 ## 다음 할 일
@@ -123,7 +123,7 @@ pytest -q && ruff check .                  # 테스트는 네트워크 없이 �
 | `app/services/` | 체류시간 · 서재 · 업로드 파싱 · 대결 · 반응(스포일러 가드) |
 | `app/data/` | 서가·서점·인기 순서·소개 영상 목록 |
 | `scripts/` | `build_catalog` · `build_store` · `build_videos` · `fetch_covers` |
-| `migrations/` · `tests/` | Alembic · pytest 86개 |
+| `migrations/` · `tests/` | Alembic · pytest 90개 |
 
 - 환경 변수: `DATABASE_URL`, `SECRET_KEY`(배포 필수), `COOKIE_SECURE`, `MAX_UPLOAD_MB`(Vercel은 4), `DWELL_SCALE`(시연용, 기본 1.0)
 - 스키마를 바꾸면 배포 **전에** Neon에 `alembic upgrade head`

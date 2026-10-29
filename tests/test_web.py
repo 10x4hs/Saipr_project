@@ -163,7 +163,8 @@ async def test_store_book_links_to_aladin_and_upload(api):
     assert page.status_code == 200 and item["url"].replace("&", "&amp;") in page.text and "DRM" in page.text
     assert shelf.text.count('class="card"') == len(STORE)
     assert "이 책의 파일을 올려요" in form.text
-    assert up.status_code == 303 and item["cover"] in library.text  # 올린 책에 서점 표지가 붙는다
+    # 올린 책에 서점 표지가 붙는다 (목록에서는 같은 표지의 작은 판)
+    assert up.status_code == 303 and item["cover"].rsplit("/", 1)[1] in library.text
     assert missing.status_code == 404
 
 

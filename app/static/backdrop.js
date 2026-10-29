@@ -8,7 +8,7 @@
   const ctx = canvas.getContext('2d');
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const DPR = 1;                   // 점 배경은 선명할 필요가 없다 — 휴대폰에서 그리는 양을 1/4로
-  const GAP = 18;                  // 화면 위 점 간격(px)
+  const GAP = matchMedia('(pointer: coarse)').matches ? 22 : 18;   // 화면 위 점 간격(px) — 휴대폰은 점 수를 2/3로
   let W = 0, H = 0, raf = 0, grid = [], ink = '255,255,255';
   // 점 색 = 지금 테마의 글자색. 매 프레임 읽으면 느려서 테마가 바뀔 때만 다시 읽는다
   const readInk = () => { ink = (getComputedStyle(document.body).color.match(/\d+/g) || [255, 255, 255]).slice(0, 3).join(','); };
@@ -33,7 +33,12 @@
     }
   }
 
+  let lastDraw = 0;
+  const FRAME_MS = matchMedia('(pointer: coarse)').matches ? 1000 / 24 : 1000 / 40;   // 천천히 일렁이는 배경은 24~40fps면 충분
   function draw(ms) {
+    if (document.hidden || host.closest('[hidden]')) return;   // 안 보이면 멈춘다(visibilitychange가 다시 깨운다)
+    if (ms - lastDraw < FRAME_MS) { raf = requestAnimationFrame(draw); return; }
+    lastDraw = ms;
     const t = ms / 1000 + scrollY * .006;
     pointer.k += ((pointer.x > -999 ? 1 : 0) - pointer.k) * .08;
     ctx.clearRect(0, 0, W, H);
