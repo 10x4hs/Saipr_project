@@ -170,8 +170,10 @@ FAMOUS = [
 _BOX = re.compile(r'<div class="ss_book_box" itemId="(\d+)">(.*?)(?=<div class="ss_book_box"|$)', re.S)
 _COVER = re.compile(r'<img src="(https://image\.aladin\.co\.kr/product/[^"]+?/cover\d*/[^"]+?\.(?:jpg|png))"')
 _TITLE = re.compile(r'class="bo3">([^<]+)</a>')
-_AUTHOR = re.compile(r'AuthorSearch=[^"]+">([^<]+)</a>\s*\(지은이\)')  # 옮긴이·그린이가 아니라 지은이
-_ANY_AUTHOR = re.compile(r'AuthorSearch=[^"]+">([^<]+)</a>')
+# 옮긴이·그린이가 아니라 지은이
+_AUTHOR = re.compile(r'AuthorSearch=[^"]+"[^>]*>([^<]+)</a>(?:\s|&nbsp;)*\((?:지은이|글|원작|저자)\)')
+_META_AUTHOR = re.compile(r'<meta name="author" content="([^",]+)')
+PRODUCT = "https://www.aladin.co.kr/shop/wproduct.aspx"
 _PRICE = re.compile(r'<span class="ss_p2"><em>([\d,]+)</em>원')
 
 
@@ -186,7 +188,10 @@ async def find(client: httpx.AsyncClient, query: str, must: str) -> dict | None:
         if not t or not _clean(t.group(1)).startswith(must):  # 해설서·연구서 제외
             continue
         cover = _COVER.search(block)
-        author = _AUTHOR.search(block) or _ANY_AUTHOR.search(block)
+        author = _AUTHOR.search(block)
+        if not author:  # 검색 결과에 옮긴이만 나오는 책(향수 등)은 상품 페이지에서 지은이를 읽는다
+            detail = (await client.get(PRODUCT, params={"ItemId": item_id})).text
+            author = _AUTHOR.search(detail) or _META_AUTHOR.search(detail)
         price = _PRICE.search(block)
         return {
             "id": item_id,
