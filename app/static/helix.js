@@ -67,19 +67,16 @@
   function hud(el) {
     focusEl = el;
     books.forEach(b => b.classList.toggle('focus', b === el));
-    const rank = el.dataset.rank, readers = +el.dataset.readers;
-    const text = $('drumHud').querySelector('.hud-text');
-    text.classList.add('fading');
-    clearTimeout(hudTimer);
-    hudTimer = setTimeout(() => {                        // 흐려진 뒤 바꾸고 다시 선명하게
-      $('hudRank').textContent = rank ? `인기 ${rank}위${readers ? ` · 독자 ${readers}명` : ''}` : '오늘의 추천';
-      $('hudTitle').textContent = el.dataset.title;
-      $('hudAuthor').textContent = el.dataset.author || '\u00a0';
-      text.classList.remove('fading');
-    }, 140);
-    $('hudRead').href = el.getAttribute('href');
-    $('hudRaceForm').action = el.dataset.race;
   }
+
+  // 맨 앞 책을 누르면 열고, 뒤에 있는 책을 누르면 그 책을 앞으로 데려온다
+  books.forEach((el, i) => el.addEventListener('click', e => {
+    if (el === focusEl) return;                          // 링크 그대로 → 책 열기
+    e.preventDefault();
+    const target = i * PER;
+    if (lenis) lenis.scrollTo(target, { duration: 1.1, easing: t => 1 - Math.pow(1 - t, 4) });
+    else scrollTo({ top: target, behavior: 'smooth' });
+  }));
 
   // 스크롤이 멈추면 가장 가까운 책에 부드럽게 맞춘다
   function snap() {

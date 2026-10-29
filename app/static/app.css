@@ -309,10 +309,10 @@ body.locked{overflow:hidden}
 /* ---------- home: 3D 나선 (bloomworld 방식) ---------- */
 .in-drum .content{padding-bottom:0}
 .helix{position:relative}
-.hx-view{position:fixed;left:0;right:0;top:calc(76px + env(safe-area-inset-top));bottom:calc(var(--tab) + 112px + env(safe-area-inset-bottom));z-index:2;perspective:1100px;perspective-origin:50% 66%;overflow:hidden;pointer-events:none;
+.hx-view{position:fixed;left:0;right:0;top:calc(76px + env(safe-area-inset-top));bottom:calc(var(--tab) + 28px + env(safe-area-inset-bottom));z-index:2;perspective:1100px;perspective-origin:50% 66%;overflow:hidden;pointer-events:none;
   -webkit-mask:linear-gradient(transparent 0,#000 10%,#000 90%,transparent 100%);mask:linear-gradient(transparent 0,#000 10%,#000 90%,transparent 100%)}
-.hx-stage{position:absolute;left:50%;top:66%;width:0;height:0;transform-style:preserve-3d}
-.hx-book{--w:min(46vw,186px,calc((100dvh - 330px) * .42));position:absolute;left:calc(var(--w) / -2);top:calc(var(--w) * -0.75);width:var(--w);transform-style:preserve-3d;will-change:transform;pointer-events:auto}
+.hx-stage{position:absolute;left:50%;top:64%;width:0;height:0;transform-style:preserve-3d}
+.hx-book{--w:min(50vw,200px,calc((100dvh - 250px) * .42));cursor:pointer;position:absolute;left:calc(var(--w) / -2);top:calc(var(--w) * -0.75);width:var(--w);transform-style:preserve-3d;will-change:transform;pointer-events:auto}
 /* 3D 사슬을 끊지 않는다: 책 상자 안까지 preserve-3d, 흐림·어둡게는 각 면에만 */
 .book3d.solid{perspective:none;transform-style:preserve-3d;--d:16cqw}
 .book3d.solid .bk{--tilt:0deg;transition:none}
@@ -452,3 +452,17 @@ h3.sub,.sheet h3{font-size:14px;font-weight:600;color:var(--dim);margin:22px 0 1
 .react-list b{font-size:13px}
 .react-list p{margin:2px 0 0;font-size:14px;color:var(--body)}
 .avatar.sm{width:28px;height:28px;font-size:12px}
+
+/* 3D 홈 뒤 배경: 위에서 내려오는 조명 · 원근 바닥 격자 · 맨 앞 책 아래 빛 웅덩이 — 아주 옅게 */
+.hx-backdrop{position:absolute;inset:0;pointer-events:none}
+.hx-backdrop i{position:absolute;display:block}
+.hx-light{left:50%;top:-30%;width:120%;height:110%;transform:translateX(-50%);
+  background:radial-gradient(50% 55% at 50% 0%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 70%),
+             conic-gradient(from 180deg at 50% 0%,transparent 160deg,rgba(255,255,255,.05) 172deg,rgba(255,255,255,.07) 180deg,rgba(255,255,255,.05) 188deg,transparent 200deg)}
+.hx-floor{left:-40%;right:-40%;top:58%;height:70%;transform:perspective(400px) rotateX(62deg);transform-origin:50% 0;
+  background:linear-gradient(var(--line) 1px,transparent 1px) 0 0/48px 48px,linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/48px 48px;
+  -webkit-mask:radial-gradient(60% 70% at 50% 0%,#000,transparent 75%);mask:radial-gradient(60% 70% at 50% 0%,#000,transparent 75%);opacity:.55}
+.hx-pool{left:50%;top:calc(64% + min(50vw,200px) * .78);width:min(70vw,300px);height:46px;transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--accent) 30%,transparent),transparent);filter:blur(6px);animation:pool 6s ease-in-out infinite alternate}
+@keyframes pool{to{opacity:.6;transform:translate(-50%,-50%) scaleX(.9)}}
+.hx-book.focus .book3d::after{opacity:.9}
