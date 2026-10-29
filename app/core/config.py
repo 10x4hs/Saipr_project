@@ -1,4 +1,5 @@
 from functools import lru_cache
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -19,7 +20,14 @@ class Settings(BaseSettings):
         if v.startswith("postgresql://"):
             v = "postgresql+asyncpg://" + v.removeprefix("postgresql://")
         if v.startswith("postgresql+asyncpg://"):
-            v = v.replace("sslmode=require", "ssl=require").replace("&channel_binding=require", "")
+            # asyncpg가 모르는 쿼리 인자(sslmode, channel_binding)를 정리한다 — 순서와 상관없이
+            parts = urlsplit(v)
+            query = []
+            for key, val in parse_qsl(parts.query):
+                if key == "channel_binding":
+                    continue
+                query.append(("ssl", val) if key == "sslmode" else (key, val))
+            v = urlunsplit(parts._replace(query=urlencode(query)))
         return v
 
     # 외부 소스별 타임아웃. 한 소스가 느려도 통합 검색 전체가 막히지 않도록 짧게 둔다.
