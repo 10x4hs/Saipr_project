@@ -1,9 +1,7 @@
 {% extends "app.html" %}
 {% from "_ui.html" import book_cover, catalog_card, book_card, icon %}
 {% block heading %}<small>{{ user.nickname }}님,</small>오늘은 뭘 읽을까요{% endblock %}
-{% block menu_extra %}
-<button type="button" data-view-toggle><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span data-view-label>목록으로 보기</span></button>
-{% endblock %}
+
 {% block main %}
 {# ---------- 3D: 책들이 나선 계단처럼 위로·뒤로 감겨 쌓여 있고, 스크롤하면 앞으로 한 권씩 내려온다 ---------- #}
 <section class="helix" id="drum" aria-label="인기 고전">
@@ -23,49 +21,6 @@
   <div class="drum-spacer" id="drumSpacer"></div>
 </section>
 
-{# ---------- 목록 보기 ---------- #}
-<section class="listview" id="listview" hidden>
-{% if current %}{% set e, b = current %}
-<a class="now glass-card" href="/books/{{ b.id }}">
-  {{ book_cover(b.title, b.author, 'lg', img=cover_of(b)) }}
-  <div class="now-body">
-    <span class="eyebrow mono">이어 읽기</span>
-    <h2>{{ b.title }}</h2>
-    <p class="muted">{{ b.author or '' }}</p>
-    <div class="now-meter"><span class="meter"><i style="width:{{ e.progress_pct }}%"></i></span><span class="mono">{{ e.current_chunk + 1 }} / {{ b.total_chunks }}쪽 · {{ e.progress_pct }}%</span></div>
-    <span class="btn primary">계속 읽기</span>
-  </div>
-</a>
-{% endif %}
-
-<div class="marquee" aria-hidden="true"><div class="marquee-track">
-  {% for b in marquee + marquee %}{{ book_cover(b.title, b.author, 'sm', img=b.cover) }}{% endfor %}
-</div></div>
-
-<section class="row">
-  <div class="row-h"><h2>인기 순위</h2><span class="mono muted">유명 고전 + 함께읽기 독자 수</span></div>
-  <ol class="ranklist">{% for b in popular[:10] %}<li><a href="/open/{{ b.source }}/{{ b.id|urlencode }}"><span class="mono">{{ b.rank }}</span>{{ book_cover(b.title, b.author, 'xs', img=b.cover) }}<div><b>{{ b.title }}</b><span>{{ b.author or '' }}</span></div></a></li>{% endfor %}</ol>
-</section>
-
-{% if reading %}
-<section class="row">
-  <div class="row-h"><h2>읽는 중</h2><a href="/library">전체</a></div>
-  <div class="rail">{% for e, b in reading %}{{ book_card(b, e) }}{% endfor %}</div>
-</section>
-{% endif %}
-
-<section class="row">
-  <div class="row-h"><h2>오늘의 추천</h2><span class="mono muted">매일 바뀌어요</span></div>
-  <div class="rail big">{% for b in picks %}{{ catalog_card(b) }}{% endfor %}</div>
-</section>
-
-{% for name, books in shelves.items() %}
-<section class="row">
-  <div class="row-h"><h2>{{ name }}</h2><a href="/discover?g={{ name|urlencode }}">전체</a></div>
-  <div class="rail">{% for b in books %}{{ catalog_card(b) }}{% endfor %}</div>
-</section>
-{% endfor %}
-</section>
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 <script src="/static/helix.js"></script>
 <script src="/static/backdrop.js"></script>

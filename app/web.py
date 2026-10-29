@@ -150,20 +150,9 @@ async def home(
 ) -> HTMLResponse:
     if user is None:
         return _render(request, "landing.html", None, picks=(await popular(session, 9)), total=len(CATALOG))
-    library = await book_service.library_of(session, user.id)
-    reading = [(e, b) for e, b in library if e.shelf == Shelf.READING]
+    top = await popular(session, 30)
     return _render(
-        request,
-        "home.html",
-        user,
-        current=reading[0] if reading else None,
-        reading=reading[1:6],
-        picks=_daily_picks(10),
-        marquee=_daily_picks(16),
-        popular=(top := await popular(session, 30)),
-        drum=[b | {"store": True} for b in STORE[:14]] + _fill(top, 30),
-        store=STORE,
-        shelves={g: books[:14] for g, books in SHELVES.items()},
+        request, "home.html", user, drum=[b | {"store": True} for b in STORE[:14]] + _fill(top, 30)
     )
 
 
@@ -243,30 +232,33 @@ async def logout(
 
 @router.get("/discover", response_class=HTMLResponse)
 async def discover(
-    request: Request, g: str | None = None, user: User = Depends(auth.require_user)
+    request: Request,
+    g: str | None = None,
+    session: AsyncSession = Depends(get_session),
+    user: User = Depends(auth.require_user),
 ) -> HTMLResponse:
+    """탐색: 이어 읽기 · 인기 순위 · 오늘의 추천 · 서점 · 장르별 선반. ?g= 를 주면 그 서가 전체 격자."""
+    common = {"genres": SHELVES, "store": STORE, "total": len(CATALOG)}
     if g == "서점":
+        return _render(request, "discover.html", user, genre="서점", books=[], **common)
+    if g == "all" or g in SHELVES:
+        genre = g if g in SHELVES else None
         return _render(
-            request,
-            "discover.html",
-            user,
-            genres=SHELVES,
-            genre="서점",
-            books=[],
-            store=STORE,
-            total=len(CATALOG),
+            request, "discover.html", user, genre=genre, books=SHELVES[genre] if genre else CATALOG, **common
         )
-    genre = g if g in SHELVES else None
-    books = SHELVES[genre] if genre else CATALOG
+    library = await book_service.library_of(session, user.id)
+    reading = [(e, b) for e, b in library if e.shelf == Shelf.READING]
     return _render(
         request,
-        "discover.html",
+        "explore.html",
         user,
-        genres=SHELVES,
-        genre=genre,
-        books=books,
-        store=STORE,
-        total=len(CATALOG),
+        current=reading[0] if reading else None,
+        reading=reading[1:6],
+        picks=_daily_picks(10),
+        marquee=_daily_picks(16),
+        popular=await popular(session, 30),
+        shelves={name: books[:14] for name, books in SHELVES.items()},
+        **common,
     )
 
 

@@ -1,11 +1,11 @@
 {% extends "app.html" %}
 {% from "_ui.html" import catalog_card, store_card %}
 {% block title %}탐색 — 함께읽기{% endblock %}
-{% block heading %}탐색{% endblock %}
+{% block heading %}<small><a href="/discover">‹ 탐색</a></small>{{ genre or "전체" }}{% endblock %}
 {% block main %}
 <nav class="chips" aria-label="장르">
   <a href="/discover?g=%EC%84%9C%EC%A0%90" class="{{ 'on' if genre == '서점' }}">서점 <span>{{ store|length }}</span></a>
-  <a href="/discover" class="{{ 'on' if not genre }}">전체 <span>{{ total }}</span></a>
+  <a href="/discover?g=all" class="{{ 'on' if not genre }}">전체 <span>{{ total }}</span></a>
   {% for g, books in genres.items() %}<a href="/discover?g={{ g|urlencode }}" class="{{ 'on' if g == genre }}">{{ g }} <span>{{ books|length }}</span></a>{% endfor %}
 </nav>
 <input class="filter" id="filter" placeholder="이 목록에서 제목·저자 거르기" aria-label="목록 거르기">

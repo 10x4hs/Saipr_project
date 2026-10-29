@@ -3,27 +3,14 @@
 // 책은 앞표지·책등·페이지 단면이 있는 3D 상자이고, 부모에 opacity/filter를 걸지 않아 입체가 눌리지 않는다.
 (() => {
   const $ = id => document.getElementById(id);
-  const home = $('drum'), list = $('listview');
+  const home = $('drum');
   const books = [...document.querySelectorAll('.hx-book')];
   const PER = 150;            // 책 한 권 넘기는 스크롤 거리(px)
   const TURN = 24;            // 다음 책까지 나선이 도는 각도(도)
   const RISE = 62;            // 다음 책까지 올라가는 높이(px)
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const store = { get: () => { try { return localStorage.getItem('homeView'); } catch (e) { return null; } },
-                  set: v => { try { localStorage.setItem('homeView', v); } catch (e) {} } };
-  let view = store.get() === 'list' ? 'list' : 'drum';
   let lenis = null, raf = 0, focusEl = null, R = 160, hudTimer = 0, snapTimer = 0;
-
-  function setView(v) {
-    view = v; store.set(v);
-    home.hidden = v !== 'drum'; list.hidden = v === 'drum';
-    document.body.classList.toggle('in-drum', v === 'drum');
-    document.querySelectorAll('[data-view-label]').forEach(l => l.textContent = v === 'drum' ? '목록으로 보기' : '3D로 보기');
-    v === 'drum' ? start() : stop();
-    scrollTo(0, 0);
-  }
-  // 메뉴는 이 스크립트보다 뒤에 그려지므로, 문서 전체에서 클릭을 받아 처리한다
-  document.addEventListener('click', e => { if (e.target.closest('[data-view-toggle]')) setView(view === 'drum' ? 'list' : 'drum'); });
+  document.body.classList.add('in-drum');
 
   function layout() {
     R = Math.min(innerWidth, 480) * .42;                 // 나선 반지름
@@ -105,9 +92,8 @@
     }
     cancelAnimationFrame(raf); raf = requestAnimationFrame(frame);
   }
-  function stop() { cancelAnimationFrame(raf); if (lenis) { lenis.destroy(); lenis = null; } }
 
-  addEventListener('scroll', () => view === 'drum' && snap(), { passive: true });
-  addEventListener('resize', () => view === 'drum' && layout());
-  setView(view);
+  addEventListener('scroll', snap, { passive: true });
+  addEventListener('resize', layout);
+  start();
 })();

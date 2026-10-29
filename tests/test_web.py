@@ -10,12 +10,16 @@ async def test_anonymous_sees_landing_and_app_pages_redirect_to_login(api):
     assert library.status_code == 303 and library.headers["location"] == "/login?next=/library"
 
 
-async def test_home_shows_greeting_and_shelves(api):
+async def test_home_is_3d_and_explore_has_the_shelves(api):
     async with api(upstream) as c:
         await signup(c, nickname="지현")
-        r = await c.get("/")
-    assert r.status_code == 200
-    assert "지현님" in r.text and "오늘의 추천" in r.text and "단편소설" in r.text
+        home = await c.get("/")
+        explore = await c.get("/discover")
+        grid = await c.get("/discover", params={"g": "all"})
+    assert home.status_code == 200 and "지현님" in home.text and 'class="hx-book"' in home.text
+    assert "목록으로 보기" not in home.text  # 보기 전환은 없어지고 목록은 탐색으로
+    assert "오늘의 추천" in explore.text and "단편소설" in explore.text and "서점 · 유명한 책" in explore.text
+    assert grid.text.count('class="card"') > 800
 
 
 async def test_open_shelves_book_and_reader_resumes(api):
