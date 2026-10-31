@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_ui.html" import icon %}
+{% from "_ui.html" import icon, brand %}
 {% block body_class %}app{% endblock %}
 {% block body %}
 <div class="phone">
@@ -8,8 +8,9 @@
     {% block top_extra %}{% endblock %}
     <button class="menu-pill" id="menuBtn" aria-label="메뉴" aria-expanded="false" aria-controls="menu"><span></span><span></span></button>
   </header>
-  <main class="content">{% block main %}{% endblock %}</main>
+  <main class="content {% block content_class %}{% endblock %}">{% block main %}{% endblock %}</main>
   <nav class="tabbar" aria-label="주 메뉴">
+    <a class="side-brand" href="/" aria-label="해독 홈">{{ brand() }}</a>
     {% for href, name, label in [('/', 'home', '홈'), ('/discover', 'discover', '탐색'), ('/races', 'race', '대결'), ('/library', 'library', '서재'), ('/me', 'me', '나')] %}
     <a href="{{ href }}" class="{{ 'on' if (path == href or (href != '/' and path.startswith(href))) else '' }}">{{ icon(name) }}<span>{{ label }}</span></a>
     {% endfor %}

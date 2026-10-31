@@ -168,6 +168,7 @@ def test_friend_progress_arrives_over_websocket_within_a_second(live_client, mon
         "type": "progress.updated",
         "user_id": msg["user_id"],
         "nickname": "에이",
+        "avatar": None,  # 사진이 없으면 이니셜로 그린다
         "current_chunk": 0,
         "verified_chunk": 0,
         "advanced": True,

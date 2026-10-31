@@ -14,7 +14,9 @@
 
   function layout() {
     lastPos = -1;
-    R = Math.min(innerWidth, 480) * .42;                 // 나선 반지름
+    // 나선 반지름: 휴대폰은 화면 폭, 넓은 화면은 사이드바를 뺀 본문 폭 기준(너무 퍼지지 않게 상한)
+    const side = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--side')) || 0;
+    R = Math.min(innerWidth - side, innerWidth >= 768 ? 820 : 480) * (innerWidth >= 768 ? .36 : .42);
     $('drumSpacer').style.height = ((books.length - 1) * PER + innerHeight) + 'px';
   }
 
@@ -60,12 +62,28 @@
   function hud(el) {
     focusEl = el;
     books.forEach(b => b.classList.toggle('focus', b === el));
+    caption(el);
     // 앞에 선 책과 다음 책만 선명한 큰 표지로 바꾼다 (나머지는 작은 판으로 메모리를 아낀다)
     const i = books.indexOf(el);
     [books[i], books[i + 1]].forEach(b => {
       const img = b && b.dataset.hi && b.querySelector('.bk-front img');
       if (img && img.src !== new URL(b.dataset.hi, location.href).href) img.src = b.dataset.hi;
     });
+  }
+
+  // 넓은 화면에서만 보이는 큰 제목: 바뀔 때 잠깐 흐려졌다가 새 이름으로
+  const cap = $('hxCap');
+  function caption(el) {
+    if (!cap || !getComputedStyle(cap).display || getComputedStyle(cap).display === 'none') return;
+    cap.classList.add('fading');
+    clearTimeout(hudTimer);
+    hudTimer = setTimeout(() => {
+      $('capRank').textContent = el.dataset.rank ? `인기 ${el.dataset.rank}위` : '';
+      $('capTitle').textContent = el.dataset.title;
+      $('capAuthor').textContent = el.dataset.author;
+      $('capMeta').textContent = +el.dataset.readers ? `해독 독자 ${el.dataset.readers}명이 읽는 중` : '눌러서 바로 읽기';
+      cap.classList.remove('fading');
+    }, 180);
   }
 
   // 맨 앞 책을 누르면 열고, 뒤에 있는 책을 누르면 그 책을 앞으로 데려온다
@@ -105,6 +123,6 @@
   }
 
   addEventListener('scroll', snap, { passive: true });
-  addEventListener('resize', layout);
+  addEventListener('resize', () => { layout(); if (focusEl) caption(focusEl); });
   start();
 })();

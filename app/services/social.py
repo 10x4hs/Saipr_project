@@ -4,6 +4,7 @@
 - 스포일러 가드: 내가 검증받은 마지막 청크보다 뒤의 반응은 내용 없이 개수만 준다.
 """
 
+import hashlib
 from dataclasses import dataclass
 
 from sqlalchemy import func, select
@@ -16,6 +17,11 @@ MAX_COMMENT = 140
 MAX_ANCHOR = 2000
 
 
+def avatar_path(user_id: int, data: bytes | None) -> str | None:
+    """프로필 사진 주소 — 사진이 바뀌면 주소도 바뀌어 캐시가 새 사진을 받는다."""
+    return f"/avatars/{user_id}?v={hashlib.sha1(data).hexdigest()[:8]}" if data else None
+
+
 class ReactionError(ValueError):
     pass
 
@@ -26,6 +32,7 @@ class Friend:
     nickname: str
     current_chunk: int
     verified_chunk: int
+    avatar: str | None = None
 
 
 async def circle(session: AsyncSession, user_id: int, book_id: int) -> set[int]:
@@ -114,11 +121,14 @@ async def friends(session: AsyncSession, user: User, book: Book) -> list[Friend]
     if not members:
         return []
     rows = await session.execute(
-        select(User.id, User.nickname, LibraryEntry.current_chunk, LibraryEntry.verified_chunk)
+        select(User.id, User.nickname, User.avatar, LibraryEntry.current_chunk, LibraryEntry.verified_chunk)
         .outerjoin(LibraryEntry, (LibraryEntry.user_id == User.id) & (LibraryEntry.book_id == book.id))
         .where(User.id.in_(members))
     )
-    return [Friend(uid, nick, cur or 0, -1 if ver is None else ver) for uid, nick, cur, ver in rows.all()]
+    return [
+        Friend(uid, nick, cur or 0, -1 if ver is None else ver, avatar_path(uid, av))
+        for uid, nick, av, cur, ver in rows.all()
+    ]
 
 
 def _out(r: Reaction, nickname: str, me: int) -> dict:

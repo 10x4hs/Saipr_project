@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% from "_ui.html" import brand %}
 {% block body_class %}auth{% endblock %}
 {% block body %}
 <div class="auth-bg" aria-hidden="true"></div>
-<a class="auth-brand" href="/">함께읽기</a>
+<a class="auth-brand" href="/">{{ brand() }}</a>
 <main class="auth-main">
   {% block form %}{% endblock %}
 </main>

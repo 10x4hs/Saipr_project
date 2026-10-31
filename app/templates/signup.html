@@ -1,5 +1,5 @@
 {% extends "_auth.html" %}
-{% block title %}회원가입 — 함께읽기{% endblock %}
+{% block title %}회원가입 — 偕讀 해독{% endblock %}
 {% block form %}
 {% set e = form.errors if form else {} %}
 <form method="post" action="/signup" class="steps" novalidate data-first-error="{{ (e.keys()|list)[0] if e else '' }}">

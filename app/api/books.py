@@ -171,6 +171,7 @@ async def put_progress(
             "type": "progress.updated",
             "user_id": user.id,
             "nickname": user.nickname,
+            "avatar": social.avatar_path(user.id, user.avatar),
             "current_chunk": e.current_chunk,
             "verified_chunk": e.verified_chunk,
             "advanced": e.verified_chunk > was_verified,

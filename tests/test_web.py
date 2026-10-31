@@ -211,3 +211,36 @@ async def test_store_page_shows_review_videos(api):
         page = await c.get(f"/store/{item['id']}")
     first = VIDEOS[f"store:{item['id']}"][0]
     assert "이 책을 소개하는 영상" in page.text and f'data-yt="{first["id"]}"' in page.text
+
+
+async def test_brand_is_haedok_everywhere(api):
+    async with api(upstream) as c:
+        landing = await c.get("/")
+        login = await c.get("/login")
+        await signup(c)
+        home = await c.get("/")
+    for page in (landing, login, home):
+        assert "偕讀" in page.text and "해독" in page.text
+        assert "함께읽기" not in page.text
+    assert 'class="side-brand"' in home.text  # 넓은 화면 사이드바의 로고
+
+
+async def test_me_page_title_has_no_script(api):
+    """사진 고르기 스크립트가 <title> 안에 들어가 실행되지 않던 버그."""
+    async with api(upstream) as c:
+        await signup(c)
+        me = await c.get("/me")
+    title = me.text.split("<title>", 1)[1].split("</title>", 1)[0]
+    assert "<script" not in title and title.startswith("내 정보")
+    assert "photoPick" in me.text.split("</title>", 1)[1].split("<script>")[-1]
+
+
+async def test_reader_has_side_column_and_wide_pages_are_marked(api):
+    async with api(upstream) as c:
+        await signup(c)
+        r = await c.get("/open/wikisource/봄봄")
+        reader = await c.get(r.headers["location"])
+        discover = await c.get("/discover")
+        me = await c.get("/me")
+    assert 'id="side"' in reader.text and 'id="sideFriends"' in reader.text
+    assert 'class="content wide"' in discover.text and 'class="content split"' in me.text

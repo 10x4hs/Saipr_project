@@ -7,7 +7,7 @@
 <section class="helix" id="drum" aria-label="인기 고전">
   <div class="dotfield" id="dotfield" aria-hidden="true"></div>
   <div class="hx-view">
-    <div class="hx-stage" id="hxStage">
+    <div class="hx-stage" id="hxStage" data-tilt="6">
       {% for b in drum %}
       <a class="hx-book" href="{{ '/store/' ~ b.id if b.store else '/open/' ~ b.source ~ '/' ~ (b.id|urlencode) }}" data-title="{{ b.title }}" data-author="{{ b.author or '' }}"
          data-rank="{{ b.rank or '' }}" data-readers="{{ b.readers or 0 }}" data-race="/races/start/{{ b.source }}/{{ b.id|urlencode }}"
@@ -19,6 +19,13 @@
     </div>
   </div>
   <div class="hx-count mono" id="hxCount"></div>
+  {# 넓은 화면: 앞에 선 책의 이름을 왼쪽에 크게 #}
+  <div class="hx-caption" id="hxCap" aria-live="polite">
+    <span class="mono" id="capRank"></span>
+    <h2 id="capTitle"></h2>
+    <p id="capAuthor"></p>
+    <span class="muted small" id="capMeta"></span>
+  </div>
   <div class="drum-spacer" id="drumSpacer"></div>
 </section>
 

@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         yield
 
 
-app = FastAPI(title="함께읽기 API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="해독(偕讀) API", version="0.1.0", lifespan=lifespan)
 _settings = get_settings()
 if os.environ.get("VERCEL") and _settings.secret_key == Settings.model_fields["secret_key"].default:
     # 기본 키는 공개 저장소에 있어 누구나 세션 쿠키를 위조할 수 있다

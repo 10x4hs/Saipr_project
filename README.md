@@ -1,13 +1,13 @@
 <div align="center">
 
-# 함께읽기
+# 偕讀 <sub>해독</sub>
 
-**같은 책을, 각자의 속도로, 함께 읽어요.**
+**偕** 함께 해 + **讀** 읽을 독 — 같은 책을, 각자의 속도로, 함께 읽어요.
 
 친구와 같은 책을 읽으면 서로 어디까지 읽었는지, 어느 문단에 어떤 반응을 남겼는지 보여요.<br>
 초대 코드 하나로 페이지 레이스를 열고, 대충 넘긴 쪽은 점수가 되지 않아요.
 
-[**앱 열기 →**](https://saipr-reading.vercel.app) · [소개 페이지](https://saipr-reading.vercel.app/intro) · [PRD](docs/PRD.md) · [완료 기준](GOAL.md) · [구조](docs/architecture.md)
+[**앱 열기 →**](https://haedok.vercel.app) · [소개 페이지](https://haedok.vercel.app/intro) · [PRD](docs/PRD.md) · [완료 기준](GOAL.md) · [구조](docs/architecture.md)
 
 </div>
 
@@ -21,7 +21,7 @@
 
 | 읽기 | 함께 | 어디서나 |
 |---|---|---|
-| 저작권이 끝난 고전 **825권**은 앱에서 전문을 3D로 넘겨 읽어요 | 같은 방 친구의 진행과 **문단 반응**이 보여요. 아직 안 읽은 곳의 반응은 가려져요 | 모바일 웹 앱이라 설치 없이 열려요. 읽던 위치·설정은 계정에 저장돼요 |
+| 저작권이 끝난 고전 **825권**은 앱에서 전문을 3D로 넘겨 읽어요 | 같은 방 친구의 진행과 **문단 반응**이 보여요. 아직 안 읽은 곳의 반응은 가려져요 | 휴대폰·태블릿·PC 어디서나 설치 없이 열려요. 화면 크기에 맞춰 배치가 바뀌어요 |
 | 유명한 신간 **130권**은 알라딘 전자책으로 연결하고, 산 파일을 올려 읽어요 | **초대 코드**로 대결을 열고, 검증된 쪽 수로 순위를 매겨요 | 배경 30종·강조색 12종으로 화면을 꾸며요 |
 
 ## 사용 흐름
@@ -45,6 +45,12 @@ flowchart TB
     R --> I
 ```
 
+**PC·태블릿에서는** 하단 탭 바가 왼쪽 사이드바가 되고, 리더는 종이책처럼 두 쪽을 펼쳐요. 오른쪽 열에는 같이 읽는 친구의 위치와 이 쪽의 반응이 늘 보여요.
+
+| PC 홈 | PC 리더 · 친구 소식이 날아와요 |
+|:---:|:---:|
+| <img src="docs/images/app/9-pc-home.jpg" alt="PC 홈"> | <img src="docs/images/app/10-pc-reader.jpg" alt="PC 리더"> |
+
 <details>
 <summary><b>화면 전체 보기</b></summary>
 <br>
@@ -54,6 +60,8 @@ flowchart TB
 | <img src="docs/images/app/1-login.jpg" width="180"> | <img src="docs/images/app/2-home.jpg" width="180"> | <img src="docs/images/app/3-explore.jpg" width="180"> | <img src="docs/images/app/4-store.jpg" width="180"> |
 | **리더 (3D 넘김)** | **문단 반응** | **대결** | **화면 꾸미기** |
 | <img src="docs/images/app/5-reader.jpg" width="180"> | <img src="docs/images/app/6-react.jpg" width="180"> | <img src="docs/images/app/7-race.jpg" width="180"> | <img src="docs/images/app/8-look.jpg" width="180"> |
+
+<img src="docs/images/app/11-pc-store.jpg" alt="PC 서점: 왼쪽 표지, 오른쪽 구매 단계·영상">
 
 </details>
 
@@ -77,7 +85,7 @@ flowchart LR
 | 층 | 쓰는 것 |
 |---|---|
 | 서버 | Python 3.12 · FastAPI · SQLAlchemy(async) · Alembic |
-| 화면 | Jinja2 서버 렌더링 + 바닐라 JS (빌드 단계 없음) · 3D는 CSS transform · 책장 넘김은 StPageFlip |
+| 화면 | Jinja2 서버 렌더링 + 바닐라 JS (빌드 단계 없음) · 3D는 CSS transform · 책장 넘김은 StPageFlip · 화면 전환은 View Transitions |
 | 데이터 | Postgres(Neon) · 로컬은 SQLite |
 | 실시간 | 로컬은 WebSocket, 배포(서버리스)는 20초 폴링 |
 | 배포 | Vercel · CI는 GitHub Actions (테스트 + 실제 Postgres 마이그레이션) |
@@ -92,8 +100,9 @@ flowchart LR
 | 계정 | 이메일 로그인(BCrypt·CSRF·세션 만료) · 프로필 사진 · 화면 꾸미기 |
 | 서가 | 퍼블릭 도메인 825권(24개 서가) · 서점 130권 · 북튜버 소개 영상 |
 | 함께 | 대결방·초대 코드 · 문단 반응 · 스포일러 가드 · 실시간 알림 |
-| 품질 | 코드 리뷰로 10건 수정(체류시간 우회·업로드 DoS·오픈 리다이렉트 등) · 보안 헤더 · 로그인 시도 제한 · DB 인덱스 · 휴대폰 최적화 · 테스트 90개 |
+| 품질 | 코드 리뷰로 10건 수정(체류시간 우회·업로드 DoS·오픈 리다이렉트 등) · 보안 헤더 · 로그인 시도 제한 · DB 인덱스 · 휴대폰 최적화 · 테스트 93개 |
 | 배포 | Vercel + Neon, main 머지 (#7) |
+| 해독 | 이름을 偕讀(해독)으로 · PC·태블릿 반응형(사이드바, 펼친 두 쪽 리더, 두 단 화면) · 마우스·기기 기울기 3D · 이어지는 화면 전환 · 날아오는 친구 소식 |
 
 ## 다음 할 일
 
@@ -123,7 +132,7 @@ pytest -q && ruff check .                  # 테스트는 네트워크 없이 �
 | `app/services/` | 체류시간 · 서재 · 업로드 파싱 · 대결 · 반응(스포일러 가드) |
 | `app/data/` | 서가·서점·인기 순서·소개 영상 목록 |
 | `scripts/` | `build_catalog` · `build_store` · `build_videos` · `fetch_covers` |
-| `migrations/` · `tests/` | Alembic · pytest 90개 |
+| `migrations/` · `tests/` | Alembic · pytest 93개 |
 
 - 환경 변수: `DATABASE_URL`, `SECRET_KEY`(배포 필수), `COOKIE_SECURE`, `MAX_UPLOAD_MB`(Vercel은 4), `DWELL_SCALE`(시연용, 기본 1.0)
 - 스키마를 바꾸면 배포 **전에** Neon에 `alembic upgrade head`

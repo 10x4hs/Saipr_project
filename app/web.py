@@ -25,6 +25,7 @@ from app.db.session import get_session
 from app.models import Book, LibraryEntry, Room, Shelf, User
 from app.services import books as book_service
 from app.services import races as race_service
+from app.services import social
 from app.services.search import FULLTEXT_SOURCES, search_all
 from app.services.uploads import parse_upload
 from app.sources.base import BookSource, SourceError
@@ -587,9 +588,7 @@ MAX_AVATAR_BYTES = 300_000
 
 
 def avatar_url(user: User | None) -> str | None:
-    if user is None or not user.avatar:
-        return None
-    return f"/avatars/{user.id}?v={hashlib.sha1(user.avatar).hexdigest()[:8]}"
+    return social.avatar_path(user.id, user.avatar) if user else None
 
 
 templates.env.globals["avatar_url"] = avatar_url
