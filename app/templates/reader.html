@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "_ui.html" import icon, video_list %}
-{% block title %}{{ book.title }} — 함께읽기{% endblock %}
+{% block title %}{{ book.title }} — 偕讀 해독{% endblock %}
 {% block body_class %}reading{% endblock %}
 {% block body %}
 <header class="r-top glass">
@@ -18,6 +18,14 @@
 <main class="r-stage" id="stage" data-book="{{ book.id }}" data-total="{{ book.total_chunks }}"
       data-start="{{ entry.current_chunk }}" data-verified="{{ entry.verified_chunk }}" data-csrf="{{ csrf }}"></main>
 <div class="pg measure" id="measure" aria-hidden="true"></div>
+
+{# 넓은 화면: 오른쪽에 같이 읽는 친구와 지금 쪽의 반응이 늘 보인다 #}
+<aside class="r-side glass" id="side" aria-label="같이 읽는 사람들">
+  <h3>같이 읽는 중</h3>
+  <ul class="side-friends" id="sideFriends"></ul>
+  <h3>이 쪽의 반응 <span class="mono muted" id="sideCount"></span></h3>
+  <ul class="side-reacts" id="sideReacts"></ul>
+</aside>
 
 <footer class="r-foot glass">
   <span class="mono" id="pos">–</span>

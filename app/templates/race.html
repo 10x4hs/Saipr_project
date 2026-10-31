@@ -1,10 +1,11 @@
 {% extends "app.html" %}
 {% from "_ui.html" import book_cover, avatar %}
-{% block title %}{{ book.title }} 레이스 — 함께읽기{% endblock %}
+{% block title %}{{ book.title }} 레이스 — 偕讀 해독{% endblock %}
+{% block content_class %}split{% endblock %}
 {% block heading %}<small>{{ '끝난 대결' if over else '진행 중' }}</small>{{ book.title }}{% endblock %}
 {% block main %}
 <section class="race-hero glass-card">
-  {{ book_cover(book.title, book.author, img=cover_of(book)) }}
+  <div class="race-cover" data-tilt="14">{{ book_cover(book.title, book.author, img=cover_of(book)) }}</div>
   <div>
     <span class="mono muted">{% if over %}끝남{% else %}남은 시간 <b id="left" data-ends="{{ room.ends_at.isoformat() if room.ends_at else '' }}">–</b>{% endif %}</span>
     <h2>{{ board|length }}명이 달리는 중</h2>
@@ -38,10 +39,10 @@
 <script>
 (() => {
   const share = document.getElementById('share'), note = document.getElementById('copied');
-  const text = `함께읽기에서 「${share.dataset.title}」 페이지 레이스 하자! 코드 ${document.getElementById('code').textContent}`;
+  const text = `해독(偕讀)에서 「${share.dataset.title}」 페이지 레이스 하자! 코드 ${document.getElementById('code').textContent}`;
   const copy = async v => { try { await navigator.clipboard.writeText(v); note.textContent = '복사했어요'; } catch (e) { note.textContent = v; } };
   share.onclick = async () => {
-    if (navigator.share) { try { await navigator.share({ title: '함께읽기 대결', text, url: share.dataset.url }); return; } catch (e) {} }
+    if (navigator.share) { try { await navigator.share({ title: '해독 대결', text, url: share.dataset.url }); return; } catch (e) {} }
     copy(`${text}\n${share.dataset.url}`);
   };
   document.getElementById('copy').onclick = () => copy(document.getElementById('code').textContent);

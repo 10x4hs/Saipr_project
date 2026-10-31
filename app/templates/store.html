@@ -1,10 +1,11 @@
 {% extends "app.html" %}
 {% from "_ui.html" import book_cover, video_list %}
-{% block title %}{{ book.title }} — 함께읽기{% endblock %}
+{% block title %}{{ book.title }} — 偕讀 해독{% endblock %}
+{% block content_class %}split{% endblock %}
 {% block heading %}<small>{{ book.author or '' }}</small>{{ book.title }}{% endblock %}
 {% block main %}
 <section class="store-hero">
-  <div class="store-cover">{{ book_cover(book.title, book.author, 'lg', img=book.cover) }}</div>
+  <div class="store-cover" data-tilt="14">{{ book_cover(book.title, book.author, 'lg', img=book.cover) }}</div>
   <div class="store-info">
     <span class="eyebrow mono">전자책 · 알라딘</span>
     <h2>{{ book.title }}</h2>

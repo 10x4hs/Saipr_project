@@ -1,4 +1,4 @@
-/* 함께읽기 — 모바일 앱 기준. 잉크빛 바탕, 유리 질감 컨트롤, 색은 책 표지와 한 가지 핑크 포인트가 가져온다. */
+/* 해독(偕讀) — 모바일 앱 기준. 잉크빛 바탕, 유리 질감 컨트롤, 색은 책 표지와 한 가지 핑크 포인트가 가져온다. */
 :root{
   --bg:#0a0a0a; --surface:rgba(28,30,36,.55); --sunken:rgba(255,255,255,.06); --text:#fafafa; --body:#d6d8dd; --dim:#8a8a8a; --line:#24272e;
   --accent:#ffb3c7; --accent-ink:#2a1119; --glow:rgba(255,140,180,.28); --ok:#8fe3b8; --bad:#ff8a8a;
@@ -49,8 +49,10 @@ h1,h2{text-wrap:balance}
 .btn.ghost{color:var(--text);border:1px solid var(--line)}
 .btn.wide{width:100%}
 
-.logo{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:17px;letter-spacing:-.03em}
-.logo-mark{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:var(--text);color:var(--bg);font:700 15px var(--f-serif)}
+/* 로고: 한자 偕讀를 크게, 한글 해독을 작게 */
+.brand{display:inline-flex;align-items:baseline;gap:7px;line-height:1;white-space:nowrap}
+.brand b{font:700 24px/1 var(--f-serif);letter-spacing:.04em}
+.brand small{font-size:11px;font-weight:600;letter-spacing:.12em;color:var(--dim)}
 
 /* ---------- covers: 진짜 책처럼 두께가 있는 3D 상자 ---------- */
 /* 너비 기준 단위(cqw)로 두께를 잡아서 어떤 크기에서도 같은 비율의 책이 된다 */
@@ -582,3 +584,156 @@ html,body{overflow-x:clip;max-width:100%}
 .hx-book{contain:layout style}
 .l-about{justify-self:center;font-size:13px;color:var(--dim);padding:4px}
 .l-about:hover{color:var(--text)}
+
+/* =====================================================================
+   해독 — 넓은 화면 · 손에 반응하는 움직임
+   ===================================================================== */
+.auth-brand .brand b{font-size:30px}
+.auth-brand .brand small{color:rgba(255,255,255,.8)}
+.tabbar a.side-brand,.r-side,.hx-caption{display:none}
+.fchip i{overflow:hidden}
+.fchip i img{width:100%;height:100%;object-fit:cover}
+
+/* 화면 전환: 페이지가 바뀌어도 끊기지 않고 이어진다. 누른 책 표지는 다음 화면의 책(리더 무대·서점 표지)으로 커진다 */
+@view-transition{navigation:auto}
+.tabbar{view-transition-name:tabbar}
+.top .menu-pill{view-transition-name:menu}
+.r-stage,.store-cover{view-transition-name:book}
+::view-transition-old(root){animation:vt-out .18s ease both}
+::view-transition-new(root){animation:vt-in .42s var(--ease) both}
+::view-transition-group(book){animation-duration:.55s;animation-timing-function:var(--ease)}
+::view-transition-old(book),::view-transition-new(book){height:100%;object-fit:cover}
+@keyframes vt-out{to{opacity:0}}
+@keyframes vt-in{from{opacity:0;transform:translateY(14px)}}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+
+/* 기울기: motion.js가 --tx·--ty만 바꾸고, 움직임은 transition이 부드럽게 잇는다 */
+[data-tilt]{transform:perspective(900px) rotateX(var(--ty,0deg)) rotateY(var(--tx,0deg));transition:transform .6s var(--ease)}
+.hx-stage[data-tilt]{transform:rotateX(var(--ty,0deg)) rotateY(var(--tx,0deg));transition:transform .9s var(--ease)}
+
+/* 날아오는 친구 소식 */
+.fly{position:fixed;left:0;top:0;z-index:60;display:flex;align-items:center;gap:8px;max-width:min(340px,calc(100vw - 32px));padding:6px 16px 6px 6px;border-radius:999px;
+  font-size:13px;font-weight:500;pointer-events:none;box-shadow:var(--shadow);background:color-mix(in srgb,var(--surface) 92%,transparent)}
+.fly span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fly .avatar{width:30px;height:30px;font-size:13px}
+
+/* ---------- 태블릿 이상(세로 520px 이상): 하단 탭 바 → 왼쪽 세로 사이드바 ---------- */
+@media (min-width:768px) and (min-height:520px){
+  :root{--side:92px}
+  body.app .phone{max-width:none;margin:0;padding-left:var(--side);box-shadow:none}
+  .top{max-width:1200px;margin:0 auto;padding:calc(30px + env(safe-area-inset-top)) 96px 18px 40px}
+  .top-title{font-size:30px}
+  .top .menu-pill{right:28px;top:calc(26px + env(safe-area-inset-top))}
+  .menu-list{right:24px;top:calc(82px + env(safe-area-inset-top))}
+  .content{max-width:1200px;margin:0 auto;padding:4px 40px 72px}
+  .content:not(.wide):not(.split),.phone:has(.content:not(.wide):not(.split)) .top{max-width:760px}
+
+  .tabbar{left:12px;top:12px;bottom:12px;transform:none;width:calc(var(--side) - 20px);height:auto;grid-template-columns:1fr;grid-auto-rows:auto;align-content:start;gap:4px;padding:16px 6px;border-radius:26px}
+  .tabbar a{height:62px;border-radius:18px;transition:background .3s var(--ease),color .3s var(--ease)}
+  .tabbar a:hover{background:var(--sunken);color:var(--text)}
+  .tabbar a.on{background:color-mix(in srgb,var(--accent) 16%,transparent)}
+  .tabbar a.side-brand{display:grid;height:78px;margin-bottom:8px;background:none}
+  .side-brand .brand{flex-direction:column;align-items:center;gap:6px}
+  .side-brand .brand b{font-size:21px}
+  .side-brand .brand small{font-size:10px}
+
+  .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:32px 22px}
+  .rail,.chips{margin:0 -40px;padding-left:40px;padding-right:40px}
+  .rail{grid-auto-columns:140px}
+  .rail.big{grid-auto-columns:176px}
+  .rail .card{scroll-margin-left:40px}
+  .ranklist{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .marquee{margin:4px -40px}
+  .pick-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+
+  /* 홈 3D: 사이드바 오른쪽 전체가 무대 */
+  .hx-view{left:var(--side);top:calc(96px + env(safe-area-inset-top));bottom:24px}
+  .hx-book{--w:min(30vw,240px,calc((100dvh - 200px) * .42))}
+  .hx-count{right:32px;top:calc(100px + env(safe-area-inset-top))}
+
+  /* 아래에서 올라오던 시트는 가운데 창으로 */
+  .sheet-wrap{align-items:center;padding:24px}
+  .sheet{width:min(520px,100%);border-radius:28px;max-height:86dvh}
+
+  /* 리더 */
+  .r-top{width:min(calc(100% - 48px),760px)}
+  .r-stage{top:calc(84px + env(safe-area-inset-top));bottom:calc(86px + env(safe-area-inset-bottom));width:min(calc(100% - 48px),620px)}
+  .spread .r-stage{width:min(calc(100% - 64px),1180px,calc((100dvh - 170px) * 1.5))}
+  .spread .pg.--left{border-radius:14px 4px 4px 14px;box-shadow:inset -18px 0 24px -20px rgba(0,0,0,.6)}
+  .pg.blank{background:var(--paper)}
+}
+
+/* ---------- PC(1100px~): 이름까지 보이는 사이드바, 두 단 화면, 리더 오른쪽 열 ---------- */
+@media (min-width:1100px) and (min-height:520px){
+  :root{--side:240px}
+  .tabbar{width:calc(var(--side) - 24px);padding:22px 12px;border-radius:28px}
+  .tabbar a{display:flex;justify-content:flex-start;gap:14px;height:50px;padding:0 16px;font-size:15px}
+  .tabbar a.side-brand{display:flex;height:auto;padding:6px 16px 22px;margin-bottom:10px;border-bottom:1px solid var(--glass-line);border-radius:0}
+  .side-brand .brand{flex-direction:row;align-items:baseline;gap:8px}
+  .side-brand .brand b{font-size:32px}
+  .side-brand .brand small{font-size:12px}
+
+  /* 책 상세 · 대결 · 내 정보: 왼쪽 요약은 붙어 있고 오른쪽 내용이 흐른다 */
+  .content.split{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:0 48px;align-items:start}
+  .content.split>*{grid-column:2}
+  .content.split>:first-child{grid-column:1;grid-row:1 / span 40;position:sticky;top:32px;margin-top:4px}
+  .content.split>:nth-child(2){margin-top:4px}
+  .split .store-hero{grid-template-columns:1fr;justify-items:center;text-align:center;gap:24px;padding:36px 28px;border-radius:28px;background:var(--surface);border:1px solid var(--glass-line)}
+  .split .store-cover{width:min(240px,70%)}
+  .split .race-hero{grid-template-columns:1fr;justify-items:center;text-align:center;padding:32px 24px}
+  .split .race-cover{width:180px}
+  .split .profile-edit{grid-template-columns:1fr;justify-items:center;text-align:center;padding:32px 24px}
+  .split .profile-fields{width:100%}
+  .split .profile-actions{justify-content:center}
+  .split .avatar.xl{width:112px;height:112px;font-size:44px}
+  .split .stats{margin-top:4px}
+
+  /* 홈: 왼쪽엔 앞에 선 책의 이름을 크게, 나선은 오른쪽으로 */
+  .hx-stage{left:60%}
+  .hx-book{--w:min(24vw,260px,calc((100dvh - 200px) * .42))}
+  .hx-caption{display:grid;gap:10px;justify-items:start;position:fixed;z-index:3;left:calc(var(--side) + 56px);bottom:clamp(48px,10dvh,120px);width:min(30vw,400px);
+    transition:opacity .22s ease,transform .4s var(--ease)}
+  .hx-caption.fading{opacity:0;transform:translateY(8px)}
+  .hx-caption .mono{color:var(--accent-strong);font-size:12px}
+  .hx-caption h2{margin:0;font:700 clamp(34px,3.6vw,56px)/1.12 var(--f-serif);letter-spacing:-.02em;text-wrap:balance}
+  .hx-caption p{margin:0;font-size:17px;color:var(--body)}
+
+  /* 리더: 펼친 두 쪽 + 오른쪽 열(친구 진행 · 이 쪽의 반응) */
+  body.reading{--rw:352px}
+  .r-top,.r-foot,.r-stage,.r-sheet,.r-toast{left:calc((100% - var(--rw)) / 2)}
+  .r-top{width:min(calc(100% - var(--rw) - 48px),760px)}
+  .r-stage{width:min(calc(100% - var(--rw) - 48px),620px)}
+  .spread .r-stage{width:min(calc(100% - var(--rw) - 64px),1180px,calc((100dvh - 170px) * 1.5))}
+  .r-foot .friends{display:none}
+  .r-side{display:flex;flex-direction:column;position:fixed;z-index:15;right:16px;top:calc(12px + env(safe-area-inset-top));bottom:16px;width:320px;padding:22px 18px;border-radius:26px;overflow-y:auto;overscroll-behavior:contain}
+  .r-side h3{display:flex;gap:6px;align-items:baseline;margin:0 0 12px;font-size:13px;font-weight:600;color:var(--dim)}
+  .r-side ul+h3{margin-top:26px}
+  .side-friends,.side-reacts{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+  .side-friends li{display:flex;align-items:center;gap:10px}
+  .side-friends li>div{flex:1;display:grid;gap:6px;min-width:0}
+  .side-friends b{font-size:13px}
+  .side-friends li.me b{color:var(--accent-strong)}
+  .side-friends .mono{color:var(--dim)}
+  .side-reacts li{display:grid;gap:8px;padding:12px 14px;border-radius:16px;background:var(--sunken)}
+  .side-quote{font:13px/1.6 var(--f-serif);color:var(--body);text-align:left;border-left:2px solid var(--accent);padding-left:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .side-quote:hover{color:var(--text)}
+  .side-r{display:flex;gap:8px;align-items:baseline;font-size:13px}
+  .side-r b{flex:none;font-weight:600}
+  .side-r p{margin:0;color:var(--body);min-width:0;overflow-wrap:anywhere}
+  .side-r.emoji p{font-size:17px;line-height:1}
+  .side-reacts li.sealed{background:none;border:1px dashed var(--glass-line);color:var(--dim);font-size:13px}
+}
+
+/* ---------- 소개(랜딩) 화면도 PC에서는 두 단: 왼쪽 글·버튼, 오른쪽 3D 책 ---------- */
+@media (min-width:1100px) and (min-height:600px){
+  .landing .phone{max-width:1240px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto 1fr auto auto;column-gap:56px;padding:0 56px 32px;box-shadow:none}
+  .l-nav{grid-column:1 / -1}
+  .l-copy{grid-column:1;grid-row:2;align-self:end}
+  .l-copy h1{font-size:clamp(48px,4.6vw,68px)}
+  .l-lede{font-size:18px;max-width:30em}
+  .l-cta{grid-column:1;grid-row:3;position:static;background:none;max-width:420px;padding-top:28px}
+  .l-stage{grid-column:2;grid-row:2 / span 2;height:auto;min-height:480px;margin:0;align-self:center}
+  .l-book{width:clamp(150px,13vw,200px);transform:translate(-50%,-50%) translateX(calc(var(--i) * 92px)) translateZ(calc((2 - max(var(--i),-1 * var(--i))) * 56px)) rotateZ(calc(var(--i) * 4deg))}
+  .landing .marquee{grid-column:1 / -1;grid-row:4;margin:32px 0 0}
+  .l-nav .brand b{font-size:30px}
+}

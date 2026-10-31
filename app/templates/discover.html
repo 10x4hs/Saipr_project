@@ -1,6 +1,7 @@
 {% extends "app.html" %}
 {% from "_ui.html" import catalog_card, store_card %}
-{% block title %}탐색 — 함께읽기{% endblock %}
+{% block title %}탐색 — 偕讀 해독{% endblock %}
+{% block content_class %}wide{% endblock %}
 {% block heading %}<small><a href="/discover">‹ 탐색</a></small>{{ genre or "전체" }}{% endblock %}
 {% block main %}
 <nav class="chips" aria-label="장르">

@@ -40,3 +40,13 @@ p{margin:0;color:var(--mute)}
 }
 @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+/* 이름 풀이 */
+.brand-line{font-size:15px;letter-spacing:.02em}
+.brand-line b{font:700 1.35em "Noto Serif KR",serif;margin-right:6px;color:var(--fg)}
+.name{text-align:center}
+.glyphs{display:flex;align-items:center;justify-content:center;gap:clamp(12px,4vw,32px);margin:0 0 24px}
+.glyphs i{font-style:normal;color:var(--mute);font-size:1.6rem}
+.glyph{display:grid;justify-items:center;gap:6px;padding:20px 26px;border:1px solid var(--line);border-radius:22px;background:var(--glass)}
+.glyph b{font:700 clamp(3rem,12vw,4.6rem)/1 "Noto Serif KR",serif}
+.glyph span{color:var(--mute);font-size:14px}
+.name p{max-width:30em;margin:0 auto}

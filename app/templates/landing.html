@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% from "_ui.html" import book_cover %}
+{% from "_ui.html" import book_cover, brand %}
 {% block body_class %}landing{% endblock %}
 {% block body %}
 <div class="phone">
   <header class="l-nav">
-    <span class="logo"><span class="logo-mark">읽</span>함께읽기</span>
+    {{ brand() }}
     <a class="pill" href="/login">로그인</a>
   </header>
-  <section class="l-stage" aria-hidden="true">
+  <section class="l-stage" aria-hidden="true" data-tilt="8">
     <div class="l-glow"></div>
     {% for b in picks[:5] %}<div class="l-book" style="--i:{{ loop.index0 - 2 }}">{{ book_cover(b.title, b.author, 'lg', img=b.cover) }}</div>{% endfor %}
   </section>
@@ -22,7 +22,7 @@
   <div class="l-cta">
     <a class="btn primary wide" href="/signup">무료로 시작하기</a>
     <a class="btn ghost wide" href="/login">이미 계정이 있어요</a>
-    <a class="l-about" href="/intro">함께읽기가 뭔가요? 소개 보기 →</a>
+    <a class="l-about" href="/intro">偕讀(해독)이 뭔가요? 소개 보기 →</a>
   </div>
 </div>
 {% endblock %}

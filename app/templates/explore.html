@@ -1,6 +1,7 @@
 {% extends "app.html" %}
 {% from "_ui.html" import book_cover, catalog_card, book_card, store_card %}
-{% block title %}탐색 — 함께읽기{% endblock %}
+{% block title %}탐색 — 偕讀 해독{% endblock %}
+{% block content_class %}wide{% endblock %}
 {% block heading %}탐색{% endblock %}
 {% block main %}
 <nav class="chips" aria-label="서가">
@@ -27,7 +28,7 @@
 </div></div>
 
 <section class="row">
-  <div class="row-h"><h2>인기 순위</h2><span class="mono muted">유명 고전 + 함께읽기 독자 수</span></div>
+  <div class="row-h"><h2>인기 순위</h2><span class="mono muted">유명 고전 + 해독 독자 수</span></div>
   <ol class="ranklist">{% for b in popular[:10] %}<li><a href="/open/{{ b.source }}/{{ b.id|urlencode }}"><span class="mono">{{ b.rank }}</span>{{ book_cover(b.title, b.author, 'xs', img=b.cover|small_cover) }}<div><b>{{ b.title }}</b><span>{{ b.author or '' }}</span></div></a></li>{% endfor %}</ol>
 </section>
 

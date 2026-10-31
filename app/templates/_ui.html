@@ -94,3 +94,8 @@ document.querySelectorAll('.yt').forEach(b => b.addEventListener('click', () => 
 }, { once: true }));
 </script>
 {%- endmacro %}
+
+{# 로고: 한자 偕讀(함께 해 + 읽을 독)를 크게, 한글 '해독'을 작게. 한글만 쓰면 解毒으로 읽혀서 #}
+{% macro brand(cls='') -%}
+<span class="brand {{ cls }}" aria-label="해독 偕讀"><b aria-hidden="true">偕讀</b><small aria-hidden="true">해독</small></span>
+{%- endmacro %}

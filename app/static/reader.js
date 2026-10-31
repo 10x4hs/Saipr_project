@@ -12,6 +12,9 @@ const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 let verifiedUpTo = +stage.dataset.verified;
 let chunk = Math.min(+stage.dataset.start || 0, total - 1);
 let chunkData = null, minMs = 0, dwellMs = 0, pageFlip = null, pageCount = 0, lead = 0;
+// 넓은 화면에서는 종이책처럼 두 쪽을 펼친다(step=2). 장 수를 짝수로 맞추고 넘김용 장도 두 장씩 붙인다
+let step = 1;
+const spreadFits = () => innerWidth >= 900 && innerHeight >= 560;
 const cache = new Map();
 let lastOpened = -1, sentVerify = false;
 let mode = local.get('flip', '3d');   // '3d' = 책장 넘김, 'scroll' = 넘김 효과 끄기
@@ -43,9 +46,9 @@ function save(verified = false) {
 }
 
 // --- 페이지 나누기: 실제 페이지와 같은 크기의 측정용 상자에 문단을 채워 본다 ---
-function paginate(text) {
+function paginate(text, width) {
   const m = $('measure');
-  m.style.width = stage.clientWidth + 'px';
+  m.style.width = width + 'px';
   m.style.height = stage.clientHeight + 'px';
   const fits = () => m.scrollHeight <= m.clientHeight;
   const pages = [];
@@ -100,12 +103,17 @@ async function open(i, { atEnd = false } = {}) {
   minMs = chunkData.min_dwell_ms; dwellMs = 0; sentVerify = false;
 
   if (mode === 'scroll') return openScroll();
-  const pages = paginate(chunkData.text).map(h => pageEl(h));
+  step = spreadFits() ? 2 : 1;
+  document.body.classList.toggle('spread', step === 2);   // 무대 폭이 펼침에 맞게 바뀐 뒤 잰다
+  const pw = Math.floor(stage.clientWidth / step);
+  const pages = paginate(chunkData.text, pw).map(h => pageEl(h));
+  if (pages.length % step) pages.push(pageEl('', 'blank'));
+  const pad = list => step === 2 ? [...list, pageEl('', 'edge-page blank')] : list;
   // 청크 경계에 '넘김용' 페이지를 붙여, 그 페이지에 닿으면 이웃 청크를 불러온다
-  lead = chunk > 0 ? 1 : 0;
-  if (lead) pages.unshift(pageEl('<div class="turn">‹ 앞 쪽으로</div>', 'edge-page'));
-  if (chunk < total - 1) pages.push(pageEl('<div class="turn">다음 쪽으로 ›</div>', 'edge-page'));
-  else pages.push(pageEl('<div class="fin"><b>끝</b><span>마지막 쪽까지 왔어요</span><a class="btn primary" href="/library">서재로</a></div>', 'edge-page'));
+  lead = chunk > 0 ? step : 0;
+  if (lead) pages.unshift(...pad([pageEl('<div class="turn">‹ 앞 쪽으로</div>', 'edge-page')]));
+  if (chunk < total - 1) pages.push(...pad([pageEl('<div class="turn">다음 쪽으로 ›</div>', 'edge-page')]));
+  else pages.push(...pad([pageEl('<div class="fin"><b>끝</b><span>마지막 쪽까지 왔어요</span><a class="btn primary" href="/library">서재로</a></div>', 'edge-page')]));
   pageCount = pages.length;
 
   if (pageFlip) { pageFlip.destroy(); }
@@ -114,12 +122,12 @@ async function open(i, { atEnd = false } = {}) {
   stage.replaceChildren(book);
   pages.forEach(p => book.appendChild(p));
   pageFlip = new St.PageFlip(book, {
-    width: stage.clientWidth, height: stage.clientHeight, size: 'fixed',
+    width: pw, height: stage.clientHeight, size: 'fixed',
     usePortrait: true, showCover: false, mobileScrollSupport: true,
     maxShadowOpacity: .45, flippingTime: 650, swipeDistance: 24, drawShadow: true, disableFlipByClick: true,
   });
   pageFlip.loadFromHTML(book.querySelectorAll('.pg'));
-  const startAt = atEnd ? pageCount - 2 : lead;
+  const startAt = atEnd ? pageCount - 2 * step : lead;
   pageFlip.turnToPage(Math.max(0, startAt));
   pageFlip.on('flip', e => onPage(e.data));
   onPage(pageFlip.getCurrentPageIndex());
@@ -129,9 +137,9 @@ async function open(i, { atEnd = false } = {}) {
 }
 
 function onPage(idx) {
-  if (lead && idx === 0) return open(chunk - 1, { atEnd: true });
-  if (idx === pageCount - 1 && chunk < total - 1) return open(chunk + 1);
-  const inChunk = idx - lead + 1, pagesInChunk = pageCount - lead - 1;
+  if (lead && idx < lead) return open(chunk - 1, { atEnd: true });
+  if (idx >= pageCount - step && chunk < total - 1) return open(chunk + 1);
+  const inChunk = Math.floor((idx - lead) / step) + 1, pagesInChunk = (pageCount - lead - step) / step;
   $('pos').textContent = `${chunk + 1}/${total}쪽 · ${Math.min(inChunk, pagesInChunk)}/${pagesInChunk}`;
   paintDwell();
 }
@@ -183,13 +191,13 @@ open(chunk);
 let reacts = { items: [], sealed: 0 }, friendMap = new Map(), emojis = ['❤️', '😂', '😮', '😢', '👏'];
 let sheetAnchor = 0;
 
-async function loadReactions(i) {
+async function loadReactions(i, { quiet = false } = {}) {
   try {
     const r = await fetch(`/api/v1/books/${bookId}/reactions?chunk=${i}`);
     if (!r.ok || i !== chunk) return;
     reacts = await r.json();
     paintReactions();
-    if (reacts.sealed) toast(`🔒 이 쪽에 친구 반응 ${reacts.sealed}개 — 다 읽으면 열려요`);
+    if (reacts.sealed && !quiet && !sideShown()) toast(`🔒 이 쪽에 친구 반응 ${reacts.sealed}개 — 다 읽으면 열려요`);
   } catch (e) {}
 }
 
@@ -209,6 +217,73 @@ function paintReactions() {
     b.textContent = Object.entries(counts).map(([k, n]) => n > 1 ? `${k}${n}` : k).join(' ');
     p.appendChild(b);
   });
+  paintSide();
+}
+
+// ---------------- 넓은 화면 오른쪽 열: 친구 진행 + 이 쪽의 반응 ----------------
+const sideShown = () => getComputedStyle($('side')).display !== 'none';
+function avatarEl(nickname, url, cls = 'avatar sm') {
+  const a = document.createElement('span');
+  a.className = cls;
+  if (url) { const im = new Image(); im.src = url; im.alt = ''; a.appendChild(im); } else a.textContent = nickname.slice(0, 1);
+  return a;
+}
+function paintSide() {
+  if (!sideShown()) return;
+  const fl = $('sideFriends'); fl.innerHTML = '';
+  const rows = [{ user_id: 0, nickname: '나', verified_chunk: verifiedUpTo, me: true }, ...friendMap.values()]
+    .sort((a, b) => b.verified_chunk - a.verified_chunk);
+  rows.forEach(f => {
+    const li = document.createElement('li');
+    li.dataset.uid = f.user_id;
+    if (f.me) li.className = 'me';
+    const done = Math.max(0, f.verified_chunk + 1);
+    li.append(avatarEl(f.nickname, f.avatar));
+    const d = document.createElement('div');
+    d.innerHTML = '<b></b><span class="meter"><i></i></span>';
+    d.querySelector('b').textContent = f.nickname;
+    d.querySelector('i').style.width = Math.min(100, done / total * 100) + '%';
+    const n = document.createElement('span');
+    n.className = 'mono'; n.textContent = `${done}쪽`;
+    li.append(d, n);
+    fl.appendChild(li);
+  });
+  if (rows.length === 1) fl.insertAdjacentHTML('beforeend', '<li class="muted small">대결방에서 친구를 초대하면 여기서 서로의 위치가 보여요</li>');
+
+  const paras = chunkData ? chunkData.text.split(/\n\s*\n/) : [];
+  const by = new Map();
+  reacts.items.forEach(x => { if (!by.has(x.anchor)) by.set(x.anchor, []); by.get(x.anchor).push(x); });
+  $('sideCount').textContent = reacts.items.length ? reacts.items.length : '';
+  const rl = $('sideReacts'); rl.innerHTML = '';
+  [...by.keys()].sort((a, b) => a - b).forEach(anchor => {
+    const li = document.createElement('li');
+    const q = document.createElement('button');
+    q.type = 'button'; q.className = 'side-quote';
+    const quote = (paras[anchor] || '').trim();
+    q.textContent = quote.length > 70 ? quote.slice(0, 70) + '…' : quote;
+    q.onclick = () => openSheet(anchor, quote);
+    li.appendChild(q);
+    by.get(anchor).forEach(x => {
+      const row = document.createElement('div');
+      row.className = 'side-r' + (x.kind === 'emoji' ? ' emoji' : '');
+      const t = document.createElement('p'); t.textContent = x.body;
+      const who = document.createElement('b'); who.textContent = x.mine ? '나' : x.nickname;
+      row.append(who, t);
+      li.appendChild(row);
+    });
+    rl.appendChild(li);
+  });
+  if (reacts.sealed) rl.insertAdjacentHTML('beforeend', `<li class="sealed">🔒 아직 안 읽은 곳의 반응 ${reacts.sealed}개 — 다 읽으면 열려요</li>`);
+  if (!by.size && !reacts.sealed) rl.innerHTML = '<li class="muted small">문단을 누르면 첫 반응을 남길 수 있어요</li>';
+}
+
+// 친구 소식이 그 친구의 자리(오른쪽 열 또는 아래 동그라미)로 날아와 앉는다
+function friendEl(uid) {
+  return document.querySelector(sideShown() ? `#sideFriends [data-uid="${uid}"] .avatar` : `#friends [data-uid="${uid}"]`) || $('friends');
+}
+function news(f, text) {
+  if (window.haedok) window.haedok.fly({ name: f.nickname, avatar: f.avatar, text, to: friendEl(f.user_id) });
+  else toast(text);
 }
 
 // 탭: 문단이면 반응 시트, 페이지 가장자리면 넘김
@@ -292,12 +367,15 @@ function paintFriends() {
   [...friendMap.values()].forEach(f => {
     const s = document.createElement('span');
     s.className = 'fchip';
+    s.dataset.uid = f.user_id;
     s.title = `${f.nickname} · ${f.current_chunk + 1}쪽`;
     s.innerHTML = '<i></i><em></em>';
-    s.querySelector('i').textContent = f.nickname.slice(0, 1);
+    if (f.avatar) { const im = new Image(); im.src = f.avatar; im.alt = ''; s.querySelector('i').appendChild(im); }
+    else s.querySelector('i').textContent = f.nickname.slice(0, 1);
     s.querySelector('em').textContent = f.verified_chunk + 1;
     box.appendChild(s);
   });
+  paintSide();
 }
 
 let toastTimer = 0;
@@ -327,17 +405,18 @@ function connect() {
     const m = JSON.parse(ev.data);
     if (m.type === 'progress.updated') {
       const before = friendMap.get(m.user_id);
-      friendMap.set(m.user_id, { user_id: m.user_id, nickname: m.nickname, current_chunk: m.current_chunk, verified_chunk: m.verified_chunk });
+      const f = { user_id: m.user_id, nickname: m.nickname, avatar: m.avatar, current_chunk: m.current_chunk, verified_chunk: m.verified_chunk };
+      friendMap.set(m.user_id, f);
       paintFriends();
       if (m.advanced) {
         const passed = before && before.verified_chunk <= verifiedUpTo && m.verified_chunk > verifiedUpTo;
-        toast(passed ? `🏃 ${m.nickname}님이 나를 앞질렀어요` : `${m.nickname}님이 ${m.verified_chunk + 1}쪽을 다 읽었어요`);
+        news(f, passed ? `🏃 ${m.nickname}님이 나를 앞질렀어요` : `${m.nickname}님이 ${m.verified_chunk + 1}쪽을 다 읽었어요`);
       }
     } else if (m.type === 'reaction.removed') {
       if (m.chunk === chunk) loadReactions(chunk);
     } else if (m.type === 'reaction.added') {
-      toast(`${m.nickname}님이 ${m.chunk + 1}쪽에 반응을 남겼어요`);
-      if (m.chunk === chunk) loadReactions(chunk);
+      news({ user_id: m.user_id, nickname: m.nickname, avatar: m.avatar }, `${m.nickname}님이 ${m.chunk + 1}쪽에 반응을 남겼어요`);
+      if (m.chunk === chunk) loadReactions(chunk, { quiet: true });
     }
   };
   // 서버리스 배포처럼 WebSocket이 없는 곳에서는 점점 드물게 다시 시도하고, 그동안은 주기적으로 물어본다
@@ -350,6 +429,7 @@ social();
 // ---------------- 넘김 효과 끄기: 한 쪽을 위아래로 스크롤해 읽는다 ----------------
 function openScroll() {
   if (pageFlip) { pageFlip.destroy(); pageFlip = null; }
+  document.body.classList.remove('spread');
   const col = document.createElement('article');
   col.className = 'pg scroll-col';
   col.innerHTML = chunkData.text.split(/\n\s*\n/).map((p, a) => `<p data-a="${a}">${esc(p)}</p>`).join('')
@@ -386,10 +466,17 @@ function startPolling() {
         friendMap.set(f.user_id, f);
         if (before && f.verified_chunk > before.verified_chunk) {
           const passed = before.verified_chunk <= verifiedUpTo && f.verified_chunk > verifiedUpTo;
-          toast(passed ? `🏃 ${f.nickname}님이 나를 앞질렀어요` : `${f.nickname}님이 ${f.verified_chunk + 1}쪽을 다 읽었어요`);
+          news(f, passed ? `🏃 ${f.nickname}님이 나를 앞질렀어요` : `${f.nickname}님이 ${f.verified_chunk + 1}쪽을 다 읽었어요`);
         }
       });
       paintFriends();
+      // 지금 쪽에 새로 달린 친구 반응도 확인한다(WebSocket이 없으면 알림이 오지 않으니)
+      const seen = new Set(reacts.items.map(x => x.id)), at = chunk;
+      await loadReactions(at, { quiet: true });
+      reacts.items.filter(x => !x.mine && !seen.has(x.id) && at === chunk).forEach(x => {
+        const f = [...friendMap.values()].find(v => v.nickname === x.nickname) || { user_id: 0, nickname: x.nickname };
+        news(f, `${x.nickname}님이 이 쪽에 ${x.kind === 'emoji' ? x.body : '💬'} 반응을 남겼어요`);
+      });
     } catch (e) {}
   }, 20000);
 }

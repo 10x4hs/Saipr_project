@@ -1,6 +1,7 @@
 {% extends "app.html" %}
 {% from "_ui.html" import catalog_card, book_cover %}
-{% block title %}{{ q }} — 함께읽기{% endblock %}
+{% block title %}{{ q }} — 偕讀 해독{% endblock %}
+{% block content_class %}wide{% endblock %}
 {% block heading %}검색{% endblock %}
 {% block main %}
 <form class="big-search" action="/search" role="search"><input name="q" value="{{ q }}" placeholder="제목이나 저자를 입력하세요" aria-label="검색어" autofocus></form>

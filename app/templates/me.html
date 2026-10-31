@@ -1,28 +1,7 @@
 {% extends "app.html" %}
 {% from "_ui.html" import icon, avatar %}
-{% block title %}내 정보 — 함께읽기<script>
-(() => {
-  // 고른 사진을 가운데 정사각형으로 잘라 256px JPEG로 줄인 뒤 폼 파일로 넣는다
-  const pick = document.getElementById('photoPick'), out = document.getElementById('photoOut');
-  document.getElementById('avatarPick').onclick = () => pick.click();
-  pick.onchange = async () => {
-    const f = pick.files[0]; if (!f) return;
-    const img = await createImageBitmap(f);
-    const s = Math.min(img.width, img.height), c = document.createElement('canvas');
-    c.width = c.height = 256;
-    c.getContext('2d').drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 256, 256);
-    const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', .86));
-    const dt = new DataTransfer(); dt.items.add(new File([blob], 'avatar.jpg', { type: 'image/jpeg' })); out.files = dt.files;
-    const av = document.querySelector('.avatar-pick .avatar'); av.innerHTML = ''; const im = new Image(); im.src = URL.createObjectURL(blob); av.appendChild(im);
-    document.getElementById('removePhoto').value = '';
-    document.getElementById('saveProfile').textContent = '저장';
-  };
-  const drop = document.getElementById('dropPhoto');
-  if (drop) drop.onclick = () => { document.getElementById('removePhoto').value = '1'; document.getElementById('profileForm').submit(); };
-  document.getElementById('nickname').oninput = () => { document.getElementById('saveProfile').textContent = '저장'; };
-})();
-</script>
-{% endblock %}
+{% block title %}내 정보 — 偕讀 해독{% endblock %}
+{% block content_class %}split{% endblock %}
 {% block heading %}내 정보{% endblock %}
 {% block main %}
 {% if error %}<p class="form-err" role="alert">{{ error }}</p>{% endif %}
@@ -55,4 +34,26 @@
   <a class="set-row" href="/upload">{{ icon('upload') }}<span>내 파일 올리기</span><em>›</em></a>
   <form method="post" action="/logout"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="set-row danger">로그아웃</button></form>
 </section>
+<script>
+(() => {
+  // 고른 사진을 가운데 정사각형으로 잘라 256px JPEG로 줄인 뒤 폼 파일로 넣는다
+  const pick = document.getElementById('photoPick'), out = document.getElementById('photoOut');
+  document.getElementById('avatarPick').onclick = () => pick.click();
+  pick.onchange = async () => {
+    const f = pick.files[0]; if (!f) return;
+    const img = await createImageBitmap(f);
+    const s = Math.min(img.width, img.height), c = document.createElement('canvas');
+    c.width = c.height = 256;
+    c.getContext('2d').drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 256, 256);
+    const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', .86));
+    const dt = new DataTransfer(); dt.items.add(new File([blob], 'avatar.jpg', { type: 'image/jpeg' })); out.files = dt.files;
+    const av = document.querySelector('.avatar-pick .avatar'); av.innerHTML = ''; const im = new Image(); im.src = URL.createObjectURL(blob); av.appendChild(im);
+    document.getElementById('removePhoto').value = '';
+    document.getElementById('saveProfile').textContent = '저장';
+  };
+  const drop = document.getElementById('dropPhoto');
+  if (drop) drop.onclick = () => { document.getElementById('removePhoto').value = '1'; document.getElementById('profileForm').submit(); };
+  document.getElementById('nickname').oninput = () => { document.getElementById('saveProfile').textContent = '저장'; };
+})();
+</script>
 {% endblock %}

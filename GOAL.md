@@ -1,4 +1,4 @@
-# GOAL — 함께읽기 MVP v0.1.0
+# GOAL — 해독(偕讀) MVP v0.1.0
 
 > 근거: [docs/PRD.md](docs/PRD.md) 11장 마일스톤 · 결정 로그: [.grill/reading-together-mvp.md](.grill/reading-together-mvp.md)
 

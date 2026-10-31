@@ -65,7 +65,15 @@ async def post_reaction(
     others = await social.circle(session, user.id, book.id) - {user.id}
     # 본문은 싣지 않는다: 받는 쪽이 자기 스포일러 가드로 다시 읽는다
     await broker.publish(
-        book.id, others, {"type": "reaction.added", "chunk": r.chunk_index, "nickname": user.nickname}
+        book.id,
+        others,
+        {
+            "type": "reaction.added",
+            "chunk": r.chunk_index,
+            "user_id": user.id,
+            "nickname": user.nickname,
+            "avatar": social.avatar_path(user.id, user.avatar),
+        },
     )
     return social._out(r, user.nickname, user.id)
 
