@@ -16,9 +16,27 @@
     <h1>같은 책을<br>각자의 속도로<br><em>함께</em> 읽어요</h1>
     <p class="l-lede">고전 {{ total }}권을 처음부터 끝까지. 내 EPUB·PDF도 같은 리더로 넘겨 읽어요.</p>
   </section>
-  <div class="marquee" aria-hidden="true"><div class="marquee-track">
-    {% for b in picks + picks %}{{ book_cover(b.title, b.author, 'sm', img=b.cover) }}{% endfor %}
+  <link rel="stylesheet" href="/static/landing-books.css">
+  <div class="marquee sc-strip" role="group" aria-label="유명한 책들"><div class="marquee-track">
+    {%- for b in showcase + showcase %}{% set dup = loop.index0 >= showcase|length %}
+    {%- if b.readable %}<a class="sc-book" href="/open/{{ b.source }}/{{ b.id|urlencode }}" title="{{ b.title }} · {{ b.author }}"{% if dup %} aria-hidden="true" tabindex="-1"{% endif %}>
+    {%- else %}<button class="sc-book locked" type="button" data-locked title="{{ b.title }} · {{ b.author }}"{% if dup %} aria-hidden="true" tabindex="-1"{% endif %}>{% endif %}
+      {{- book_cover(b.title, b.author, 'sm', img=b.cover) }}<span class="sr-only">{{ b.title }} — {{ b.author }}</span>
+    {%- if b.readable %}</a>{% else %}</button>{% endif %}
+    {%- endfor %}
   </div></div>
+  <div class="sc-toast" id="scToast" role="status" aria-live="polite" hidden>아직 해독에서 읽을 수 없는 책이에요</div>
+  <script>
+  (() => {
+    const t = document.getElementById('scToast');
+    let timer;
+    document.querySelector('.sc-strip').addEventListener('click', (e) => {
+      if (!e.target.closest('[data-locked]')) return;
+      t.hidden = false; t.classList.remove('in'); void t.offsetWidth; t.classList.add('in');
+      clearTimeout(timer); timer = setTimeout(() => { t.hidden = true; }, 2200);
+    });
+  })();
+  </script>
   <div class="l-cta">
     <a class="btn primary wide" href="/signup">무료로 시작하기</a>
     <div class="l-cta-row">
