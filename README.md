@@ -134,7 +134,7 @@ pytest -q && ruff check .                  # 테스트는 네트워크 없이 �
 | `scripts/` | `build_catalog` · `build_store` · `build_videos` · `fetch_covers` |
 | `migrations/` · `tests/` | Alembic · pytest 93개 |
 
-- 환경 변수: `DATABASE_URL`, `SECRET_KEY`(배포 필수), `COOKIE_SECURE`, `MAX_UPLOAD_MB`(Vercel은 4), `DWELL_SCALE`(시연용, 기본 1.0), `RESEND_API_KEY`·`RESEND_FROM`(가입 인증 메일, 없으면 코드를 로그에 남김), `ANDROID_CERT_SHA256`(TWA 서명 지문, assetlinks.json)
+- 환경 변수: `DATABASE_URL`, `SECRET_KEY`(배포 필수), `COOKIE_SECURE`, `MAX_UPLOAD_MB`(Vercel은 4), `DWELL_SCALE`(시연용, 기본 1.0), `SMTP_USER`·`SMTP_PASSWORD`(Gmail 앱 비밀번호, 우선) 또는 `RESEND_API_KEY`·`RESEND_FROM`(가입 인증 메일, 없으면 코드를 로그에 남김), `ANDROID_CERT_SHA256`(TWA 서명 지문, assetlinks.json)
 - 스키마를 바꾸면 배포 **전에** Neon에 `alembic upgrade head`
 - 표지 이미지는 시연용으로만 받고 저장소에 올리지 않아요. 알라딘 전자책은 DRM 때문에 앱에서 열 수 없고, 앱에도 그렇게 안내해요.
 - 예전 디자인 시안은 [`docs/archive/`](docs/archive/)에 있어요.

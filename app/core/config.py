@@ -51,6 +51,11 @@ class Settings(BaseSettings):
     # 가입 인증 메일(Resend). 키가 없으면 코드를 로그에만 남긴다
     resend_api_key: str | None = None
     resend_from: str = "해독 <onboarding@resend.dev>"
+    # Gmail 등 SMTP(우선 사용). Gmail은 계정 주소 + 16자리 앱 비밀번호
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 465
+    smtp_user: str | None = None
+    smtp_password: str | None = None
     # 안드로이드 TWA 앱 — /.well-known/assetlinks.json 에 실린다. 지문은 쉼표로 여러 개
     android_package: str = "app.vercel.saipr_reading.twa"
     android_cert_sha256: str = (
