@@ -11,6 +11,11 @@ from app.api.deps import get_http_client
 from app.db.base import Base
 from app.db.session import get_session
 from app.main import app
+from app.services import mail
+
+# 테스트 중 "보낸" 가입 인증 코드: 이메일 -> 마지막 코드. 실제 메일은 나가지 않는다
+SENT_CODES: dict[str, str] = {}
+REAL_SEND_SIGNUP_CODE = mail.send_signup_code
 
 Handler = Callable[[httpx.Request], httpx.Response]
 
@@ -73,6 +78,8 @@ async def signup(
             "csrf": token,
         },
     )
+    assert r.status_code == 303 and r.headers["location"] == "/signup/verify", r.text
+    r = await client.post("/signup/verify", data={"code": SENT_CODES[email], "csrf": token})
     assert r.status_code == 303, r.text
 
 
@@ -111,3 +118,17 @@ def _reset_login_failures():
     auth._failures.clear()
     yield
     auth._failures.clear()
+
+
+@pytest.fixture(autouse=True)
+def _capture_signup_mail(monkeypatch):
+    """가입 인증 메일을 보내는 대신 SENT_CODES에 적어 둔다."""
+
+    async def fake(client, email, code):
+        SENT_CODES[email] = code
+        return True
+
+    SENT_CODES.clear()
+    monkeypatch.setattr(mail, "send_signup_code", fake)
+    yield
+    SENT_CODES.clear()

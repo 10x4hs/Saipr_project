@@ -48,6 +48,14 @@ class Settings(BaseSettings):
     dwell_scale: float = 1.0
     # 업로드 상한(MB). Vercel은 요청 본문을 4.5MB에서 끊으므로 배포에서는 4로 둔다
     max_upload_mb: int = 20
+    # 가입 인증 메일(Resend). 키가 없으면 코드를 로그에만 남긴다
+    resend_api_key: str | None = None
+    resend_from: str = "해독 <onboarding@resend.dev>"
+    # 안드로이드 TWA 앱 — /.well-known/assetlinks.json 에 실린다. 지문은 쉼표로 여러 개
+    android_package: str = "app.vercel.saipr_reading.twa"
+    android_cert_sha256: str = (
+        "7F:D4:97:F9:FC:B0:1F:F9:A2:CB:2F:1A:A8:BE:65:21:F7:C9:08:3B:34:96:A4:E3:8F:F9:CB:41:7C:35:06:48"
+    )
 
 
 @lru_cache

@@ -8,7 +8,7 @@
       ('nickname', '이름', 'text', 'nickname', form.nickname if form else ''),
       ('email', '이메일', 'email', 'email', form.email if form else ''),
       ('password', '비밀번호 (8자 이상)', 'password', 'new-password', ''),
-      ('password_confirm', '비밀번호 한 번 더', 'password', 'new-password', '')] %}
+      ('password_confirm', '비밀번호 확인', 'password', 'new-password', '')] %}
   <div class="step" data-step data-name="{{ name }}" data-error="{{ e.get(name, '') }}">
     <label class="sr" for="{{ name }}">{{ ph }}</label>
     <div class="pill-field"><input id="{{ name }}" name="{{ name }}" type="{{ typ }}" value="{{ val }}" placeholder="{{ ph }}" autocomplete="{{ ac }}" required {% if name == 'nickname' %}maxlength="40" autofocus{% endif %}{% if name == 'password' %} minlength="8"{% endif %}>
