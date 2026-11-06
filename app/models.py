@@ -195,6 +195,31 @@ class RoomMember(Base):
     joined_at: Mapped[datetime] = _now()
 
 
+class RacePresence(Base):
+    """대결방에서 누가 지금 몇 쪽을 펼쳐 두었는지 — 리더가 몇 초마다 심장박동을 보낸다."""
+
+    __tablename__ = "race_presence"
+
+    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id", ondelete="CASCADE"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    chunk_index: Mapped[int] = mapped_column(Integer, default=0)
+    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class RaceQuote(Base):
+    """대결방 피드에 공유한 한 문장."""
+
+    __tablename__ = "race_quotes"
+    __table_args__ = (Index("ix_race_quotes_room_id_id", "room_id", "id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id", ondelete="CASCADE"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    chunk_index: Mapped[int] = mapped_column(Integer)
+    body: Mapped[str] = mapped_column(String(280))
+    created_at: Mapped[datetime] = _now()
+
+
 class Reaction(Base):
     __tablename__ = "reactions"
     __table_args__ = (Index("ix_reactions_book_chunk", "book_id", "chunk_index"),)
