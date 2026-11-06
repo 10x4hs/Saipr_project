@@ -1,7 +1,7 @@
 """worker D: race presence and quote feed
 
 Revision ID: f1d4c8a2b907
-Revises: e2f7a3c9b815
+Revises: a1f0c3d5e7b9
 Create Date: 2026-11-06 12:00:00
 """
 from collections.abc import Sequence
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = 'f1d4c8a2b907'
-down_revision: str | None = 'e2f7a3c9b815'
+down_revision: str | None = 'a1f0c3d5e7b9'
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
