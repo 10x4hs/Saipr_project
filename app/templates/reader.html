@@ -4,7 +4,7 @@
 {% block body_class %}reading{% endblock %}
 {% block body %}
 <header class="r-top glass">
-  <a href="/library" class="pill-btn" aria-label="서재로">{{ icon('back') }}</a>
+  <a href="/library" class="pill-btn" id="back" aria-label="뒤로">{{ icon('back') }}</a>
   <div class="r-title"><b>{{ book.title }}</b><span>{{ book.author or '' }}</span></div>
   {% if videos %}<button class="pill-btn" id="vidBtn" aria-label="책 소개 영상">▶</button>{% endif %}
   <button class="pill-btn" id="aa" aria-label="보기 설정" aria-expanded="false">Aa</button>
@@ -16,7 +16,7 @@
 </div>
 
 <main class="r-stage" id="stage" data-book="{{ book.id }}" data-total="{{ book.total_chunks }}"
-      data-start="{{ entry.current_chunk }}" data-verified="{{ entry.verified_chunk }}" data-csrf="{{ csrf }}"></main>
+      data-start="{{ [[entry.verified_chunk + 1, book.total_chunks - 1]|min, 0]|max }}" data-verified="{{ entry.verified_chunk }}" data-csrf="{{ csrf }}"></main>
 <div class="pg measure" id="measure" aria-hidden="true"></div>
 
 {# 넓은 화면: 오른쪽에 같이 읽는 친구와 지금 쪽의 반응이 늘 보인다 #}
@@ -28,11 +28,28 @@
 </aside>
 
 <footer class="r-foot glass">
-  <span class="mono" id="pos">–</span>
+  <button type="button" class="mono pos-btn" id="pos" aria-label="쪽 이동" aria-expanded="false">–</button>
   <span class="dwell" title="이 쪽을 다 읽었다고 인정되기까지"><i id="dwell"></i></span>
   <span id="state">읽는 중</span>
   <span class="friends" id="friends" aria-label="같이 읽는 친구"></span>
 </footer>
+{# 쪽 이동: 건너뛴 쪽은 '읽음'이 되지 않는다 — 다 읽음은 순서대로 머문 쪽만 #}
+<style>
+.pos-btn{all:unset;cursor:pointer;padding:4px 2px;border-bottom:1px dashed currentColor}
+.r-jump{position:fixed;z-index:21;left:50%;transform:translateX(-50%);bottom:calc(72px + env(safe-area-inset-bottom));width:min(calc(100% - 24px),420px);display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px;border-radius:20px}
+.r-jump[hidden]{display:none}
+.r-jump input[type=range]{flex:1 1 100%;accent-color:var(--accent)}
+.r-jump input[type=number]{width:72px;padding:6px 8px;border-radius:10px;border:1px solid color-mix(in srgb,currentColor 25%,transparent);background:transparent;color:inherit;font:inherit}
+.r-jump .btn{margin-left:auto}
+.r-jump .hint{flex:1 1 100%;margin:0}
+</style>
+<form class="r-jump glass" id="jump" hidden>
+  <input type="range" id="jumpRange" min="1" max="{{ book.total_chunks }}" step="1" aria-label="쪽 고르기">
+  <input type="number" id="jumpNum" min="1" max="{{ book.total_chunks }}" inputmode="numeric" aria-label="쪽 번호">
+  <span class="mono muted">/ {{ book.total_chunks }}쪽</span>
+  <button class="btn primary">이동</button>
+  <p class="hint">건너뛴 쪽은 읽음으로 세지 않아요</p>
+</form>
 
 {% if videos %}
 <div class="sheet-wrap" id="vids" hidden>

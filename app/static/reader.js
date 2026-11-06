@@ -10,7 +10,8 @@ const local = {
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
 let verifiedUpTo = +stage.dataset.verified;
-let chunk = Math.min(+stage.dataset.start || 0, total - 1);
+// 이어 읽기는 서버가 정한 '다 읽은 쪽 + 1'에서 — 마지막으로 건너뛰어 본 쪽이 아니라
+let chunk = Math.max(0, Math.min(+stage.dataset.start || 0, total - 1));
 let chunkData = null, minMs = 0, dwellMs = 0, pageFlip = null, pageCount = 0, lead = 0;
 // 넓은 화면에서는 종이책처럼 두 쪽을 펼친다(step=2). 장 수를 짝수로 맞추고 넘김용 장도 두 장씩 붙인다
 let step = 1;
@@ -160,6 +161,7 @@ setInterval(() => {
 }, 250);
 
 addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('input, textarea')) return;   // 쪽 번호·반응 입력 중에는 넘기지 않는다
   if (mode === 'scroll' && chunkData) {
     if (e.key === 'ArrowRight' && chunk < total - 1) open(chunk + 1);
     if (e.key === 'ArrowLeft' && chunk > 0) open(chunk - 1);
@@ -184,6 +186,33 @@ $('bigger').onclick = () => { size = Math.min(26, size + 1); applySize(); local.
 document.querySelectorAll('#tones button').forEach(b => b.onclick = () => { tone = b.dataset.tone; applyTone(); local.set('tone', tone); });
 $('aa').onclick = () => { const s = $('sheet'); s.hidden = !s.hidden; $('aa').setAttribute('aria-expanded', !s.hidden); };
 let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(relayout, 250); });
+
+// --- 뒤로: 같은 사이트에서 왔으면 그 화면으로, 아니면(링크로 바로 열었으면) 서재로 ---
+$('back').addEventListener('click', e => {
+  let same = false;
+  try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (err) {}
+  if (same && history.length > 1) { e.preventDefault(); history.back(); }
+});
+
+// --- 쪽 이동: 아무 쪽으로나 건너뛸 수 있지만, '읽음'은 순서대로 머문 쪽만 (verifiedUpTo + 1 규칙) ---
+const jump = $('jump'), jumpRange = $('jumpRange'), jumpNum = $('jumpNum');
+function toggleJump(show = jump.hidden) {
+  jump.hidden = !show;
+  $('pos').setAttribute('aria-expanded', show);
+  if (show) { jumpRange.value = jumpNum.value = chunk + 1; }
+}
+$('pos').addEventListener('click', () => toggleJump());
+jumpRange.addEventListener('input', () => { jumpNum.value = jumpRange.value; });
+jumpNum.addEventListener('input', () => { if (jumpNum.value) jumpRange.value = jumpNum.value; });
+jump.addEventListener('submit', e => {
+  e.preventDefault();
+  const n = Math.round(+jumpNum.value);
+  if (!Number.isFinite(n) || n < 1) return;
+  toggleJump(false);
+  const to = Math.min(total, n) - 1;
+  if (to !== chunk) open(to);
+});
+addEventListener('keydown', e => { if (e.key === 'Escape' && !jump.hidden) toggleJump(false); });
 
 open(chunk);
 
