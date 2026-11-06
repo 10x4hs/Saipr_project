@@ -1,6 +1,7 @@
+from app.core.config import get_settings
+from app.services import books as book_service
 from app.services.pace import (
     DWELL_CAP_MULTIPLIER,
-    MIN_DWELL_MS,
     PAGE_DWELL_MS,
     credited_dwell_ms,
     is_verified,
@@ -8,29 +9,22 @@ from app.services.pace import (
 )
 
 
-def test_one_baseline_page_takes_30s():
-    assert min_dwell_ms("가" * 300, "ko") == PAGE_DWELL_MS
-    assert min_dwell_ms("a" * 600, "en") == PAGE_DWELL_MS
+def test_every_page_takes_flat_15s():
+    assert PAGE_DWELL_MS == 15_000
+    assert min_dwell_ms("가" * 300, "ko") == 15_000
+    assert min_dwell_ms("a" * 600, "en") == 15_000
 
 
-def test_required_time_scales_with_chars():
-    assert min_dwell_ms("가" * 900, "ko") == 3 * PAGE_DWELL_MS
-    assert min_dwell_ms("가" * 450, "ko") == 45_000
+def test_length_and_language_do_not_matter():
+    assert min_dwell_ms("가" * 3000, "ko") == min_dwell_ms("가", "ko") == min_dwell_ms("") == 15_000
+    assert min_dwell_ms("word " * 2000) == 15_000
 
 
-def test_whitespace_is_not_counted():
-    assert min_dwell_ms("가 " * 600, "ko") == min_dwell_ms("가" * 600, "ko")
-    assert min_dwell_ms("가\n\n" * 600, "ko") == 60_000
-
-
-def test_short_chunk_has_a_floor():
-    assert min_dwell_ms("가", "ko") == MIN_DWELL_MS
-    assert min_dwell_ms("", "ko") == MIN_DWELL_MS
-
-
-def test_language_autodetect():
-    assert min_dwell_ms("가" * 600) == 60_000
-    assert min_dwell_ms("word " * 300) == 60_000  # 1200글자 / 600
+def test_dwell_scale_still_multiplies(monkeypatch):
+    monkeypatch.setattr(get_settings(), "dwell_scale", 0.2)
+    assert book_service.required_dwell_ms("가" * 900, "ko") == 3_000
+    monkeypatch.setattr(get_settings(), "dwell_scale", 1.0)
+    assert book_service.required_dwell_ms("가" * 900, "ko") == 15_000
 
 
 def test_skimming_is_not_verified():

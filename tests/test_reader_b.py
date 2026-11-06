@@ -1,6 +1,6 @@
 """리더: 쪽 이동은 읽음이 아니고, 다시 열면 '다 읽은 쪽 + 1'에서 이어 읽는다."""
 
-from app.services.pace import MIN_DWELL_MS, min_dwell_ms
+from app.services.pace import PAGE_DWELL_MS
 from tests.conftest import read_chunk, signup
 from tests.test_api import upstream
 
@@ -46,7 +46,7 @@ async def test_fresh_book_starts_at_first_page(api):
     assert 'data-start="0"' in reader.text and 'id="jump"' in reader.text and 'id="back"' in reader.text
 
 
-async def test_chunk_dwell_is_chars_based_and_server_decided(api, clock):
+async def test_chunk_dwell_is_flat_15s_and_server_decided(api, clock):
     async with api(upstream) as c:
         await signup(c)
         _, book_id, h = await _open(c)
@@ -61,6 +61,6 @@ async def test_chunk_dwell_is_chars_based_and_server_decided(api, clock):
         ok = await c.put(
             f"/api/v1/books/{book_id}/progress", json={"chunk_index": 0, "verified": True}, headers=h
         )
-    assert need == max(MIN_DWELL_MS, min_dwell_ms(chunk["text"], "ko"))
+    assert need == PAGE_DWELL_MS == 15_000
     assert early.json()["verified_chunk"] == -1
     assert ok.json()["verified_chunk"] == 0
