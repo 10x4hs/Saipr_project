@@ -146,12 +146,32 @@ function onPage(idx) {
   paintDwell();
 }
 
+// 하단 진행: 이 쪽의 15초 고리 + 책 전체 막대(다 읽은 곳·지금 쪽) + 남은 쪽·시간
+const fmtLeft = ms => ms < 60_000 ? `약 ${Math.max(1, Math.ceil(ms / 1000))}초` : `약 ${Math.ceil(ms / 60_000)}분`;
 function paintDwell() {
-  const ok = chunk <= verifiedUpTo;
-  $('dwell').style.width = ok ? '100%' : Math.min(100, dwellMs / Math.max(minMs, 1) * 100) + '%';
-  $('dwell').parentElement.classList.toggle('ok', ok);
-  $('state').textContent = ok ? '읽음' : '읽는 중';
+  const ok = chunk <= verifiedUpTo, skip = !ok && chunk > verifiedUpTo + 1;
+  const per = Math.max(minMs, 1), frac = ok ? 1 : skip ? 0 : Math.min(1, dwellMs / per);
+  const ring = $('ring');
+  ring.classList.toggle('ok', ok);
+  ring.classList.toggle('skip', skip);
+  $('ringArc').style.strokeDasharray = `${(frac * 100).toFixed(1)} 100`;
+  const secs = Math.max(0, Math.ceil((per - dwellMs) / 1000));
+  $('ringNum').textContent = ok ? '✓' : skip ? '–' : secs;
+  ring.title = ok ? '이 쪽은 읽음으로 인정됐어요' : skip ? '앞 쪽을 먼저 다 읽어야 읽음으로 세요'
+    : `${secs}초 더 머물면 이 쪽이 읽음이 돼요`;
+  $('state').textContent = ok ? '읽음' : skip ? '건너뛴 쪽' : secs ? `읽는 중 · ${secs}초` : '읽는 중';
   $('state').classList.toggle('ok', ok);
+
+  const done = Math.max(0, verifiedUpTo + 1), left = Math.max(0, total - done);
+  $('fill').style.width = (done / total * 100) + '%';
+  $('meMark').style.left = ((chunk + .5) / total * 100) + '%';
+  $('track').setAttribute('aria-valuenow', done);
+  $('track').setAttribute('aria-valuetext', `${total}쪽 중 ${done}쪽 읽음, 지금 ${chunk + 1}쪽`);
+  // 남은 시간 = 남은 쪽 × 쪽당 시간 − 지금 쪽에서 이미 머문 시간
+  const leftMs = left * per - (chunk === verifiedUpTo + 1 ? Math.min(dwellMs, per) : 0);
+  const el = $('left');
+  el.classList.toggle('done', !left);
+  el.textContent = left ? `남은 ${left}쪽 · ${fmtLeft(leftMs)}` : '다 읽었어요';
 }
 
 setInterval(() => {
@@ -218,7 +238,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && !jump.hidden) toggl
 open(chunk);
 
 // ---------------- 함께 읽기: 반응 · 친구 · 실시간 ----------------
-let reacts = { items: [], sealed: 0 }, friendMap = new Map(), emojis = ['❤️', '😂', '😮', '😢', '👏'];
+let reacts = { items: [], sealed: 0 }, friendMap = new Map(), live = new Map(), emojis = ['❤️', '😂', '😮', '😢', '👏'];
 let sheetAnchor = 0;
 
 async function loadReactions(i, { quiet = false } = {}) {
@@ -258,21 +278,34 @@ function avatarEl(nickname, url, cls = 'avatar sm') {
   if (url) { const im = new Image(); im.src = url; im.alt = ''; a.appendChild(im); } else a.textContent = nickname.slice(0, 1);
   return a;
 }
+const colorOf = uid => (window.haedokPresence ? window.haedokPresence.colorOf(uid) : 'var(--accent)');
+// 지금 이 책을 펼친 친구(presence.js가 5초마다 알려 준다) — 대결방 밖 친구도 온다
+document.addEventListener('haedok:presence', e => {
+  live = new Map((e.detail.friends || []).map(f => [f.user_id, f]));
+  paintFriends();
+});
 function paintSide() {
   if (!sideShown()) return;
   const fl = $('sideFriends'); fl.innerHTML = '';
-  const rows = [{ user_id: 0, nickname: '나', verified_chunk: verifiedUpTo, me: true }, ...friendMap.values()]
-    .sort((a, b) => b.verified_chunk - a.verified_chunk);
+  const known = new Map(friendMap);
+  live.forEach((f, uid) => {   // 진행 기록이 없는 친구도 지금 읽고 있으면 보인다
+    if (!known.has(uid)) known.set(uid, { user_id: uid, nickname: f.nickname, avatar: f.avatar, verified_chunk: f.verified_chunk ?? -1 });
+  });
+  const rows = [{ user_id: 0, nickname: '나', verified_chunk: verifiedUpTo, me: true }, ...known.values()]
+    .sort((a, b) => (live.has(b.user_id) - live.has(a.user_id)) || b.verified_chunk - a.verified_chunk);
   rows.forEach(f => {
     const li = document.createElement('li');
     li.dataset.uid = f.user_id;
+    const now = live.get(f.user_id);
     if (f.me) li.className = 'me';
+    else if (now) { li.className = 'live' + (now.chunk === chunk ? ' here' : ''); li.style.setProperty('--pc', colorOf(f.user_id)); }
     const done = Math.max(0, f.verified_chunk + 1);
     li.append(avatarEl(f.nickname, f.avatar));
     const d = document.createElement('div');
-    d.innerHTML = '<b></b><span class="meter"><i></i></span>';
+    d.innerHTML = '<b></b><span class="meter"><i></i></span><small></small>';
     d.querySelector('b').textContent = f.nickname;
     d.querySelector('i').style.width = Math.min(100, done / total * 100) + '%';
+    d.querySelector('small').textContent = f.me ? `지금 ${chunk + 1}쪽` : now ? (now.chunk === chunk ? '● 나와 같은 쪽을 읽는 중' : `● 지금 ${now.chunk + 1}쪽 읽는 중`) : '자리 비움';
     const n = document.createElement('span');
     n.className = 'mono'; n.textContent = `${done}쪽`;
     li.append(d, n);
@@ -394,15 +427,20 @@ function renderEmojis() {
 
 function paintFriends() {
   const box = $('friends'); box.innerHTML = '';
-  [...friendMap.values()].forEach(f => {
+  const all = new Map(friendMap);
+  live.forEach((f, uid) => { if (!all.has(uid)) all.set(uid, { user_id: uid, nickname: f.nickname, avatar: f.avatar, verified_chunk: f.verified_chunk ?? -1 }); });
+  // 지금 읽는 친구를 앞에, 색 테두리로 — 아래 막대의 색 점과 같은 색
+  [...all.values()].sort((a, b) => live.has(b.user_id) - live.has(a.user_id)).slice(0, 4).forEach(f => {
     const s = document.createElement('span');
-    s.className = 'fchip';
+    const now = live.get(f.user_id);
+    s.className = 'fchip' + (now ? ' live' : '');
+    if (now) s.style.setProperty('--pc', colorOf(f.user_id));
     s.dataset.uid = f.user_id;
-    s.title = `${f.nickname} · ${f.current_chunk + 1}쪽`;
+    s.title = now ? `${f.nickname} · 지금 ${now.chunk + 1}쪽` : `${f.nickname} · ${f.verified_chunk + 1}쪽까지 읽음`;
     s.innerHTML = '<i></i><em></em>';
     if (f.avatar) { const im = new Image(); im.src = f.avatar; im.alt = ''; s.querySelector('i').appendChild(im); }
     else s.querySelector('i').textContent = f.nickname.slice(0, 1);
-    s.querySelector('em').textContent = f.verified_chunk + 1;
+    s.querySelector('em').textContent = now ? now.chunk + 1 : f.verified_chunk + 1;
     box.appendChild(s);
   });
   paintSide();

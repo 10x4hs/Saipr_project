@@ -1,12 +1,13 @@
 import datetime as dt
 import uuid
+from dataclasses import dataclass
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.models import Book, BookChunk, LibraryEntry, ReadingEvent, Shelf
+from app.models import Book, BookChunk, LibraryEntry, ReadingEvent, RoomMember, Shelf, TeamMember, User
 from app.services.chunker import chunk_text, target_for
 from app.services.pace import credited_dwell_ms, is_verified, min_dwell_ms
 from app.services.search import FULLTEXT_SOURCES
@@ -141,6 +142,7 @@ async def record_progress(
     chunk_index = max(0, min(chunk_index, book.total_chunks - 1))
     now = clock()
     entry.current_chunk = chunk_index
+    entry.updated_at = now  # 같이 읽는 중(presence)도 이 시각을 본다
     if not verified:
         session.add(
             ReadingEvent(
@@ -212,3 +214,58 @@ async def library_of(session: AsyncSession, user_id: int) -> list[tuple[LibraryE
 async def uploads_of(session: AsyncSession, user_id: int) -> list[Book]:
     rows = await session.scalars(select(Book).where(Book.owner_id == user_id).order_by(Book.id.desc()))
     return list(rows)
+
+
+# --- 같이 읽는 중(presence): 대결방 밖 친구까지 ---
+# 대결방 presence(race_presence)는 방이 있어야만 기록된다. 그래서 대결방 없이 같은 책을 펼친
+# 친구는 리더에 보이지 않았다. 내 서재 기록(library_entries)의 current_chunk·updated_at을
+# 심장박동으로 갱신하면, 방과 상관없이 '이 책을 지금 펼친 친구'를 알 수 있다(마이그레이션 없음).
+
+PRESENCE_TTL = dt.timedelta(seconds=60)  # 이보다 오래 소식이 없으면 '지금 읽는 중'에서 뺀다
+
+
+@dataclass
+class Reading:
+    user: User
+    chunk_index: int
+    verified_chunk: int
+
+
+def _aware(t: dt.datetime) -> dt.datetime:
+    return t if t.tzinfo else t.replace(tzinfo=dt.UTC)  # SQLite는 시간대를 버린다
+
+
+async def friend_ids(session: AsyncSession, user_id: int) -> set[int]:
+    """친구 = 나와 같은 방(어떤 책이든)이나 같은 팀에 있는 사람들. 나는 빼고."""
+    my_rooms = select(RoomMember.room_id).where(RoomMember.user_id == user_id)
+    my_teams = select(TeamMember.team_id).where(TeamMember.user_id == user_id)
+    rooms = await session.scalars(select(RoomMember.user_id).where(RoomMember.room_id.in_(my_rooms)))
+    teams = await session.scalars(select(TeamMember.user_id).where(TeamMember.team_id.in_(my_teams)))
+    return (set(rooms) | set(teams)) - {user_id}
+
+
+async def touch_presence(session: AsyncSession, user_id: int, book: Book, chunk_index: int) -> None:
+    """리더의 심장박동: 지금 펼친 쪽과 시각을 남긴다. 읽음 판정과는 무관하다."""
+    entry = await shelve(session, user_id, book.id)
+    entry.current_chunk = max(0, min(chunk_index, book.total_chunks - 1))
+    entry.updated_at = clock()
+    await session.commit()
+
+
+async def reading_now(session: AsyncSession, user_id: int, book: Book) -> list[Reading]:
+    """최근 PRESENCE_TTL 안에 이 책을 펼쳐 둔 친구들과 그 쪽."""
+    ids = await friend_ids(session, user_id)
+    if not ids:
+        return []
+    rows = await session.execute(
+        select(LibraryEntry, User)
+        .join(User, User.id == LibraryEntry.user_id)
+        .where(LibraryEntry.book_id == book.id, LibraryEntry.user_id.in_(ids))
+        .order_by(User.id)
+    )
+    cutoff = clock() - PRESENCE_TTL
+    return [
+        Reading(user=u, chunk_index=e.current_chunk, verified_chunk=e.verified_chunk)
+        for e, u in rows.all()
+        if e.updated_at is not None and _aware(e.updated_at) >= cutoff
+    ]

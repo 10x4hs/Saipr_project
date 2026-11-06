@@ -291,7 +291,7 @@ a:hover .bk,a:focus-visible .bk,.now:hover .bk,.pick:hover .bk{transform:rotateY
 .r-sheet{position:fixed;z-index:20;left:50%;transform:translateX(-50%);top:calc(70px + env(safe-area-inset-top));width:min(calc(100% - 24px),360px);display:grid;gap:12px;padding:14px;border-radius:20px}
 .r-row{display:flex;justify-content:space-between;align-items:center;font-size:14px}
 .seg.mini button{height:32px;padding:0 12px;font-size:13px}
-.r-stage{position:fixed;left:50%;transform:translateX(-50%);top:calc(72px + env(safe-area-inset-top));bottom:calc(76px + env(safe-area-inset-bottom));width:min(calc(100% - 24px),calc(var(--app) - 24px))}
+.r-stage{position:fixed;left:50%;transform:translateX(-50%);top:calc(72px + env(safe-area-inset-top));bottom:calc(98px + env(safe-area-inset-bottom));width:min(calc(100% - 24px),calc(var(--app) - 24px))}
 .flip{width:100%;height:100%}
 .pg{background:var(--paper);color:var(--ink);padding:30px 26px;overflow:hidden;border-radius:4px 14px 14px 4px;
   box-shadow:inset 18px 0 24px -20px rgba(0,0,0,.6)}
@@ -304,11 +304,31 @@ a:hover .bk,a:focus-visible .bk,.now:hover .bk,.pick:hover .bk{transform:rotateY
 .fin b{font:700 30px var(--f-serif);color:var(--ink)}
 .fin .btn{margin-top:14px;height:44px}
 .r-err{color:var(--dim);text-align:center;margin-top:40%}
-.r-foot{position:fixed;z-index:20;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;height:46px;padding:0 18px;border-radius:999px;font-size:13px;color:var(--dim);white-space:nowrap}
-.dwell{width:56px;height:3px;background:var(--line);border-radius:3px;overflow:hidden}
-.dwell i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s linear}
-.dwell.ok i{background:var(--ok)}
+.r-foot{position:fixed;z-index:20;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));width:min(calc(100% - 24px),440px);display:grid;gap:7px;padding:8px 16px 10px;border-radius:24px;font-size:13px;color:var(--dim);white-space:nowrap;
+  --rf-trk:color-mix(in srgb,var(--text) 16%,transparent);--rf-fill:var(--accent);--rf-ok:var(--ok)}
+.rf-row{display:flex;align-items:center;gap:10px;min-height:34px}
+.rf-row #state{color:var(--text);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.rf-row .friends{margin-left:auto}
+/* 이 쪽의 15초 고리: 회색 바탕 고리 위로 악센트 호가 차오르고, 가운데 남은 초 */
+.ring{position:relative;flex:none;width:32px;height:32px;display:grid;place-items:center}
+.ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:3.4}
+.ring-trk{stroke:var(--rf-trk)}
+.ring-arc{stroke:var(--rf-fill);stroke-linecap:round;stroke-dasharray:0 100;transition:stroke-dasharray .25s linear}
+.ring b{font-size:11px;font-weight:600;color:var(--text);letter-spacing:-.04em}
+.ring.ok .ring-arc{stroke:var(--rf-ok)}
+.ring.ok b{color:var(--rf-ok)}
+.ring.skip{opacity:.45}
+/* 책 전체 진행: 바탕을 분명히 보이게 하고, 다 읽은 곳은 악센트, 지금 쪽은 눈금, 친구는 색 점 */
+.rf-bar{display:flex;align-items:center;gap:10px}
+.rf-track{position:relative;flex:1;height:8px;border-radius:8px;background:var(--rf-trk);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--text) 10%,transparent)}
+.rf-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:8px;background:var(--rf-fill);transition:width .4s var(--ease)}
+.rf-me{position:absolute;z-index:1;top:-6px;bottom:-6px;width:3px;margin-left:-1.5px;border-radius:2px;background:var(--text);box-shadow:0 0 0 1.5px var(--bg)}
+.rf-marks{position:absolute;inset:0;pointer-events:none}
+.rf-left{flex:none;font-size:12px;color:var(--text);opacity:.85}
+.rf-left.done{color:var(--ok);opacity:1}
 #state.ok{color:var(--ok)}
+.dwell{display:none}
 
 @media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
 
@@ -643,6 +663,13 @@ html,body{overflow-x:clip;max-width:100%}
 .tabbar a.side-brand,.r-side,.hx-caption{display:none}
 .fchip i{overflow:hidden}
 .fchip i img{width:100%;height:100%;object-fit:cover}
+.fchip.live i{background:var(--pc);color:#fff;box-shadow:0 0 0 2px var(--pc)}
+.fchip.live em{background:var(--pc);color:#fff}
+.side-friends li.live .avatar{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--pc)}
+.side-friends li.live .meter i{background:var(--pc)}
+.side-friends li small{font-size:11.5px;color:var(--dim)}
+.side-friends li.live small{color:var(--pc);font-weight:600}
+.side-friends li.here{padding:6px;margin:-6px;border-radius:14px;background:color-mix(in srgb,var(--pc) 14%,transparent)}
 
 /* 화면 전환: 페이지가 바뀌어도 끊기지 않고 이어진다. 누른 책 표지는 다음 화면의 책(리더 무대·서점 표지)으로 커진다 */
 @view-transition{navigation:auto}

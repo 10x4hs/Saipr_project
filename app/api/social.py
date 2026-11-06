@@ -161,15 +161,28 @@ async def book_presence(
     session: AsyncSession = Depends(get_session),
     user: User = Depends(require_api_user),
 ) -> dict:
-    """리더의 심장박동 겸 조회 — 내 쪽을 기록하고, 같은 대결방 친구들이 어디를 읽는지 돌려준다."""
+    """리더의 심장박동 겸 조회 — 내 쪽을 기록하고, 이 책을 지금 펼친 친구들이 어디를 읽는지 돌려준다.
+
+    친구 = 같은 대결방(이 책)뿐 아니라 어떤 방·팀이든 함께 쓰는 사람. 60초 소식이 없으면 뺀다.
+    """
     check_csrf(request, x_csrf_token)
     book = await _readable(session, book_id, user)
-    rooms = await race_service.heartbeat(session, user, book, body.chunk_index)
-    friends = await race_service.present(session, [r.id for r in rooms], exclude=user.id)
+    rooms = await race_service.heartbeat(session, user, book, body.chunk_index)  # 대결방 화면용
+    await book_service.touch_presence(session, user.id, book, body.chunk_index)
+    friends = await book_service.reading_now(session, user.id, book)
     return {
         "rooms": [{"id": r.id, "name": r.name} for r in rooms],
-        "friends": [_present_out(p) for p in friends],
-        "ttl": int(race_service.PRESENCE_TTL.total_seconds()),
+        "friends": [
+            {
+                "user_id": f.user.id,
+                "nickname": f.user.nickname,
+                "avatar": avatar_url(f.user),
+                "chunk": f.chunk_index,
+                "verified_chunk": f.verified_chunk,
+            }
+            for f in friends
+        ],
+        "ttl": int(book_service.PRESENCE_TTL.total_seconds()),
     }
 
 
