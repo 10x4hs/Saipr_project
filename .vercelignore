@@ -1,7 +1,8 @@
 .venv
 .git
 scratch-dev.db
-app/static/covers
+app/static/covers/*
+!app/static/covers/showcase
 docs/demo
 tests
 migrations
