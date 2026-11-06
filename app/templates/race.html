@@ -14,6 +14,18 @@
 </section>
 
 <section class="row">
+  <div class="row-h"><h2>레이스</h2><span class="mono muted" id="liveNote" aria-live="polite"></span></div>
+  <div class="race-track glass-card" id="raceTrack" aria-label="진행률 레이스">
+    {% for s in board %}
+    <div class="lane{{ ' me' if s.is_me }}" data-uid="{{ s.user.id }}">
+      <span class="finish" aria-hidden="true"></span>
+      <span class="runner{{ ' flip' if s.pct > 60 }}" style="--p:{{ s.pct }}" title="{{ s.user.nickname }} · {{ s.pct }}%">{{ avatar(s.user) }}<small class="mono">{{ s.pct }}%</small></span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="row">
   <div class="row-h"><h2>순위</h2><span class="mono muted">검증된 쪽 / {{ book.total_chunks }}</span></div>
   <ol class="board" id="board" data-room="{{ room.id }}" data-book="{{ book.id }}" data-total="{{ book.total_chunks }}">
     {% for s in board %}
@@ -27,6 +39,11 @@
   </ol>
 </section>
 
+<section class="row">
+  <div class="row-h"><h2>함께 밑줄</h2><span class="mono muted">책에서 문장을 골라 「대결방에 공유」</span></div>
+  <ul class="quote-feed" id="quotes"><li class="muted small empty">아직 공유한 문장이 없어요</li></ul>
+</section>
+
 <section class="invite glass-card">
   <span class="mono muted">초대 코드</span>
   <div class="code-big mono" id="code">{{ room.invite_code }}</div>
@@ -36,6 +53,26 @@
   </div>
   <span class="muted small" id="copied" aria-live="polite"></span>
 </section>
+<style>
+.race-track{display:grid;gap:10px;padding:16px 56px 16px 20px;overflow:hidden}
+.race-track .lane{position:relative;height:44px;border-radius:22px;background:var(--sunken)}
+.race-track .lane.me{box-shadow:inset 0 0 0 1px var(--accent)}
+.race-track .finish{position:absolute;right:0;top:0;bottom:0;width:6px;border-radius:0 22px 22px 0;background:repeating-linear-gradient(0deg,var(--text,#222) 0 6px,transparent 6px 12px);opacity:.35}
+.race-track .runner{position:absolute;top:4px;left:calc(var(--p) * (100% - 36px) / 100);display:flex;align-items:center;gap:6px;transition:left 1.2s cubic-bezier(.16,1,.3,1);white-space:nowrap}
+.race-track .runner.flip{flex-direction:row-reverse;transform:translateX(calc(-100% + 36px))}
+.race-track .runner .avatar{width:36px;height:36px;font-size:15px}
+.race-track .runner small{font-size:11px;color:var(--dim)}
+.race-track .runner.live .avatar{box-shadow:0 0 0 2px var(--accent),0 0 12px color-mix(in srgb,var(--accent) 60%,transparent)}
+.race-track .runner.overtake{animation:overtake .9s cubic-bezier(.16,1,.3,1)}
+@keyframes overtake{0%{translate:0 0;scale:1}35%{translate:0 -10px;scale:1.18}70%{translate:0 2px;scale:.96}100%{translate:0 0;scale:1}}
+.quote-feed{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.quote-feed li{padding:12px 14px;border-radius:18px;background:var(--surface);border:1px solid var(--glass-line)}
+.quote-feed li.empty{background:none;border:0}
+.quote-feed blockquote{margin:0 0 6px;font-size:15px;line-height:1.6}
+.quote-feed .sealed blockquote{filter:blur(5px);user-select:none}
+.quote-feed .meta{font-size:12px;color:var(--dim)}
+@media (prefers-reduced-motion:reduce){.race-track .runner{transition:none}.race-track .runner.overtake{animation:none}}
+</style>
 <script>
 (() => {
   const share = document.getElementById('share'), note = document.getElementById('copied');
@@ -53,17 +90,61 @@
       left.textContent = s > 86400 ? `${Math.floor(s / 86400)}일 ${Math.floor(s % 86400 / 3600)}시간` : `${Math.floor(s / 3600)}시간 ${Math.floor(s % 3600 / 60)}분`; };
     tick(); setInterval(tick, 30000);
   }
-  // 실시간 순위: 같은 방 친구가 쪽을 다 읽으면 서버가 알려 주고, 순위를 다시 받아 자리바꿈을 애니메이션한다
-  const board = document.getElementById('board');
+  // 실시간 순위: 기본은 5초 폴링(서버리스에서는 WebSocket 허브를 붙들 수 없다), WebSocket은 되면 덤으로 쓴다
+  const board = document.getElementById('board'), trackEl = document.getElementById('raceTrack');
+  const room = board.dataset.room, liveNote = document.getElementById('liveNote');
+  const avatarEl = s => {
+    const av = document.createElement('span'); av.className = 'avatar';
+    if (s.avatar) { const im = new Image(); im.src = s.avatar; im.alt = ''; av.appendChild(im); } else av.textContent = s.nickname.slice(0, 1);
+    return av;
+  };
+  let lastOrder = [...board.children].map(li => li.dataset.uid);
+  let live = new Map();
+  const say = msg => { liveNote.textContent = msg; clearTimeout(say.t); say.t = setTimeout(() => { liveNote.textContent = ''; }, 6000); };
+  const paintTrack = data => {
+    const lanes = new Map([...trackEl.children].map(l => [l.dataset.uid, l]));
+    data.board.forEach(s => {
+      const uid = String(s.user_id);
+      let lane = lanes.get(uid);
+      if (!lane) {
+        lane = document.createElement('div'); lane.className = 'lane'; lane.dataset.uid = uid;
+        lane.innerHTML = '<span class="finish" aria-hidden="true"></span><span class="runner"><small class="mono"></small></span>';
+        lane.querySelector('.runner').prepend(avatarEl(s));
+        trackEl.appendChild(lane);
+      }
+      lane.classList.toggle('me', !!s.me);
+      const r = lane.querySelector('.runner');
+      r.style.setProperty('--p', s.pct);
+      r.querySelector('small').textContent = live.has(uid) ? `${s.pct}% · ${live.get(uid) + 1}쪽 읽는 중` : `${s.pct}%`;
+      r.classList.toggle('live', live.has(uid));
+      r.classList.toggle('flip', s.pct > 60);
+      r.title = `${s.nickname} · ${s.pct}%`;
+      lanes.delete(uid);
+    });
+    lanes.forEach(l => l.remove());
+  };
   const render = data => {
+    const order = data.board.map(s => String(s.user_id));
+    const names = new Map(data.board.map(s => [String(s.user_id), s.nickname]));
+    // 추월: 예전엔 뒤였는데 이제 앞선 사람
+    const before = new Map(lastOrder.map((u, i) => [u, i]));
+    order.forEach((a, i) => order.slice(i + 1).forEach(b => {
+      if (before.has(a) && before.has(b) && before.get(a) > before.get(b)) {
+        const r = trackEl.querySelector(`.lane[data-uid="${a}"] .runner`);
+        if (r) { r.classList.remove('overtake'); void r.offsetWidth; r.classList.add('overtake'); }
+        say(`${names.get(a)}님이 ${names.get(b)}님을 추월했어요!`);
+      }
+    }));
+    lastOrder = order;
+    paintTrack(data);
     const first = new Map([...board.children].map(li => [li.dataset.uid, li.getBoundingClientRect().top]));
     board.innerHTML = '';
     data.board.forEach((s, i) => {
       const li = document.createElement('li');
       li.dataset.uid = s.user_id; if (s.me) li.className = 'me';
-      li.innerHTML = '<span class="pos mono"></span><span class="avatar"></span><div class="who"><b></b><span class="track"><i></i></span></div><span class="mono pages"></span>';
+      li.innerHTML = '<span class="pos mono"></span><div class="who"><b></b><span class="track"><i></i></span></div><span class="mono pages"></span>';
       li.querySelector('.pos').textContent = i + 1;
-      const av = li.querySelector('.avatar'); if (s.avatar) { const im = new Image(); im.src = s.avatar; av.appendChild(im); } else av.textContent = s.nickname.slice(0, 1);
+      li.querySelector('.pos').after(avatarEl(s));
       li.querySelector('b').textContent = s.nickname;
       if (s.me) { const em = document.createElement('em'); em.textContent = '나'; li.querySelector('b').append(' ', em); }
       li.querySelector('.track i').style.width = s.pct + '%';
@@ -77,17 +158,48 @@
     });
     document.querySelector('.race-hero h2').textContent = `${data.board.length}명이 달리는 중`;
   };
-  const refresh = () => fetch(`/api/v1/races/${board.dataset.room}/standings`).then(r => r.ok && r.json()).then(d => d && render(d)).catch(() => {});
-  let retry = 3000;
+  const getJSON = url => fetch(url).then(r => r.ok ? r.json() : null).catch(() => null);
+  let lastBoard = null;
+  const refresh = async () => {
+    const [d, p] = await Promise.all([getJSON(`/api/v1/races/${room}/standings`), getJSON(`/api/v1/races/${room}/presence`)]);
+    if (p) live = new Map(p.present.map(x => [String(x.user_id), x.chunk]));
+    if (d) { lastBoard = d; render(d); } else if (lastBoard && p) paintTrack(lastBoard);
+  };
+  const feed = document.getElementById('quotes');
+  let feedSig = '';
+  const loadQuotes = async () => {
+    const d = await getJSON(`/api/v1/races/${room}/quotes`);
+    if (!d) return;
+    const sig = d.items.map(q => `${q.id}:${q.sealed}`).join();
+    if (sig === feedSig) return;
+    feedSig = sig;
+    feed.innerHTML = '';
+    if (!d.items.length) { feed.innerHTML = '<li class="muted small empty">아직 공유한 문장이 없어요</li>'; return; }
+    d.items.forEach(q => {
+      const li = document.createElement('li'); if (q.sealed) li.className = 'sealed';
+      const bq = document.createElement('blockquote');
+      bq.textContent = q.sealed ? '아직 읽지 않은 쪽의 문장이에요 — 거기까지 읽으면 열려요' : `“${q.text}”`;
+      const meta = document.createElement('div'); meta.className = 'meta mono';
+      meta.textContent = `${q.nickname}${q.me ? ' (나)' : ''} · ${q.chunk + 1}쪽`;
+      li.append(bq, meta); feed.appendChild(li);
+    });
+  };
+  let retry = 3000, wsTries = 0;
   const connect = () => {
-    const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/api/v1/ws/books/${board.dataset.book}`);
+    if (++wsTries > 4) return;  // 몇 번 안 되면 폴링만 쓴다
+    let ws;
+    try { ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/api/v1/ws/books/${board.dataset.book}`); } catch (e) { return; }
     const ping = setInterval(() => ws.readyState === 1 && ws.send('ping'), 25000);
     ws.onmessage = ev => { const m = JSON.parse(ev.data); if (m.type === 'progress.updated' && m.advanced) refresh(); };
-    ws.onopen = () => { retry = 3000; };
+    ws.onopen = () => { retry = 3000; wsTries = 0; };
     ws.onclose = () => { clearInterval(ping); setTimeout(connect, retry); retry = Math.min(retry * 2, 60000); };
   };
   connect();
-  setInterval(refresh, 15000);  // WebSocket이 없어도 순위가 따라오게
+  let n = 0;
+  const tickAll = () => { if (document.hidden) return; refresh(); if (n++ % 2 === 0) loadQuotes(); };
+  tickAll();
+  setInterval(tickAll, 5000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { refresh(); loadQuotes(); } });
 })();
 </script>
 {% endblock %}
