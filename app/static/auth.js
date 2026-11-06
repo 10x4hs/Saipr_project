@@ -12,6 +12,7 @@
     if (!v) return `${input.placeholder.replace(/ \(.+\)/, '')}을(를) 입력해 주세요`;
     if (input.type === 'email' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return '이메일 형식을 확인해 주세요';
     if (input.minLength > 1 && input.value.length < input.minLength) return `${input.minLength}자 이상 입력해 주세요`;
+    if (input.name === 'code' && !/^\d{6}$/.test(v)) return '6자리 숫자를 입력해 주세요';
     if (input.name === 'password_confirm' && input.value !== form.password.value) return '비밀번호가 서로 달라요';
     return '';
   };
@@ -21,7 +22,7 @@
     at = i;
     steps.forEach((s, k) => { s.classList.toggle('on', k === i); s.classList.toggle('past', k < i); });
     dots.forEach((d, k) => d.classList.toggle('on', k <= i));
-    back.hidden = i === 0;
+    if (back) back.hidden = i === 0;
     msg.textContent = note;
     const input = steps[i].querySelector('input');
     setTimeout(() => input.focus(), 60);
@@ -38,7 +39,7 @@
   form.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', advance));
   form.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); if (advance()) form.requestSubmit(); } });
   form.addEventListener('submit', e => { if (at < steps.length - 1 || check(steps[at].querySelector('input'))) { e.preventDefault(); advance(); return; } form.classList.add('sending'); });
-  back.addEventListener('click', () => show(Math.max(0, at - 1)));
+  back?.addEventListener('click', () => show(Math.max(0, at - 1)));
 
   // 서버가 돌려준 오류: 가입은 그 칸에서, 로그인은 비밀번호 칸에서 다시 시작
   const firstErr = form.dataset.firstError;

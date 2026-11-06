@@ -96,6 +96,23 @@ class OAuthAccount(Base):
     provider_user_id: Mapped[str] = mapped_column(String(255))
 
 
+class SignupVerification(Base):
+    """가입 대기 — 이메일로 보낸 6자리 코드를 확인해야 users에 계정이 생긴다."""
+
+    __tablename__ = "signup_verifications"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True)
+    nickname: Mapped[str] = mapped_column(String(40))
+    password_hash: Mapped[str] = mapped_column(String(60))
+    # HMAC-SHA256(secret, email:code) — 코드 원문은 저장하지 않는다
+    code_hash: Mapped[str] = mapped_column(String(64))
+    attempts: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    # 유닉스 초 — SQLite(테스트)에서도 시간대 문제 없이 비교하려고 정수로 둔다
+    expires_at: Mapped[int] = mapped_column(BigInteger)
+    sent_at: Mapped[int] = mapped_column(BigInteger)
+
+
 class Book(Base):
     __tablename__ = "books"
     __table_args__ = (UniqueConstraint("source", "external_id"),)

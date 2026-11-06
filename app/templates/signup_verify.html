@@ -1,0 +1,18 @@
+{% extends "_auth.html" %}
+{% block title %}이메일 인증 — 偕讀 해독{% endblock %}
+{% block form %}
+<p class="auth-note"><b>{{ email }}</b>(으)로<br>인증 코드를 보냈어요</p>
+<form method="post" action="/signup/verify" class="steps" novalidate>
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <div class="step" data-step data-name="code">
+    <label class="sr" for="code">인증 코드 6자리</label>
+    <div class="pill-field"><input id="code" name="code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="인증 코드 6자리" autocomplete="one-time-code" required autofocus><button class="go" aria-label="인증하기">→</button></div>
+  </div>
+  <p class="step-msg{% if notice and not error %} ok{% endif %}" role="alert" data-msg>{{ error or notice or '' }}</p>
+</form>
+<form method="post" action="/signup/resend" class="auth-resend">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <button class="step-back">코드 다시 받기</button>
+</form>
+{% endblock %}
+{% block foot %}메일이 안 보이면 스팸함도 확인해 주세요 · <a href="/signup">처음부터</a>{% endblock %}

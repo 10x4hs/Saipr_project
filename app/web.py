@@ -18,14 +18,14 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import auth
-from app.api.deps import get_sources
+from app.api.deps import get_http_client, get_sources
 from app.core import appearance
 from app.core.config import Settings, get_settings
 from app.db.session import get_session
 from app.models import Book, LibraryEntry, Room, Shelf, User
 from app.services import books as book_service
+from app.services import mail, social
 from app.services import races as race_service
-from app.services import social
 from app.services.search import FULLTEXT_SOURCES, search_all
 from app.services.uploads import parse_upload
 from app.sources.base import BookSource, SourceError
@@ -181,17 +181,72 @@ async def signup(
     password_confirm: str = Form(""),
     csrf: str = Form(""),
     session: AsyncSession = Depends(get_session),
+    http: httpx.AsyncClient = Depends(get_http_client),
 ) -> HTMLResponse | RedirectResponse:
     auth.check_csrf(request, csrf)
     form = auth.SignupForm(nickname, email, password, password_confirm)
     if form.validate():
-        user = await auth.create_user(session, form)
-        if user is not None:
-            auth.login(request, user)
-            return RedirectResponse("/", status_code=303)
-        form.errors["email"] = "이미 가입된 이메일이에요"
+        if await auth.email_taken(session, form.email):
+            form.errors["email"] = "이미 가입된 이메일이에요"
+        else:
+            code = await auth.start_signup(session, form)
+            if code is None or await mail.send_signup_code(http, form.email, code):
+                request.session["signup_email"] = form.email
+                return RedirectResponse("/signup/verify", status_code=303)
+            form.errors["email"] = "인증 메일을 보내지 못했어요. 잠시 뒤 다시 시도해 주세요"
     # 비밀번호는 다시 채워 보내지 않는다
     return _render(request, "signup.html", None, form=form)
+
+
+def _verify_page(request: Request, email: str, error: str | None = None, notice: str | None = None):
+    return _render(request, "signup_verify.html", None, email=email, error=error, notice=notice)
+
+
+@router.get("/signup/verify", response_class=HTMLResponse, response_model=None)
+async def signup_verify_form(request: Request) -> HTMLResponse | RedirectResponse:
+    email = request.session.get("signup_email")
+    if not email:
+        return RedirectResponse("/signup", status_code=303)
+    return _verify_page(request, email, notice="메일로 받은 6자리 코드를 입력해 주세요")
+
+
+@router.post("/signup/verify", response_class=HTMLResponse, response_model=None)
+async def signup_verify(
+    request: Request,
+    code: str = Form(""),
+    csrf: str = Form(""),
+    session: AsyncSession = Depends(get_session),
+) -> HTMLResponse | RedirectResponse:
+    auth.check_csrf(request, csrf)
+    email = request.session.get("signup_email")
+    if not email:
+        return RedirectResponse("/signup", status_code=303)
+    user, error = await auth.verify_signup(session, email, code)
+    if user is None:
+        return _verify_page(request, email, error=error)
+    auth.login(request, user)  # 세션을 새로 만들며 signup_email도 지워진다
+    return RedirectResponse("/", status_code=303)
+
+
+@router.post("/signup/resend", response_class=HTMLResponse, response_model=None)
+async def signup_resend(
+    request: Request,
+    csrf: str = Form(""),
+    session: AsyncSession = Depends(get_session),
+    http: httpx.AsyncClient = Depends(get_http_client),
+) -> HTMLResponse | RedirectResponse:
+    auth.check_csrf(request, csrf)
+    email = request.session.get("signup_email")
+    if not email:
+        return RedirectResponse("/signup", status_code=303)
+    code, wait = await auth.resend_code(session, email)
+    if wait < 0:
+        return RedirectResponse("/signup", status_code=303)
+    if code is None:
+        return _verify_page(request, email, error=f"{wait}초 뒤에 다시 받을 수 있어요")
+    if not await mail.send_signup_code(http, email, code):
+        return _verify_page(request, email, error="인증 메일을 보내지 못했어요. 잠시 뒤 다시 시도해 주세요")
+    return _verify_page(request, email, notice="새 코드를 보냈어요")
 
 
 @router.get("/login", response_class=HTMLResponse)

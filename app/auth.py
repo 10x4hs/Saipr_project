@@ -4,8 +4,10 @@
 - 비밀번호는 BCrypt(cost 12), 8자 이상 · UTF-8 72바이트 이하
 - 세션은 서명된 HttpOnly·SameSite=Lax 쿠키, 30분 동안 요청이 없으면 만료
 - 로그인 시 세션을 새로 만들고(고정 공격 방지), 모든 POST는 CSRF 토큰을 검사
+- 가입은 이메일로 받은 6자리 코드를 확인한 뒤에야 계정이 생긴다 (10분 유효, 5번까지, 재발송 60초 간격)
 """
 
+import hashlib
 import hmac
 import secrets
 import time
@@ -19,7 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.db.session import get_session
-from app.models import User
+from app.models import SignupVerification, User
 
 BCRYPT_COST = 12
 MIN_PASSWORD_CHARS = 8
@@ -72,18 +74,96 @@ def verify_password(password: str, hashed: str | None) -> bool:
     return bcrypt.checkpw(raw, hashed.encode())
 
 
-async def create_user(session: AsyncSession, form: SignupForm) -> User | None:
-    """중복 이메일이면 None (동시 가입은 UNIQUE 제약이 막는다)."""
-    if await session.scalar(select(User.id).where(User.email == form.email)):
+# --- 가입 이메일 인증 ---
+
+CODE_TTL_S = 600
+MAX_CODE_ATTEMPTS = 5
+RESEND_COOLDOWN_S = 60
+
+
+def new_code() -> str:
+    return f"{secrets.randbelow(10**6):06d}"
+
+
+def _code_hash(email: str, code: str) -> str:
+    key = get_settings().secret_key.encode()
+    return hmac.new(key, f"{email}:{code}".encode(), hashlib.sha256).hexdigest()
+
+
+async def email_taken(session: AsyncSession, email: str) -> bool:
+    return bool(await session.scalar(select(User.id).where(User.email == normalize_email(email))))
+
+
+async def pending_signup(session: AsyncSession, email: str) -> SignupVerification | None:
+    return await session.scalar(
+        select(SignupVerification).where(SignupVerification.email == normalize_email(email))
+    )
+
+
+async def start_signup(session: AsyncSession, form: SignupForm) -> str | None:
+    """가입 대기를 만들거나 고친다. 새로 보낼 코드를 돌려주고, 재발송 간격 안이면 None(기존 코드 유지)."""
+    now = int(time.time())
+    pending = await pending_signup(session, form.email)
+    if pending is not None and now - pending.sent_at < RESEND_COOLDOWN_S:
+        pending.nickname, pending.password_hash = form.nickname, hash_password(form.password)
+        await session.commit()
         return None
-    user = User(nickname=form.nickname, email=form.email, password_hash=hash_password(form.password))
+    code = new_code()
+    if pending is None:
+        pending = SignupVerification(email=form.email)
+        session.add(pending)
+    pending.nickname, pending.password_hash = form.nickname, hash_password(form.password)
+    pending.code_hash, pending.attempts = _code_hash(form.email, code), 0
+    pending.sent_at, pending.expires_at = now, now + CODE_TTL_S
+    try:
+        await session.commit()
+    except IntegrityError:  # 같은 이메일로 동시에 두 번 눌렀을 때
+        await session.rollback()
+        return None
+    return code
+
+
+async def resend_code(session: AsyncSession, email: str) -> tuple[str | None, int]:
+    """(새 코드, 0) 또는 아직 기다려야 하면 (None, 남은 초). 대기가 없으면 (None, -1)."""
+    pending = await pending_signup(session, email)
+    if pending is None:
+        return None, -1
+    now = int(time.time())
+    wait = RESEND_COOLDOWN_S - (now - pending.sent_at)
+    if wait > 0:
+        return None, wait
+    code = new_code()
+    pending.code_hash, pending.attempts = _code_hash(pending.email, code), 0
+    pending.sent_at, pending.expires_at = now, now + CODE_TTL_S
+    await session.commit()
+    return code, 0
+
+
+async def verify_signup(session: AsyncSession, email: str, code: str) -> tuple[User | None, str | None]:
+    """코드가 맞으면 계정을 만들어 (user, None), 아니면 (None, 오류 문구)."""
+    pending = await pending_signup(session, email)
+    if pending is None:
+        return None, "인증 요청을 찾을 수 없어요. 처음부터 다시 가입해 주세요"
+    if int(time.time()) > pending.expires_at:
+        return None, "코드가 만료됐어요. 새 코드를 받아 주세요"
+    if pending.attempts >= MAX_CODE_ATTEMPTS:
+        return None, "코드를 너무 많이 틀렸어요. 새 코드를 받아 주세요"
+    if not hmac.compare_digest(pending.code_hash, _code_hash(pending.email, code.strip())):
+        pending.attempts += 1
+        await session.commit()
+        left = MAX_CODE_ATTEMPTS - pending.attempts
+        if left <= 0:
+            return None, "코드를 너무 많이 틀렸어요. 새 코드를 받아 주세요"
+        return None, f"코드가 맞지 않아요 (남은 기회 {left}번)"
+    user = User(nickname=pending.nickname, email=pending.email, password_hash=pending.password_hash)
     session.add(user)
+    await session.delete(pending)
     try:
         await session.commit()
     except IntegrityError:
         await session.rollback()
-        return None
-    return user
+        return None, "이미 가입된 이메일이에요"
+    return user, None
 
 
 # 비밀번호 대입 막기: (이메일, IP)별로 10분에 5번까지 틀릴 수 있다.
