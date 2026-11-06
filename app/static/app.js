@@ -14,12 +14,14 @@
   // --- 화면 꾸미기 ---
   const sheet = $('#look');
   if (!sheet) return;
+  const toneOf = bg => $(`[data-bgpick="${bg}"]`)?.dataset.tone || 'auto';
   const saved = { mode: root.dataset.theme || 'auto', bg: $('#fx').dataset.bg, accent: root.dataset.accent, hex: getComputedStyle(root).getPropertyValue('--accent').trim() };
   let pick = { ...saved };
 
   const apply = p => {
     if (p.mode === 'auto') delete root.dataset.theme; else root.dataset.theme = p.mode;
     $('#fx').dataset.bg = p.bg; $('#lookPreviewBg').dataset.bg = p.bg;
+    root.dataset.bgTone = toneOf(p.bg);   // 글자색이 배경 밝기를 따라가게(app.css 끝)
     root.dataset.accent = p.accent; root.style.setProperty('--accent', p.hex);
     $$('#lookMode button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === p.mode));
     $$('[data-bgpick]').forEach(b => b.setAttribute('aria-pressed', b.dataset.bgpick === p.bg));

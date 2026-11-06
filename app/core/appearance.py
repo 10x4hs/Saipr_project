@@ -47,6 +47,13 @@ BACKGROUNDS: dict[str, list[tuple[str, str, bool]]] = {
 }
 BG_IDS = {bid for group in BACKGROUNDS.values() for bid, _, _ in group}
 
+# 배경의 밝기. 글자색은 테마(밝게·어둡게)가 아니라 실제로 깔린 배경을 따라야 한다 —
+# 밝은 테마에서 어두운 배경을 고르면 검은 글자가 검은 배경 위에 놓여 안 보였다.
+# "auto" = 바탕이 테마 색(var(--bg))이라 테마를 그대로 따라간다.
+# 나머지 배경은 모두 짙은 바탕(--base)이고, 밝은 테마의 밝기 필터를 거쳐도 어둡다.
+TONES = ("auto", "dark", "light")
+BG_TONE: dict[str, str] = {bid: "dark" for bid in BG_IDS} | {"plain": "auto"}
+
 ACCENTS = {
     "mono": ("기본", "#fafafa"),
     "multi": ("여러 색", "#ff9ec4"),
@@ -72,4 +79,10 @@ def resolve(settings: dict | None) -> dict:
         if settings and settings.get(key) in allowed:
             s[key] = settings[key]
     s["accent_hex"] = ACCENTS[s["accent"]][1]
+    s["bg_tone"] = tone_of(s["bg"])
     return s
+
+
+def tone_of(bg: str) -> str:
+    """배경 id → "dark" | "light" | "auto". 모르는 id는 테마를 따른다."""
+    return BG_TONE.get(bg, "auto")

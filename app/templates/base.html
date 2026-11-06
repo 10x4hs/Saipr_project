@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko" {% if look and look.mode != 'auto' %}data-theme="{{ look.mode }}"{% endif %} data-accent="{{ look.accent if look else 'pink' }}" style="--accent:{{ look.accent_hex if look else '#ffb3c7' }}">
+<html lang="ko" {% if look and look.mode != 'auto' %}data-theme="{{ look.mode }}"{% endif %} data-accent="{{ look.accent if look else 'pink' }}" data-bg-tone="{{ look.bg_tone if look else 'auto' }}" style="--accent:{{ look.accent_hex if look else '#ffb3c7' }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
