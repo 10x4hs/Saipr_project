@@ -31,7 +31,7 @@ async def send_signup_code(client: httpx.AsyncClient, email: str, code: str) -> 
             await asyncio.to_thread(_send_smtp, settings, email, subject, text, html)
             return True
         except (smtplib.SMTPException, OSError) as exc:
-            log.error("SMTP 발송 실패: %s", exc)
+            log.error("SMTP 발송 실패: %s: %s", type(exc).__name__, exc)
             return False
     if not settings.resend_api_key:
         log.warning("메일 설정 없음 — %s 의 가입 인증 코드: %s", email, code)
@@ -59,19 +59,35 @@ async def send_signup_code(client: httpx.AsyncClient, email: str, code: str) -> 
 
 
 def _send_smtp(settings, to: str, subject: str, text: str, html: str) -> None:
+    """465(SSL)로 먼저 보내고, 연결이 끊기면 587(STARTTLS)로 다시 시도한다."""
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = f"해독 <{settings.smtp_user}>"
     msg["To"] = to
     msg.set_content(text)
     msg.add_alternative(html, subtype="html")
+    user, pw = settings.smtp_user.strip(), settings.smtp_password.replace(" ", "").strip()
     ctx = ssl.create_default_context()
-    if settings.smtp_port == 465:
-        with smtplib.SMTP_SSL(settings.smtp_host, settings.smtp_port, context=ctx, timeout=15) as s:
-            s.login(settings.smtp_user, settings.smtp_password)
-            s.send_message(msg)
-    else:
-        with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=15) as s:
-            s.starttls(context=ctx)
-            s.login(settings.smtp_user, settings.smtp_password)
-            s.send_message(msg)
+    ports = [settings.smtp_port] + [p for p in (465, 587) if p != settings.smtp_port]
+    last: Exception | None = None
+    for port in ports:
+        try:
+            if port == 465:
+                with smtplib.SMTP_SSL(settings.smtp_host, port, context=ctx, timeout=15) as s:
+                    s.login(user, pw)
+                    s.send_message(msg)
+            else:
+                with smtplib.SMTP(settings.smtp_host, port, timeout=15) as s:
+                    s.ehlo()
+                    s.starttls(context=ctx)
+                    s.ehlo()
+                    s.login(user, pw)
+                    s.send_message(msg)
+            return
+        except smtplib.SMTPAuthenticationError:
+            raise  # 비밀번호 문제는 포트를 바꿔도 같다
+        except (smtplib.SMTPException, OSError) as exc:
+            log.warning("SMTP %s:%s 실패 (%s: %s)", settings.smtp_host, port, type(exc).__name__, exc)
+            last = exc
+    assert last is not None
+    raise last
