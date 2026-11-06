@@ -33,3 +33,43 @@ async def test_smtp_failure_returns_false(monkeypatch):
     async with httpx.AsyncClient() as c:
         assert not await real_send(c, "a@b.com", "123456")
     get_settings.cache_clear()
+
+
+def test_smtp_falls_back_to_587(monkeypatch):
+    import smtplib
+    from types import SimpleNamespace
+
+    calls = []
+
+    class Dead:
+        def __init__(self, host, port, **kw):
+            calls.append(port)
+            raise smtplib.SMTPServerDisconnected("Connection unexpectedly closed")
+
+    class Ok:
+        def __init__(self, host, port, **kw):
+            calls.append(port)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def ehlo(self):
+            pass
+
+        def starttls(self, **kw):
+            pass
+
+        def login(self, u, p):
+            assert p == "abcdefghijklmnop"
+
+        def send_message(self, m):
+            calls.append("sent")
+
+    monkeypatch.setattr(smtplib, "SMTP_SSL", Dead)
+    monkeypatch.setattr(smtplib, "SMTP", Ok)
+    st = SimpleNamespace(smtp_host="smtp.gmail.com", smtp_port=465, smtp_user="me@gmail.com", smtp_password="abcd efgh ijkl mnop")
+    mail._send_smtp(st, "a@b.com", "s", "t", "<p>h</p>")
+    assert calls == [465, 587, "sent"]
