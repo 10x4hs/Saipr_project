@@ -98,6 +98,7 @@ function pageEl(html, cls = '') {
 
 async function open(i, { atEnd = false } = {}) {
   chunk = Math.max(0, Math.min(total - 1, i));
+  document.dispatchEvent(new CustomEvent('haedok:page', { detail: { chunk } }));
   try { chunkData = await fetchChunk(chunk); }
   catch (e) { stage.innerHTML = '<p class="r-err">이 쪽을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</p>'; return; }
   await document.fonts.ready;
