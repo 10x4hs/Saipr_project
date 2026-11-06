@@ -889,3 +889,8 @@ html:root[data-bg-tone="light"]{
 .l-dl svg{flex:none}
 .l-cta-row .btn:hover{filter:brightness(1.06)}
 @media (max-width:340px){.l-cta-row .btn{font-size:14px;padding:0 8px}}
+/* 버튼 칸이 확실히 보이게: 모든 버튼에 테두리·배경 */
+.l-cta-row .btn{border:1px solid rgba(255,255,255,.14)}
+.l-login{background:#2a2226;border-color:rgba(255,255,255,.28)}
+.l-ios{border-color:#f5f5f7}
+.l-android{border-color:#3ddc84}

@@ -1,5 +1,5 @@
-// 해독 서비스 워커 — 화면은 네트워크 우선(끊기면 저장해 둔 화면), 정적 파일은 저장본을 먼저 쓰고 뒤에서 새로 받는다.
-const VERSION = 'haedok-v1';
+// 해독 서비스 워커 — 화면·CSS·JS는 네트워크 우선(배포 직후 옛 스타일이 남지 않게), 끊기면 저장본. 이미지·폰트만 저장본 우선.
+const VERSION = 'haedok-v2';
 const OFFLINE = '/static/offline.html';
 const PRECACHE = [OFFLINE, '/static/app.css', '/static/looks.css', '/static/icons/icon-192.png'];
 
@@ -25,6 +25,13 @@ self.addEventListener('fetch', e => {
 
   if (req.mode === 'navigate') {
     e.respondWith(fetch(req).catch(async () => (await caches.match(req)) || caches.match(OFFLINE)));
+    return;
+  }
+  if (url.pathname.startsWith('/static/') && /\.(css|js|json|html)$/.test(url.pathname)) {
+    e.respondWith(caches.open(VERSION).then(cache =>
+      fetch(req).then(res => { if (res.ok) cache.put(req, res.clone()); return res; })
+        .catch(async () => (await cache.match(req)) || Response.error())
+    ));
     return;
   }
   if (url.pathname.startsWith('/static/')) {
