@@ -122,5 +122,5 @@ async def test_race_page_has_track_and_feed(api):
         page = (await host.get(f"/races/{room_id}")).text
         reader = (await host.get(f"/books/{book_id}")).text
     assert 'id="raceTrack"' in page and 'id="quotes"' in page
-    assert page.count('<div class="lane') == 2
+    assert page.count('<div class="rc-lane') == 2
     assert reader.count('src="/static/presence.js"') == 1
