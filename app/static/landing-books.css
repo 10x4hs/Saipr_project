@@ -1,0 +1,16 @@
+/* 첫 화면 유명한 책 띠 — app/data/showcase.json (app.css의 .marquee 움직임은 그대로 두고 덧씌운다) */
+.sc-strip .marquee-track{animation-duration:110s}
+.sc-strip:hover .marquee-track,.sc-strip:focus-within .marquee-track{animation-play-state:paused}
+.sc-book{flex:none;display:block;padding:0;margin:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer;
+  border-radius:4px;-webkit-tap-highlight-color:transparent;transition:transform .25s var(--ease,ease)}
+.sc-book:active{transform:scale(.96)}
+.sc-book:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.sc-book.locked:hover .bk,.sc-book.locked:focus-visible .bk{transform:rotateY(calc(var(--tilt) + 14deg)) rotateX(4deg) translateZ(6px)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+.sc-toast{position:fixed;z-index:40;left:50%;top:calc(76px + env(safe-area-inset-top));transform:translateX(-50%);
+  max-width:calc(100% - 32px);padding:10px 16px;border-radius:999px;font-size:13px;line-height:1.3;white-space:nowrap;
+  background:color-mix(in srgb,var(--text,#fff) 92%,transparent);color:var(--bg,#0a0a0a);box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none}
+.sc-toast.in{animation:sc-toast-in .35s var(--ease,ease)}
+@keyframes sc-toast-in{from{opacity:0;transform:translateX(-50%) translateY(-10px)}}
+@media (pointer:coarse){.sc-strip .marquee-track{animation-duration:170s}}

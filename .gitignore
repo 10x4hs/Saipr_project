@@ -18,7 +18,8 @@ dist/
 # 공통
 .env
 scratch-dev.db
-app/static/covers/
+app/static/covers/*
+!app/static/covers/showcase/
 docs/demo/*.mp4
 .vercel
 .env*
