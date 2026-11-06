@@ -13,6 +13,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Book, LibraryEntry, RacePresence, RaceQuote, Room, RoomMember, User
+from app.services.palette import color_for
 
 # 헷갈리는 글자(0/O, 1/I/L)를 뺀 코드 문자
 CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
@@ -38,6 +39,12 @@ class Standing:
     pages: int
     pct: int
     is_me: bool
+    left: int = 0  # 완주까지 남은 쪽
+
+    @property
+    def color(self) -> str:
+        """트랙 · 순위 · 리더 칩에서 이 사람을 나타내는 고정 색(palette.js 의 colorFor 와 같다)."""
+        return color_for(self.user.id)
 
 
 def new_code() -> str:
@@ -127,6 +134,7 @@ async def standings(session: AsyncSession, room: Room, me_id: int) -> list[Stand
             pages=(v + 1) if v is not None else 0,
             pct=round(((v + 1) if v is not None else 0) / total * 100),
             is_me=u.id == me_id,
+            left=max(total - ((v + 1) if v is not None else 0), 0),
         )
         for u, v in rows.all()
     ]

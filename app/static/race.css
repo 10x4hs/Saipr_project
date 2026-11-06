@@ -1,0 +1,101 @@
+/* 대결(페이지 레이스) 화면 — race.html 전용.
+ * 참가자마다 --c(palette.js colorFor / palette.py color_for)로 같은 색을 트랙 · 순위 · 칩에 쓴다. */
+
+.rc-sec{margin-top:34px}
+.rc-sec+.rc-sec{padding-top:30px;border-top:1px solid var(--glass-line)}
+.rc-h{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:2px 12px;margin-bottom:14px}
+.rc-h .rc-eyebrow{grid-column:1 / -1;font-size:11px;letter-spacing:.14em;color:var(--accent-strong,var(--accent))}
+.rc-h h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-.03em}
+.rc-h .rc-meta{font-size:12px;color:var(--dim);white-space:nowrap}
+.rc-clock{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-size:12px;color:var(--text);
+  background:var(--sunken);border:1px solid var(--glass-line);white-space:nowrap}
+.rc-clock b{font-weight:700;font-variant-numeric:tabular-nums}
+.rc-clock.done{color:var(--dim)}
+.rc-clock .dot{width:7px;height:7px;border-radius:50%;background:var(--ok,#1fa463);box-shadow:0 0 0 0 currentColor;animation:rc-pulse 1.8s ease-out infinite;color:var(--ok,#1fa463)}
+.rc-note{min-height:20px;margin:-6px 0 8px;font-size:13px;font-weight:600;color:var(--accent-strong,var(--accent))}
+.rc-note:empty{min-height:0;margin:0}
+
+/* ---------- 트랙 ---------- */
+.rc-track{display:grid;gap:8px;padding:12px;border-radius:22px;background:var(--surface);border:1px solid var(--glass-line);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.rc-lane{--c:var(--accent);--p:0;--ava:40px;--start:14px;--goal:30px;position:relative;height:64px;border-radius:16px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--c) 14%,transparent),color-mix(in srgb,var(--c) 6%,transparent));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 22%,transparent)}
+.rc-lane.me{box-shadow:inset 0 0 0 2px var(--c),0 6px 20px color-mix(in srgb,var(--c) 22%,transparent)}
+/* 출발선(실선)과 결승선(체크무늬)은 트랙 안쪽에 */
+.rc-lane::before{content:"";position:absolute;left:var(--start);top:10px;bottom:10px;width:2px;border-radius:2px;background:color-mix(in srgb,var(--text) 30%,transparent)}
+.rc-lane::after{content:"";position:absolute;right:12px;top:8px;bottom:8px;width:12px;border-radius:3px;opacity:.75;
+  background:repeating-conic-gradient(var(--text) 0 25%,transparent 0 50%) 0 0/6px 6px;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--text) 25%,transparent)}
+.rc-road{position:absolute;top:0;bottom:0;left:var(--start);right:var(--goal)}
+.rc-fill{position:absolute;left:0;top:50%;height:6px;margin-top:-3px;border-radius:6px;
+  width:calc((100% - var(--ava)) * var(--p) / 100 + var(--ava) / 2);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--c) 15%,transparent),var(--c));transition:width 1.2s cubic-bezier(.16,1,.3,1)}
+.rc-runner{position:absolute;top:50%;left:calc((100% - var(--ava)) * var(--p) / 100);display:flex;align-items:center;gap:8px;
+  transform:translateY(-50%);transition:left 1.2s cubic-bezier(.16,1,.3,1),transform .3s;white-space:nowrap}
+.rc-runner.flip{flex-direction:row-reverse;transform:translate(calc(-100% + var(--ava)),-50%)}
+.rc-ava{position:relative;flex:none}
+.rc-lane .avatar,.rc-board .avatar{background:var(--c);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.rc-ava .avatar{width:var(--ava);height:var(--ava);font-size:16px;box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--c)}
+.rc-crown{position:absolute;left:50%;top:-17px;transform:translateX(-50%) rotate(-12deg);font-size:19px;font-style:normal;line-height:1;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));display:none}
+.rc-lane.lead .rc-crown{display:block}
+.rc-tag{display:grid;gap:1px;line-height:1.2;padding:4px 9px;border-radius:10px;background:color-mix(in srgb,var(--bg) 78%,transparent);
+  border:1px solid color-mix(in srgb,var(--c) 35%,transparent)}
+.rc-runner.flip .rc-tag{text-align:right}
+.rc-tag b{font-size:13px;font-weight:700;color:var(--text);max-width:9em;overflow:hidden;text-overflow:ellipsis}
+.rc-tag b em{font-style:normal;font-size:10px;font-weight:700;color:#fff;background:var(--c);padding:0 5px;border-radius:999px;margin-left:4px;vertical-align:1px}
+.rc-tag small{font-size:11px;color:var(--body,var(--text))}
+.rc-tag small .pct{font-weight:700;color:var(--c);filter:brightness(1.15)}
+.rc-runner.live .rc-ava .avatar{animation:rc-ring 1.6s ease-out infinite}
+.rc-runner.live .rc-tag small::before{content:"";display:inline-block;width:6px;height:6px;margin-right:5px;border-radius:50%;background:var(--ok,#1fa463);vertical-align:1px}
+.rc-runner.overtake .rc-ava{animation:rc-overtake .9s cubic-bezier(.16,1,.3,1)}
+.rc-scale{display:flex;justify-content:space-between;padding:2px 26px 0 8px;font-size:10px;color:var(--dim);letter-spacing:.06em}
+.rc-empty{padding:18px;text-align:center;color:var(--dim);font-size:14px}
+
+@keyframes rc-overtake{0%{translate:0 0;scale:1}35%{translate:0 -12px;scale:1.2}70%{translate:0 2px;scale:.96}100%{translate:0 0;scale:1}}
+@keyframes rc-ring{0%{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--c),0 0 0 5px color-mix(in srgb,var(--c) 60%,transparent)}
+  100%{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--c),0 0 0 13px transparent}}
+@keyframes rc-pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,currentColor 60%,transparent)}100%{box-shadow:0 0 0 8px transparent}}
+
+/* ---------- 순위 ---------- */
+.rc-board{list-style:none;margin:0;padding:6px;display:grid;border-radius:22px;background:var(--surface);border:1px solid var(--glass-line);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.rc-board li{--c:var(--accent);position:relative;display:grid;grid-template-columns:30px 34px minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 12px 12px 10px;border-radius:16px}
+.rc-board li+li::before{content:"";position:absolute;left:12px;right:12px;top:0;height:1px;background:var(--glass-line)}
+.rc-board li.me{background:color-mix(in srgb,var(--c) 13%,transparent);box-shadow:inset 3px 0 0 var(--c)}
+.rc-board li.me::before,.rc-board li.me+li::before{display:none}
+.rc-pos{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;font-size:14px;font-weight:700;
+  color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 40%,transparent)}
+.rc-board li:first-child .rc-pos{color:#fff;background:var(--c);box-shadow:0 4px 12px color-mix(in srgb,var(--c) 45%,transparent)}
+.rc-board .avatar{width:34px;height:34px;font-size:14px}
+.rc-board .who{display:grid;gap:7px;min-width:0}
+.rc-board .who b{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-board .who em{font-style:normal;font-size:11px;font-weight:700;color:#fff;background:var(--c);padding:1px 7px;border-radius:999px;margin-left:4px}
+.rc-bar{display:block;height:8px;border-radius:8px;background:color-mix(in srgb,var(--c) 14%,var(--sunken));overflow:hidden}
+.rc-bar i{display:block;height:100%;min-width:2px;border-radius:8px;background:var(--c);transition:width 1s cubic-bezier(.16,1,.3,1)}
+.rc-score{display:grid;justify-items:end;gap:2px;min-width:52px}
+.rc-score b{font-size:15px;font-weight:700;color:var(--text)}
+.rc-score small{font-size:11px;color:var(--dim)}
+
+@media (min-width:900px){
+  .rc-lane{height:68px;--ava:44px;--start:18px;--goal:34px}
+  .rc-ava .avatar{font-size:18px}
+  .rc-tag b{max-width:14em}
+  .rc-track{padding:16px;gap:10px}
+}
+/* 넓은 화면의 .split 레이아웃: 오른쪽 열 첫 섹션(트랙)은 히어로와 윗선을 맞춘다 */
+@media (min-width:1100px) and (min-height:520px){.content.split>section.rc-sec:nth-of-type(2){margin-top:4px}}
+@media (max-width:380px){.rc-tag b{max-width:6.5em}}
+@media (prefers-reduced-motion:reduce){
+  .rc-runner,.rc-fill,.rc-bar i{transition:none}
+  .rc-runner.overtake .rc-ava,.rc-runner.live .rc-ava .avatar,.rc-clock .dot{animation:none}
+}
+
+/* ---------- 함께 밑줄 ---------- */
+.quote-feed{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.quote-feed li{padding:12px 14px;border-radius:18px;background:var(--surface);border:1px solid var(--glass-line)}
+.quote-feed li.empty{background:none;border:0}
+.quote-feed blockquote{margin:0 0 6px;font-size:15px;line-height:1.6}
+.quote-feed .sealed blockquote{filter:blur(5px);user-select:none}
+.quote-feed .meta{font-size:12px;color:var(--dim)}

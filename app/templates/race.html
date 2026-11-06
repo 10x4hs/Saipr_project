@@ -4,42 +4,63 @@
 {% block content_class %}split{% endblock %}
 {% block heading %}<small>{{ '끝난 대결' if over else '진행 중' }}</small>{{ book.title }}{% endblock %}
 {% block main %}
+{% set ends_iso = room.ends_at.isoformat() if room.ends_at else '' %}
 <section class="race-hero glass-card">
   <div class="race-cover" data-tilt="14">{{ book_cover(book.title, book.author, img=cover_of(book)) }}</div>
   <div>
-    <span class="mono muted">{% if over %}끝남{% else %}남은 시간 <b id="left" data-ends="{{ room.ends_at.isoformat() if room.ends_at else '' }}">–</b>{% endif %}</span>
+    <span class="mono muted">{% if over %}끝남{% elif ends_iso %}남은 시간 <b class="js-left" id="left" data-ends="{{ ends_iso }}">–</b>{% else %}기한 없음{% endif %}</span>
     <h2>{{ board|length }}명이 달리는 중</h2>
     <a class="btn primary" href="/books/{{ book.id }}">이어서 읽기</a>
   </div>
 </section>
+{# race.css는 트랙보다 먼저, 그러나 main의 첫 자식은 아니게(.split 레이아웃이 첫 자식을 왼쪽 열로 보낸다) #}
+<link rel="stylesheet" href="/static/race.css">
 
-<section class="row">
-  <div class="row-h"><h2>레이스</h2><span class="mono muted" id="liveNote" aria-live="polite"></span></div>
-  <div class="race-track glass-card" id="raceTrack" aria-label="진행률 레이스">
+<section class="rc-sec" aria-labelledby="rcTrackH">
+  <header class="rc-h">
+    <span class="rc-eyebrow mono">LIVE TRACK</span>
+    <h2 id="rcTrackH">레이스</h2>
+    {% if over %}<span class="rc-clock done">🏁 끝난 대결</span>
+    {% elif ends_iso %}<span class="rc-clock"><i class="dot" aria-hidden="true"></i>종료까지 <b class="js-left" data-ends="{{ ends_iso }}">–</b></span>
+    {% else %}<span class="rc-clock"><i class="dot" aria-hidden="true"></i>진행 중</span>{% endif %}
+  </header>
+  <p class="rc-note" id="liveNote" aria-live="polite"></p>
+  <div class="rc-track" id="raceTrack" role="list" aria-label="진행률 레이스">
     {% for s in board %}
-    <div class="lane{{ ' me' if s.is_me }}" data-uid="{{ s.user.id }}">
-      <span class="finish" aria-hidden="true"></span>
-      <span class="runner{{ ' flip' if s.pct > 60 }}" style="--p:{{ s.pct }}" title="{{ s.user.nickname }} · {{ s.pct }}%">{{ avatar(s.user) }}<small class="mono">{{ s.pct }}%</small></span>
+    {% set lead = loop.first and s.pages > 0 %}
+    <div class="rc-lane{{ ' me' if s.is_me }}{{ ' lead' if lead }}" role="listitem" data-uid="{{ s.user.id }}" style="--c:{{ s.color }};--p:{{ s.pct }}">
+      <span class="rc-road">
+        <span class="rc-fill" aria-hidden="true"></span>
+        <span class="rc-runner{{ ' flip' if s.pct > 55 }}" title="{{ s.user.nickname }} · {{ s.pct }}%">
+          <span class="rc-ava">{{ avatar(s.user) }}<i class="rc-crown" aria-hidden="true">👑</i></span>
+          <span class="rc-tag"><b>{{ s.user.nickname }}{% if s.is_me %}<em>나</em>{% endif %}</b><small><span class="pct">{{ s.pct }}%</span> · <span class="left">{{ '완주!' if s.left == 0 else s.left ~ '쪽 남음' }}</span></small></span>
+        </span>
+      </span>
     </div>
     {% endfor %}
   </div>
+  <div class="rc-scale mono" aria-hidden="true"><span>출발</span><span>50%</span><span>결승 🏁</span></div>
 </section>
 
-<section class="row">
-  <div class="row-h"><h2>순위</h2><span class="mono muted">검증된 쪽 / {{ book.total_chunks }}</span></div>
-  <ol class="board" id="board" data-room="{{ room.id }}" data-book="{{ book.id }}" data-total="{{ book.total_chunks }}">
+<section class="rc-sec" aria-labelledby="rcRankH">
+  <header class="rc-h">
+    <span class="rc-eyebrow mono">STANDINGS</span>
+    <h2 id="rcRankH">순위</h2>
+    <span class="rc-meta mono">검증된 쪽 / {{ book.total_chunks }}쪽</span>
+  </header>
+  <ol class="rc-board" id="board" data-room="{{ room.id }}" data-book="{{ book.id }}" data-total="{{ book.total_chunks }}">
     {% for s in board %}
-    <li class="{{ 'me' if s.is_me }}" data-uid="{{ s.user.id }}">
-      <span class="pos mono">{{ loop.index }}</span>
+    <li class="{{ 'me' if s.is_me }}" data-uid="{{ s.user.id }}" style="--c:{{ s.color }}">
+      <span class="rc-pos mono">{{ loop.index }}</span>
       {{ avatar(s.user) }}
-      <div class="who"><b>{{ s.user.nickname }}{% if s.is_me %} <em>나</em>{% endif %}</b><span class="track"><i style="width:{{ s.pct }}%"></i></span></div>
-      <span class="mono">{{ s.pages }}쪽</span>
+      <div class="who"><b>{{ s.user.nickname }}{% if s.is_me %} <em>나</em>{% endif %}</b><span class="rc-bar"><i style="width:{{ s.pct }}%"></i></span></div>
+      <span class="rc-score"><b class="mono">{{ s.pages }}쪽</b><small class="mono">{{ s.pct }}%</small></span>
     </li>
     {% endfor %}
   </ol>
 </section>
 
-<section class="row">
+<section class="row rc-sec">
   <div class="row-h"><h2>함께 밑줄</h2><span class="mono muted">책에서 문장을 골라 「대결방에 공유」</span></div>
   <ul class="quote-feed" id="quotes"><li class="muted small empty">아직 공유한 문장이 없어요</li></ul>
 </section>
@@ -53,26 +74,7 @@
   </div>
   <span class="muted small" id="copied" aria-live="polite"></span>
 </section>
-<style>
-.race-track{display:grid;gap:10px;padding:16px 56px 16px 20px;overflow:hidden}
-.race-track .lane{position:relative;height:44px;border-radius:22px;background:var(--sunken)}
-.race-track .lane.me{box-shadow:inset 0 0 0 1px var(--accent)}
-.race-track .finish{position:absolute;right:0;top:0;bottom:0;width:6px;border-radius:0 22px 22px 0;background:repeating-linear-gradient(0deg,var(--text,#222) 0 6px,transparent 6px 12px);opacity:.35}
-.race-track .runner{position:absolute;top:4px;left:calc(var(--p) * (100% - 36px) / 100);display:flex;align-items:center;gap:6px;transition:left 1.2s cubic-bezier(.16,1,.3,1);white-space:nowrap}
-.race-track .runner.flip{flex-direction:row-reverse;transform:translateX(calc(-100% + 36px))}
-.race-track .runner .avatar{width:36px;height:36px;font-size:15px}
-.race-track .runner small{font-size:11px;color:var(--dim)}
-.race-track .runner.live .avatar{box-shadow:0 0 0 2px var(--accent),0 0 12px color-mix(in srgb,var(--accent) 60%,transparent)}
-.race-track .runner.overtake{animation:overtake .9s cubic-bezier(.16,1,.3,1)}
-@keyframes overtake{0%{translate:0 0;scale:1}35%{translate:0 -10px;scale:1.18}70%{translate:0 2px;scale:.96}100%{translate:0 0;scale:1}}
-.quote-feed{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.quote-feed li{padding:12px 14px;border-radius:18px;background:var(--surface);border:1px solid var(--glass-line)}
-.quote-feed li.empty{background:none;border:0}
-.quote-feed blockquote{margin:0 0 6px;font-size:15px;line-height:1.6}
-.quote-feed .sealed blockquote{filter:blur(5px);user-select:none}
-.quote-feed .meta{font-size:12px;color:var(--dim)}
-@media (prefers-reduced-motion:reduce){.race-track .runner{transition:none}.race-track .runner.overtake{animation:none}}
-</style>
+<script src="/static/palette.js"></script>
 <script>
 (() => {
   const share = document.getElementById('share'), note = document.getElementById('copied');
@@ -83,42 +85,56 @@
     copy(`${text}\n${share.dataset.url}`);
   };
   document.getElementById('copy').onclick = () => copy(document.getElementById('code').textContent);
-  const left = document.getElementById('left');
-  if (left && left.dataset.ends) {
-    const ends = new Date(left.dataset.ends.endsWith('Z') || left.dataset.ends.includes('+') ? left.dataset.ends : left.dataset.ends + 'Z');
-    const tick = () => { const s = Math.max(0, (ends - Date.now()) / 1000);
-      left.textContent = s > 86400 ? `${Math.floor(s / 86400)}일 ${Math.floor(s % 86400 / 3600)}시간` : `${Math.floor(s / 3600)}시간 ${Math.floor(s % 3600 / 60)}분`; };
+  // 남은 시간: 히어로와 트랙 머리말 두 곳(.js-left)을 같이 센다
+  const fmtLeft = s => s <= 0 ? '곧 끝나요'
+    : s >= 86400 ? `${Math.floor(s / 86400)}일 ${Math.floor(s % 86400 / 3600)}시간`
+    : s >= 3600 ? `${Math.floor(s / 3600)}시간 ${Math.floor(s % 3600 / 60)}분`
+    : `${Math.max(1, Math.floor(s / 60))}분`;
+  const clocks = [...document.querySelectorAll('.js-left[data-ends]')];
+  if (clocks.length) {
+    const raw = clocks[0].dataset.ends;
+    const ends = new Date(raw.endsWith('Z') || raw.includes('+') ? raw : raw + 'Z');
+    const tick = () => { const t = fmtLeft(Math.max(0, (ends - Date.now()) / 1000)); clocks.forEach(c => { c.textContent = t; }); };
     tick(); setInterval(tick, 30000);
   }
   // 실시간 순위: 기본은 5초 폴링(서버리스에서는 WebSocket 허브를 붙들 수 없다), WebSocket은 되면 덤으로 쓴다
   const board = document.getElementById('board'), trackEl = document.getElementById('raceTrack');
-  const room = board.dataset.room, liveNote = document.getElementById('liveNote');
+  const room = board.dataset.room, total = Math.max(1, Number(board.dataset.total) || 1);
+  const liveNote = document.getElementById('liveNote');
+  const color = id => (window.colorFor ? window.colorFor(id) : '');
   const avatarEl = s => {
     const av = document.createElement('span'); av.className = 'avatar';
     if (s.avatar) { const im = new Image(); im.src = s.avatar; im.alt = ''; av.appendChild(im); } else av.textContent = s.nickname.slice(0, 1);
     return av;
   };
+  const meBadge = (b, s, sep) => { if (s.me) { const em = document.createElement('em'); em.textContent = '나'; b.append(sep, em); } };
   let lastOrder = [...board.children].map(li => li.dataset.uid);
   let live = new Map();
   const say = msg => { liveNote.textContent = msg; clearTimeout(say.t); say.t = setTimeout(() => { liveNote.textContent = ''; }, 6000); };
   const paintTrack = data => {
     const lanes = new Map([...trackEl.children].map(l => [l.dataset.uid, l]));
-    data.board.forEach(s => {
+    data.board.forEach((s, i) => {
       const uid = String(s.user_id);
       let lane = lanes.get(uid);
       if (!lane) {
-        lane = document.createElement('div'); lane.className = 'lane'; lane.dataset.uid = uid;
-        lane.innerHTML = '<span class="finish" aria-hidden="true"></span><span class="runner"><small class="mono"></small></span>';
-        lane.querySelector('.runner').prepend(avatarEl(s));
-        trackEl.appendChild(lane);
+        lane = document.createElement('div'); lane.className = 'rc-lane'; lane.dataset.uid = uid; lane.setAttribute('role', 'listitem');
+        lane.innerHTML = '<span class="rc-road"><span class="rc-fill" aria-hidden="true"></span><span class="rc-runner">'
+          + '<span class="rc-ava"><i class="rc-crown" aria-hidden="true">👑</i></span>'
+          + '<span class="rc-tag"><b></b><small><span class="pct"></span> · <span class="left"></span></small></span></span></span>';
+        lane.querySelector('.rc-ava').prepend(avatarEl(s));
+        const b = lane.querySelector('.rc-tag b'); b.textContent = s.nickname; meBadge(b, s, '');
       }
+      trackEl.appendChild(lane);  // 순위 순서대로 레인을 다시 줄 세운다
       lane.classList.toggle('me', !!s.me);
-      const r = lane.querySelector('.runner');
-      r.style.setProperty('--p', s.pct);
-      r.querySelector('small').textContent = live.has(uid) ? `${s.pct}% · ${live.get(uid) + 1}쪽 읽는 중` : `${s.pct}%`;
+      lane.classList.toggle('lead', i === 0 && s.pages > 0);
+      lane.style.setProperty('--c', color(s.user_id));
+      lane.style.setProperty('--p', s.pct);
+      const r = lane.querySelector('.rc-runner'), rest = Math.max(0, total - s.pages);
+      lane.querySelector('.pct').textContent = `${s.pct}%`;
+      lane.querySelector('.left').textContent = live.has(uid) ? `지금 ${live.get(uid) + 1}쪽` : rest ? `${rest}쪽 남음` : '완주!';
       r.classList.toggle('live', live.has(uid));
-      r.classList.toggle('flip', s.pct > 60);
-      r.title = `${s.nickname} · ${s.pct}%`;
+      r.classList.toggle('flip', s.pct > 55);
+      r.title = `${s.nickname} · ${s.pct}% · ${rest ? `${rest}쪽 남음` : '완주'}`;
       lanes.delete(uid);
     });
     lanes.forEach(l => l.remove());
@@ -128,27 +144,29 @@
     const names = new Map(data.board.map(s => [String(s.user_id), s.nickname]));
     // 추월: 예전엔 뒤였는데 이제 앞선 사람
     const before = new Map(lastOrder.map((u, i) => [u, i]));
+    const passers = [];
     order.forEach((a, i) => order.slice(i + 1).forEach(b => {
-      if (before.has(a) && before.has(b) && before.get(a) > before.get(b)) {
-        const r = trackEl.querySelector(`.lane[data-uid="${a}"] .runner`);
-        if (r) { r.classList.remove('overtake'); void r.offsetWidth; r.classList.add('overtake'); }
-        say(`${names.get(a)}님이 ${names.get(b)}님을 추월했어요!`);
-      }
+      if (before.has(a) && before.has(b) && before.get(a) > before.get(b)) { passers.push(a); say(`${names.get(a)}님이 ${names.get(b)}님을 추월했어요!`); }
     }));
     lastOrder = order;
     paintTrack(data);
+    passers.forEach(a => {
+      const r = trackEl.querySelector(`.rc-lane[data-uid="${a}"] .rc-runner`);
+      if (r) { r.classList.remove('overtake'); void r.offsetWidth; r.classList.add('overtake'); }
+    });
     const first = new Map([...board.children].map(li => [li.dataset.uid, li.getBoundingClientRect().top]));
     board.innerHTML = '';
     data.board.forEach((s, i) => {
       const li = document.createElement('li');
       li.dataset.uid = s.user_id; if (s.me) li.className = 'me';
-      li.innerHTML = '<span class="pos mono"></span><div class="who"><b></b><span class="track"><i></i></span></div><span class="mono pages"></span>';
-      li.querySelector('.pos').textContent = i + 1;
-      li.querySelector('.pos').after(avatarEl(s));
-      li.querySelector('b').textContent = s.nickname;
-      if (s.me) { const em = document.createElement('em'); em.textContent = '나'; li.querySelector('b').append(' ', em); }
-      li.querySelector('.track i').style.width = s.pct + '%';
-      li.querySelector('.pages').textContent = `${s.pages}쪽`;
+      li.style.setProperty('--c', color(s.user_id));
+      li.innerHTML = '<span class="rc-pos mono"></span><div class="who"><b></b><span class="rc-bar"><i></i></span></div><span class="rc-score"><b class="mono"></b><small class="mono"></small></span>';
+      li.querySelector('.rc-pos').textContent = i + 1;
+      li.querySelector('.rc-pos').after(avatarEl(s));
+      const b = li.querySelector('.who b'); b.textContent = s.nickname; meBadge(b, s, ' ');
+      li.querySelector('.rc-bar i').style.width = s.pct + '%';
+      li.querySelector('.rc-score b').textContent = `${s.pages}쪽`;
+      li.querySelector('.rc-score small').textContent = `${s.pct}%`;
       board.appendChild(li);
       const was = first.get(String(s.user_id));
       if (was !== undefined) {
