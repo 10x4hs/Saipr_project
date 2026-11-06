@@ -96,6 +96,23 @@ class OAuthAccount(Base):
     provider_user_id: Mapped[str] = mapped_column(String(255))
 
 
+class SignupVerification(Base):
+    """가입 대기 — 이메일로 보낸 6자리 코드를 확인해야 users에 계정이 생긴다."""
+
+    __tablename__ = "signup_verifications"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True)
+    nickname: Mapped[str] = mapped_column(String(40))
+    password_hash: Mapped[str] = mapped_column(String(60))
+    # HMAC-SHA256(secret, email:code) — 코드 원문은 저장하지 않는다
+    code_hash: Mapped[str] = mapped_column(String(64))
+    attempts: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    # 유닉스 초 — SQLite(테스트)에서도 시간대 문제 없이 비교하려고 정수로 둔다
+    expires_at: Mapped[int] = mapped_column(BigInteger)
+    sent_at: Mapped[int] = mapped_column(BigInteger)
+
+
 class Book(Base):
     __tablename__ = "books"
     __table_args__ = (UniqueConstraint("source", "external_id"),)
@@ -193,6 +210,31 @@ class RoomMember(Base):
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True, index=True
     )
     joined_at: Mapped[datetime] = _now()
+
+
+class RacePresence(Base):
+    """대결방에서 누가 지금 몇 쪽을 펼쳐 두었는지 — 리더가 몇 초마다 심장박동을 보낸다."""
+
+    __tablename__ = "race_presence"
+
+    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id", ondelete="CASCADE"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    chunk_index: Mapped[int] = mapped_column(Integer, default=0)
+    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class RaceQuote(Base):
+    """대결방 피드에 공유한 한 문장."""
+
+    __tablename__ = "race_quotes"
+    __table_args__ = (Index("ix_race_quotes_room_id_id", "room_id", "id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id", ondelete="CASCADE"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    chunk_index: Mapped[int] = mapped_column(Integer)
+    body: Mapped[str] = mapped_column(String(280))
+    created_at: Mapped[datetime] = _now()
 
 
 class Reaction(Base):

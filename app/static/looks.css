@@ -13,9 +13,10 @@
 .fx::before,.fx::after{content:"";position:absolute;inset:0;pointer-events:none}
 .fx.mini{position:relative;z-index:auto}
 
-/* 밝은 모드에서는 빛을 옅게 */
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .fx{filter:saturate(.85) brightness(1.55) contrast(.82)}}
-:root[data-theme="light"] .fx{filter:saturate(.85) brightness(1.55) contrast(.82)}
+/* 어두운 배경(data-bg-tone="dark")은 글자까지 밝게 바뀌므로 바래지 않고 그대로 둔다.
+   고르는 칸(.mini)도 실제로 깔릴 모습 그대로 — 테마를 따라가는 '기본'만 옅게 */
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]):not([data-bg-tone="dark"]) .fx:not(.mini),:root:not([data-theme="dark"]) .fx.mini[data-bg="plain"]{filter:saturate(.85) brightness(1.55) contrast(.82)}}
+:root[data-theme="light"]:not([data-bg-tone="dark"]) .fx:not(.mini),:root[data-theme="light"] .fx.mini[data-bg="plain"]{filter:saturate(.85) brightness(1.55) contrast(.82)}
 
 /* ---------- 기본 ---------- */
 .fx[data-bg="plain"]{--b1:rgba(255,140,180,.14);--b3:rgba(255,140,180,.06)}
@@ -101,8 +102,10 @@
 /* ---------- 강조 색 ---------- */
 :root{--accent-ink:#1a0d12}
 [data-accent="mono"]{--accent-ink:#0a0a0a}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"])[data-accent="mono"]{--accent:#0a0a0a!important;--accent-ink:#fafafa}}
-:root[data-theme="light"][data-accent="mono"]{--accent:#0a0a0a!important;--accent-ink:#fafafa}
+/* 밝은 바탕에서만 '기본' 강조색을 검정으로. 어두운 배경 위에서는 흰색 그대로(검정 강조가 안 보였다) */
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]):not([data-bg-tone="dark"])[data-accent="mono"]{--accent:#0a0a0a!important;--accent-ink:#fafafa}}
+:root[data-theme="light"]:not([data-bg-tone="dark"])[data-accent="mono"]{--accent:#0a0a0a!important;--accent-ink:#fafafa}
+:root[data-bg-tone="light"][data-accent="mono"]{--accent:#0a0a0a!important;--accent-ink:#fafafa}
 [data-accent="multi"] .btn.primary,[data-accent="multi"] .meter i,[data-accent="multi"] .track i{background:linear-gradient(90deg,#ff7a6b,#ffd95a,#7fd99a,#5aa0ff,#c39bff)}
 
 /* 캔버스 날씨(app/static/fx.js) */

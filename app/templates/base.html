@@ -1,11 +1,15 @@
 <!doctype html>
-<html lang="ko" {% if look and look.mode != 'auto' %}data-theme="{{ look.mode }}"{% endif %} data-accent="{{ look.accent if look else 'pink' }}" style="--accent:{{ look.accent_hex if look else '#ffb3c7' }}">
+<html lang="ko" {% if look and look.mode != 'auto' %}data-theme="{{ look.mode }}"{% endif %} data-accent="{{ look.accent if look else 'pink' }}" data-bg-tone="{{ look.bg_tone if look else 'auto' }}" style="--accent:{{ look.accent_hex if look else '#ffb3c7' }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a0a0a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<script>if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));</script>
 <title>{% block title %}偕讀 해독 — 같은 책을 함께 읽다{% endblock %}</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Geist+Mono:wght@500&display=swap">

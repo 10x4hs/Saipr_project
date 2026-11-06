@@ -112,9 +112,7 @@ async def book_social(
 async def standings(
     room_id: int, session: AsyncSession = Depends(get_session), user: User = Depends(require_api_user)
 ) -> dict:
-    room = await session.get(Room, room_id)
-    if room is None or not await race_service.is_member(session, room, user.id):
-        raise HTTPException(404, "race not found")
+    room = await _race_of(session, room_id, user)
     board = await race_service.standings(session, room, user.id)
     return {
         "book_id": room.book_id,
@@ -131,6 +129,87 @@ async def standings(
             for s in board
         ],
     }
+
+
+async def _race_of(session: AsyncSession, room_id: int, user: User) -> Room:
+    room = await session.get(Room, room_id)
+    if room is None or not await race_service.is_member(session, room, user.id):
+        raise HTTPException(404, "race not found")  # 남의 방은 있는지조차 알리지 않는다
+    return room
+
+
+def _present_out(p: race_service.Present) -> dict:
+    return {
+        "user_id": p.user.id,
+        "nickname": p.user.nickname,
+        "avatar": avatar_url(p.user),
+        "chunk": p.chunk_index,
+        "room_id": p.room_id,
+    }
+
+
+class PresenceIn(BaseModel):
+    chunk_index: int
+
+
+@router.put("/books/{book_id}/presence")
+async def book_presence(
+    book_id: int,
+    body: PresenceIn,
+    request: Request,
+    x_csrf_token: str | None = Header(None),
+    session: AsyncSession = Depends(get_session),
+    user: User = Depends(require_api_user),
+) -> dict:
+    """리더의 심장박동 겸 조회 — 내 쪽을 기록하고, 같은 대결방 친구들이 어디를 읽는지 돌려준다."""
+    check_csrf(request, x_csrf_token)
+    book = await _readable(session, book_id, user)
+    rooms = await race_service.heartbeat(session, user, book, body.chunk_index)
+    friends = await race_service.present(session, [r.id for r in rooms], exclude=user.id)
+    return {
+        "rooms": [{"id": r.id, "name": r.name} for r in rooms],
+        "friends": [_present_out(p) for p in friends],
+        "ttl": int(race_service.PRESENCE_TTL.total_seconds()),
+    }
+
+
+@router.get("/races/{room_id}/presence")
+async def race_presence(
+    room_id: int, session: AsyncSession = Depends(get_session), user: User = Depends(require_api_user)
+) -> dict:
+    room = await _race_of(session, room_id, user)
+    return {"present": [_present_out(p) for p in await race_service.present(session, [room.id])]}
+
+
+class QuoteIn(BaseModel):
+    chunk_index: int
+    text: str
+
+
+@router.get("/races/{room_id}/quotes")
+async def list_quotes(
+    room_id: int, session: AsyncSession = Depends(get_session), user: User = Depends(require_api_user)
+) -> dict:
+    room = await _race_of(session, room_id, user)
+    return {"items": await race_service.quotes(session, room, user.id)}
+
+
+@router.post("/races/{room_id}/quotes", status_code=201)
+async def post_quote(
+    room_id: int,
+    body: QuoteIn,
+    request: Request,
+    x_csrf_token: str | None = Header(None),
+    session: AsyncSession = Depends(get_session),
+    user: User = Depends(require_api_user),
+) -> dict:
+    check_csrf(request, x_csrf_token)
+    room = await _race_of(session, room_id, user)
+    try:
+        q = await race_service.add_quote(session, room, user, body.chunk_index, body.text)
+    except race_service.QuoteError as e:
+        raise HTTPException(422, str(e)) from e
+    return {"id": q.id, "chunk": q.chunk_index, "text": q.body}
 
 
 @router.websocket("/ws/books/{book_id}")

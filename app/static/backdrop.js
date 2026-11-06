@@ -13,7 +13,7 @@
   // 점 색 = 지금 테마의 글자색. 매 프레임 읽으면 느려서 테마가 바뀔 때만 다시 읽는다
   const readInk = () => { ink = (getComputedStyle(document.body).color.match(/\d+/g) || [255, 255, 255]).slice(0, 3).join(','); };
   readInk();
-  new MutationObserver(readInk).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'style'] });
+  new MutationObserver(readInk).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-bg-tone', 'style'] });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readInk);
   const pointer = { x: -9999, y: -9999, k: 0 };   // k: 닿아 있는 정도(부드럽게 0↔1)
 

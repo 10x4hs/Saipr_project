@@ -129,7 +129,7 @@ a:hover .bk,a:focus-visible .bk,.now:hover .bk,.pick:hover .bk{transform:rotateY
 /* ---------- auth: 사진 한 장 + 유리 알약 입력칸 하나 ---------- */
 .auth{min-height:100dvh;display:grid;grid-template-rows:auto 1fr auto;color:#fff;background:#120d09;overflow:hidden}
 .auth .fx{display:none}
-.auth-bg{position:fixed;inset:0;z-index:-1;background:radial-gradient(80% 60% at 50% 45%,transparent,rgba(10,6,3,.55)),linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,0) 40%,rgba(0,0,0,.5)),url("/static/img/auth.jpg") 62% center/cover no-repeat;transform:scale(1.04);animation:breathe 24s ease-in-out infinite alternate}
+.auth-bg{position:fixed;inset:0;z-index:-1;background:#120d09}
 @keyframes breathe{to{transform:scale(1.1) translateY(-1%)}}
 .auth-brand{justify-self:center;margin-top:calc(28px + env(safe-area-inset-top));font-size:22px;font-weight:700;letter-spacing:-.03em;text-shadow:0 2px 16px rgba(0,0,0,.35)}
 .auth-main{display:grid;place-items:center;padding:0 20px}
@@ -159,6 +159,29 @@ a:hover .bk,a:focus-visible .bk,.now:hover .bk,.pick:hover .bk{transform:rotateY
 .sending .go{animation:spin .9s linear infinite}
 .auth-foot{justify-self:center;padding:0 20px calc(24px + env(safe-area-inset-bottom));font-size:13px;color:rgba(255,255,255,.85);text-shadow:0 1px 8px rgba(0,0,0,.5)}
 .auth-foot a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+/* 유리 카드: 흐린 배경 위에 얇은 테두리·위쪽 하이라이트로 떠 있는 판 */
+.auth-card{position:relative;width:min(480px,100%);min-width:0;display:grid;gap:16px;padding:30px 22px 22px;border-radius:30px;isolation:isolate;
+  background:linear-gradient(155deg,rgba(255,255,255,.20),rgba(255,255,255,.06) 55%,rgba(255,255,255,.10));
+  border:1px solid rgba(255,255,255,.24);
+  backdrop-filter:blur(26px) saturate(160%);-webkit-backdrop-filter:blur(26px) saturate(160%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(255,255,255,.06),0 30px 80px -24px rgba(0,0,0,.6),0 2px 10px rgba(0,0,0,.12);
+  animation:cardin .8s var(--ease) backwards}
+.auth-card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
+  background:radial-gradient(120% 60% at 15% 0%,rgba(255,255,255,.22),transparent 55%)}
+@keyframes cardin{from{opacity:0;transform:translateY(18px) scale(.97)}}
+/* 카드 안 입력칸은 블러를 겹치지 않고 얇은 유리로만 */
+.auth-card .pill-field{height:58px;padding-left:22px;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.30);
+  backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+.auth-card .pill-field:focus-within{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.75);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 0 0 4px rgba(255,179,199,.22)}
+.auth-card .go{background:rgba(255,255,255,.16)}
+.auth-card .go:hover{background:rgba(255,255,255,.28)}
+.auth-note{margin:0;text-align:center;font-size:15px;line-height:1.55;color:rgba(255,255,255,.9);text-shadow:0 1px 8px rgba(0,0,0,.35);word-break:break-all}
+.auth-note b{color:#fff}
+.step-msg.ok{color:#d9ffe8}
+.auth-resend{display:grid}
+@media (max-width:420px){.auth-card{padding:24px 16px 18px;border-radius:26px}.auth-main{padding:0 14px}}
+/* 휴대폰: 배경이 움직이면 카드 블러를 매 프레임 다시 그리므로 배경은 멈춘다 */
+@media (pointer:coarse),(prefers-reduced-motion:reduce){.auth-bg::before{animation:none}}
 .form-err{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad);border-radius:12px;padding:12px 14px;margin:0;font-size:14px}
 
 /* ---------- app shell ---------- */
@@ -341,6 +364,9 @@ a.hx-book:hover .bk{transform:none}
 .hud-text{transition:opacity .22s ease}
 .hud-text.fading{opacity:0}
 .drum-spacer{pointer-events:none}
+/* 책을 손가락·마우스로 잡아 끈다(app/static/helix.js): 브라우저 기본 스크롤·링크 끌기·길게 누르기 메뉴 대신 */
+.hx-book{touch-action:none;-webkit-user-drag:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.hx-book img{-webkit-user-drag:none;pointer-events:none}
 .hud-actions{display:flex;gap:8px;margin-top:10px}
 .hud-actions .btn{height:42px;padding:0 18px;font-size:14px;flex:1}
 .hud-actions form{display:flex;flex:1}
@@ -387,39 +413,52 @@ h3.sub,.sheet h3{font-size:14px;font-weight:600;color:var(--dim);margin:22px 0 1
 
 /* ---------- customize sheet ---------- */
 .sheet-wrap{position:fixed;inset:0;z-index:40;display:grid;align-items:end;justify-items:center;background:rgba(0,0,0,.35);animation:fade .3s var(--ease)}
-.sheet{width:min(100%,var(--app));max-height:92dvh;overflow-y:auto;padding:22px 20px calc(16px + env(safe-area-inset-bottom));border-radius:28px 28px 0 0;background:color-mix(in srgb,var(--surface) 80%,transparent);animation:sheetup .55s var(--ease);overscroll-behavior:contain}
+.sheet{width:min(100%,var(--app));max-height:92dvh;overflow-y:auto;overflow-x:hidden;padding:22px 20px 0;border-radius:28px 28px 0 0;background:color-mix(in srgb,var(--surface) 80%,var(--bg) 20%);animation:sheetup .55s var(--ease);overscroll-behavior:contain}
 @keyframes sheetup{from{transform:translateY(60px);opacity:0}}
 .sheet-h{display:flex;justify-content:space-between;align-items:center}
-.sheet-h h2{margin:0;font-size:22px;letter-spacing:-.03em}
+.sheet-h h2{margin:0;font-size:22px;letter-spacing:-.03em;min-width:0}
 .sheet .x{font-size:26px;color:var(--dim);width:40px;height:40px}
 .look-preview{position:relative;isolation:isolate;height:150px;margin-top:16px;border-radius:20px;overflow:hidden;border:1px solid var(--glass-line)}
 .look-preview .fx{position:absolute}
-.lp-card{position:absolute;left:16px;top:16px;bottom:16px;width:58%;display:grid;align-content:space-between;gap:6px;padding:14px;border-radius:16px}
-.lp-card b{font-size:16px}
+.lp-card{position:absolute;left:16px;top:16px;bottom:16px;width:min(58%,260px);min-width:0;display:grid;align-content:space-between;gap:6px;padding:14px;border-radius:16px}
+.lp-card b{font-size:16px;line-height:1.4;min-height:1.4em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lp-card .mono{color:var(--dim)}
 .lp-btn{justify-self:end;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;background:var(--accent);color:var(--accent-ink)}
 .hint{font-size:13px;color:var(--dim);margin:8px 0 0;line-height:1.6}
 .look-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
 .look-tabs button{flex:none;height:32px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:500;color:var(--dim);border:1px solid var(--glass-line)}
 .look-tabs button[aria-pressed="true"]{color:var(--text);border-color:var(--text)}
-.swatches{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 10px}
+.swatches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px}
 .sw{position:relative;isolation:isolate;display:grid;gap:6px;justify-items:center;font-size:13px;color:var(--dim)}
 .sw .fx.mini{position:relative;inset:auto;width:100%;height:64px;border-radius:14px;border:1px solid var(--glass-line);transition:transform .4s var(--ease)}
 .sw .play{position:absolute;right:8px;top:42px;font-style:normal;font-size:10px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6)}
 .sw[aria-pressed="true"] .fx.mini{outline:2px solid var(--accent);outline-offset:2px}
 .sw[aria-pressed="true"] b{color:var(--text)}
-.sw b{font-weight:500}
-.accents{display:grid;grid-template-columns:repeat(6,1fr);gap:14px 4px}
+.sw b{font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.accents{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px 4px}
 .accents button{display:grid;justify-items:center;gap:6px;font-size:12px;color:var(--dim)}
-.accents b{font-weight:500}
+.accents b{font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dot{width:36px;height:36px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);transition:transform .4s var(--ease)}
 .dot.mono{background:linear-gradient(135deg,#fafafa 50%,#0a0a0a 50%)}
 .dot.multi{background:conic-gradient(#ff7a6b,#ffd95a,#7fd99a,#5aa0ff,#c39bff,#ff7a6b)}
 .accents button[aria-pressed="true"] .dot{outline:2px solid var(--accent);outline-offset:3px;transform:scale(1.05)}
 .accents button[aria-pressed="true"] b{color:var(--text)}
-.sheet-f{position:sticky;bottom:calc(-16px - env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px;margin:22px -20px 0;padding:14px 20px calc(14px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
-.sheet-f .hint{flex:1;margin:0}
-.sheet-f .btn{height:44px;padding:0 18px;font-size:14px}
+.sheet-f{position:sticky;bottom:0;z-index:2;display:flex;align-items:center;gap:8px;margin:22px -20px 0;padding:14px 20px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--glass-line);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.sheet-f .hint{flex:1;min-width:0;margin:0;font-size:12px;line-height:1.4}
+.sheet-f .btn{flex:none;height:44px;padding:0 18px;font-size:14px;white-space:nowrap}
+/* 좁은 휴대폰: ≤374px는 옆 여백을 줄이고, ≤340px는 강조 색을 한 줄 4개·안내 문구를 버튼 위 한 줄로 */
+@media (max-width:374px){
+  .sheet{padding-left:16px;padding-right:16px}
+  .sheet-f{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}
+}
+@media (max-width:340px){
+  .sheet-f{flex-wrap:wrap}
+  .sheet-f .hint{flex-basis:100%}
+  .sheet-f .btn{flex:1;padding:0 12px}
+  .accents{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+/* 가로로 눕힌 휴대폰: 미리보기를 줄여 고르는 칸이 더 보이게 */
+@media (max-height:500px){.look-preview{height:120px}.lp-card{top:12px;bottom:12px;gap:2px;padding:8px 12px}.lp-card .meter{display:none}.sheet{max-height:96dvh}.sheet-f{padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}}
 
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .reading:not([data-tone]){--paper:#ffffff}}
 :root[data-theme="light"] .reading:not([data-tone]){--paper:#ffffff}
@@ -559,9 +598,15 @@ body.landing .fx{filter:none!important}
 /* iOS 사파리는 화면 밖으로 커진 고정 레이어(로그인 배경 확대 애니메이션)만큼 페이지 폭을 넓혀
    입력칸이 옆으로 밀려 보였다. 확대는 틀 안에서만 일어나게 하고, 문서 전체도 가로로는 넘치지 않게 한다 */
 html,body{overflow-x:clip;max-width:100%}
-.auth-bg{inset:0;overflow:hidden;transform:none;animation:none;background:none}
-.auth-bg::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 45%,transparent,rgba(10,6,3,.55)),linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,0) 40%,rgba(0,0,0,.5)),url("/static/img/auth.jpg") 62% center/cover no-repeat;
-  transform:scale(1.04);animation:breathe 24s ease-in-out infinite alternate}
+.auth-bg{inset:0;overflow:hidden;transform:none;animation:none}
+/* 사진은 살짝 흐리고 따뜻하게, 위·아래로 깊어지는 그라데이션과 은은한 빛 번짐을 겹친다 */
+.auth-bg::before{content:"";position:absolute;inset:-4%;background:url("/static/img/auth.jpg") 62% center/cover no-repeat;
+  filter:blur(3px) saturate(115%) brightness(.92);transform:scale(1.04);animation:breathe 24s ease-in-out infinite alternate}
+.auth-bg::after{content:"";position:absolute;inset:0;background:
+  radial-gradient(60% 45% at 18% 12%,rgba(255,179,199,.28),transparent 70%),
+  radial-gradient(55% 40% at 88% 92%,rgba(255,196,140,.22),transparent 70%),
+  radial-gradient(90% 70% at 50% 50%,transparent 35%,rgba(12,7,4,.55)),
+  linear-gradient(180deg,rgba(18,10,14,.55) 0%,rgba(18,10,14,.08) 38%,rgba(18,10,14,.12) 62%,rgba(10,6,4,.78) 100%)}
 .auth{width:100%}
 .auth-main{width:100%;min-width:0}
 .steps{width:100%;max-width:560px;min-width:0}
@@ -582,6 +627,11 @@ html,body{overflow-x:clip;max-width:100%}
 /* 보이지 않는 면은 그리지 않는다 (뒤표지는 책이 뒤집히지 않는 한 안 보인다) */
 .bk-back{display:none}
 .hx-book{contain:layout style}
+.l-cta-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.l-cta-row .btn{padding:0 12px;font-size:15px;white-space:nowrap}
+.l-apk{gap:6px;border-color:color-mix(in srgb,var(--accent) 60%,transparent);color:var(--accent)}
+.l-apk svg{flex:none}
+@media (max-width:360px){.l-cta-row{grid-template-columns:1fr}}
 .l-about{justify-self:center;font-size:13px;color:var(--dim);padding:4px}
 .l-about:hover{color:var(--text)}
 
@@ -737,3 +787,21 @@ html,body{overflow-x:clip;max-width:100%}
   .landing .marquee{grid-column:1 / -1;grid-row:4;margin:32px 0 0}
   .l-nav .brand b{font-size:30px}
 }
+
+/* ---------- 배경 밝기가 글자색을 정한다 (app/core/appearance.py BG_TONE → <html data-bg-tone>) ---------- */
+/* 밝은 테마(또는 자동+밝은 기기)에서 어두운 배경을 고르면 검은 글자가 검은 배경 위에 놓여 안 보였다
+   (탐색의 인기 순위 제목·저자·순위 숫자 등). 테마와 상관없이 배경 밝기에 맞는 글자·유리 색을 쓴다.
+   소개 화면(body.landing)과 같은 어두운 변수 묶음. 맨 끝에 두고 html:root로 위의 테마 규칙을 이긴다 */
+html:root[data-bg-tone="dark"]{
+  --bg:#0a0a0a; --surface:rgba(28,30,36,.55); --sunken:rgba(255,255,255,.06); --text:#fafafa; --body:#d6d8dd; --dim:#9a9ca3; --line:#24272e;
+  --accent-ink:#2a1119; --glow:rgba(255,140,180,.28); --ok:#8fe3b8; --bad:#ff8a8a;
+  --glass:rgba(255,255,255,.08); --glass-line:rgba(255,255,255,.18); --shadow:0 18px 40px -20px rgba(0,0,0,.6);
+  --accent-strong:var(--accent); color-scheme:dark}
+html:root[data-bg-tone="dark"][data-accent="mono"]{--accent-ink:#0a0a0a}
+html:root[data-bg-tone="dark"] .tabbar{background:color-mix(in srgb,var(--surface) 72%,transparent);border-color:var(--glass-line);box-shadow:var(--shadow)}
+html:root[data-bg-tone="dark"] .reading:not([data-tone]),html:root[data-bg-tone="dark"] .reading[data-tone=""]{--paper:#17181c}
+html:root[data-bg-tone="light"]{
+  --bg:#f4f4f6; --surface:rgba(255,255,255,.62); --sunken:rgba(10,10,10,.05); --text:#0a0a0a; --body:#2a2c31; --dim:#55585f; --line:#e6e6ea;
+  --accent-ink:#1a0d12; --glow:rgba(255,140,180,.35); --ok:#16a06b; --bad:#d64545;
+  --glass:rgba(255,255,255,.7); --glass-line:rgba(10,10,10,.08); --shadow:0 18px 40px -22px rgba(0,0,0,.35);
+  --accent-strong:color-mix(in srgb,var(--accent) 55%,#000); color-scheme:light}

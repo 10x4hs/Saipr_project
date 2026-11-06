@@ -11,7 +11,7 @@ from app.api.deps import get_http_client
 from app.db.base import Base
 from app.db.session import get_session
 from app.main import app
-from tests.conftest import mock_client, read_chunk, signup
+from tests.conftest import SENT_CODES, mock_client, read_chunk, signup
 from tests.test_api import upstream
 
 
@@ -125,6 +125,8 @@ def _signup_sync(c: TestClient, email: str, nickname: str) -> dict:
         "csrf": token,
     }
     assert c.post("/signup", data=data, follow_redirects=False).status_code == 303
+    verify = {"code": SENT_CODES[email], "csrf": token}
+    assert c.post("/signup/verify", data=verify, follow_redirects=False).status_code == 303
     return dict(c.cookies)
 
 

@@ -5,7 +5,9 @@
 <div class="auth-bg" aria-hidden="true"></div>
 <a class="auth-brand" href="/">{{ brand() }}</a>
 <main class="auth-main">
-  {% block form %}{% endblock %}
+  <div class="auth-card">
+    {% block form %}{% endblock %}
+  </div>
 </main>
 <footer class="auth-foot">{% block foot %}{% endblock %}</footer>
 <script src="/static/auth.js"></script>

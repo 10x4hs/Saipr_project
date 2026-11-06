@@ -10,6 +10,7 @@
   const RISE = 62;            // 다음 책까지 올라가는 높이(px)
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let lenis = null, raf = 0, focusEl = null, R = 160, hudTimer = 0, snapTimer = 0;
+  let dirX = .7, dirY = .7, stepPx = 90;   // 끌기: 뒤 책 → 앞자리 방향(화면 단위 벡터)과 한 권 사이 화면 거리
   document.body.classList.add('in-drum');
 
   function layout() {
@@ -18,6 +19,11 @@
     const side = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--side')) || 0;
     R = Math.min(innerWidth - side, innerWidth >= 768 ? 820 : 480) * (innerWidth >= 768 ? .36 : .42);
     $('drumSpacer').style.height = ((books.length - 1) * PER + innerHeight) + 'px';
+    // 바로 뒤 책(t=1)은 앞자리보다 왼쪽 위에 있다. 그 책을 앞자리로 끌어오는 방향 = 오른쪽 아래.
+    // 원근(perspective 1100px)으로 조금 작아지는 만큼 줄여서, 손가락 아래 책이 손가락을 따라오게 한다
+    const phi = TURN * Math.PI / 180, z1 = (1 - Math.cos(phi)) * R + 70, k = 1100 / (1100 + z1);
+    const vx = Math.sin(phi) * R * k, vy = RISE * k;
+    stepPx = Math.hypot(vx, vy); dirX = vx / stepPx; dirY = vy / stepPx;
   }
 
   let lastPos = -1;
@@ -88,6 +94,7 @@
 
   // 맨 앞 책을 누르면 열고, 뒤에 있는 책을 누르면 그 책을 앞으로 데려온다
   books.forEach((el, i) => el.addEventListener('click', e => {
+    if (dragMoved) { e.preventDefault(); dragMoved = false; return; }   // 끌다가 놓은 것은 누름이 아니다
     if (el === focusEl) return;                          // 링크 그대로 → 책 열기
     e.preventDefault();
     const target = i * PER;
@@ -103,7 +110,7 @@
   addEventListener('touchcancel', () => { touching = false; }, { passive: true });
   function snap() {
     clearTimeout(snapTimer);
-    if (touching) return;
+    if (touching || drag) return;
     snapTimer = setTimeout(() => {
       const target = Math.round(scrollY / PER) * PER;
       if (Math.abs(target - scrollY) < 2) return;
@@ -111,6 +118,69 @@
       else scrollTo({ top: target, behavior: 'smooth' });
     }, matchMedia('(pointer: coarse)').matches ? 260 : 160);   // 터치는 관성 스크롤이 끝난 뒤에
   }
+
+  // --- 책을 잡고 끌기 (안드로이드 크롬 터치 · PC 마우스) ---
+  // 책을 누른 채 앞(오른쪽 아래)으로 끌면 그 책이 손가락을 따라 앞자리로 온다. 실제로는 페이지 스크롤을 움직여서
+  // 스크롤할 때와 똑같은 나선 움직임이 나온다. 놓으면 던진 속도만큼 더 가다가 가장 가까운 책에 멈춘다.
+  // 거의 움직이지 않고 떼면 평소처럼 누름(맨 앞 책 = 열기, 뒤 책 = 앞으로 데려오기).
+  const MOVE = 8;                       // 이만큼(px) 움직여야 끌기로 본다 — 손 떨림은 누름
+  const maxY = () => (books.length - 1) * PER;
+  const clampY = y => Math.max(0, Math.min(maxY(), y));
+  let drag = null, dragMoved = false, fling = 0;
+  const setScroll = y => { if (lenis) lenis.scrollTo(y, { immediate: true, force: true }); else scrollTo(0, y); };
+  function glide(to) {                  // 관성으로 미끄러져 책 자리에 멈춘다
+    const from = scrollY, dist = Math.abs(to - from);
+    if (dist < 1) return;
+    const dur = Math.min(1100, Math.max(380, 260 + dist * 1.6));
+    const ease = t => 1 - Math.pow(1 - t, 4);
+    if (lenis) { lenis.scrollTo(to, { duration: dur / 1000, easing: ease, force: true }); return; }
+    const t0 = performance.now();
+    cancelAnimationFrame(fling);
+    const step = now => {
+      const t = Math.min(1, (now - t0) / dur);
+      scrollTo(0, from + (to - from) * ease(t));
+      if (t < 1 && !drag) fling = requestAnimationFrame(step);
+    };
+    fling = requestAnimationFrame(step);
+  }
+  function onDown(e) {
+    if (drag || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    if (e.pointerType === 'mouse') e.preventDefault();   // 링크 끌기·글자 선택 대신 책을 끈다
+    cancelAnimationFrame(fling); lenis?.stop(); lenis?.start();   // 굴러가던 것을 손으로 잡아 멈춘다
+    dragMoved = false; clearTimeout(snapTimer);
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, y0: scrollY, moved: false, pts: [{ t: e.timeStamp, y: scrollY }] };
+    addEventListener('pointermove', onMove, { passive: false });
+    addEventListener('pointerup', onUp); addEventListener('pointercancel', onUp);
+  }
+  function onMove(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) < MOVE) return;
+    drag.moved = true;
+    if (e.cancelable) e.preventDefault();
+    const along = dx * dirX + dy * dirY;                 // 앞쪽 방향 성분만 쓴다
+    const y = clampY(drag.y0 + along / stepPx * PER);
+    setScroll(y);
+    drag.pts.push({ t: e.timeStamp, y });
+    if (drag.pts.length > 8) drag.pts.shift();
+  }
+  function onUp(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    removeEventListener('pointermove', onMove); removeEventListener('pointerup', onUp); removeEventListener('pointercancel', onUp);
+    const d = drag; drag = null;
+    if (!d.moved) return;                                // 누름 → click이 그대로 간다
+    dragMoved = true; setTimeout(() => { dragMoved = false; }, 400);   // 바로 뒤따르는 click만 막는다
+    // 마지막 100ms의 속도로 던진 거리를 정하고, 가장 가까운 책 자리에 맞춘다
+    const now = d.pts[d.pts.length - 1], old = d.pts.find(p => now.t - p.t <= 100) || d.pts[0];
+    const v = now.t > old.t ? (now.y - old.y) / (now.t - old.t) : 0;   // 스크롤 px/ms
+    const cur = scrollY, aim = cur + Math.max(-4 * PER, Math.min(4 * PER, v * 240));
+    glide(clampY(Math.round(aim / PER) * PER));
+  }
+  books.forEach(el => {
+    el.addEventListener('pointerdown', onDown);
+    el.addEventListener('dragstart', e => e.preventDefault());
+    el.addEventListener('contextmenu', e => { if (drag?.moved || dragMoved) e.preventDefault(); });
+  });
 
   function start() {
     layout();

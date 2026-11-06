@@ -9,7 +9,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
-from app import auth, intro, web
+from app import auth, intro, pwa, web
 from app.api import books, me, social
 from app.core.config import Settings, get_settings
 
@@ -79,6 +79,7 @@ app.include_router(me.router)
 app.include_router(social.router)
 app.include_router(web.router)
 app.include_router(intro.router)
+app.include_router(pwa.router)
 app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 
 
