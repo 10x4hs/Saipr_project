@@ -26,7 +26,7 @@
     {% for group, items in APPEARANCE.BACKGROUNDS.items() %}
     <div class="swatches" data-group-panel="{{ group }}" {% if not loop.first %}hidden{% endif %}>
       {% for bid, name, moving in items %}
-      <button type="button" class="sw" data-bgpick="{{ bid }}" aria-pressed="{{ 'true' if look.bg == bid else 'false' }}">
+      <button type="button" class="sw" data-bgpick="{{ bid }}" data-tone="{{ APPEARANCE.tone_of(bid) }}" aria-pressed="{{ 'true' if look.bg == bid else 'false' }}">
         <span class="fx mini" data-bg="{{ bid }}"></span>{% if moving %}<i class="play">▶</i>{% endif %}
         <b>{{ name }}</b>
       </button>
