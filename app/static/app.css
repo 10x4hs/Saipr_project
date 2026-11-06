@@ -874,3 +874,18 @@ html:root[data-bg-tone="light"]{
 .ios-sheet.on .ios-arrow{opacity:.85;animation:iosBob 1.4s ease-in-out infinite}
 @keyframes iosBob{50%{transform:translate(-50%,6px)}}
 @media (prefers-reduced-motion:reduce){.ios-sheet.on .ios-arrow{animation:none}}
+
+/* ---------- 첫 화면 버튼: 1행 시작·로그인, 2행 iOS·Android ---------- */
+.l-cta{display:grid;gap:10px}
+.l-cta-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.l-cta-row .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 12px;
+  font-size:15px;font-weight:600;white-space:nowrap;border-radius:999px;transition:transform .15s,filter .15s}
+.l-cta-row .btn:active{transform:scale(.97)}
+.l-start{background:linear-gradient(135deg,#ff9fb8,#ffc58f);color:#2a1410;border:0;box-shadow:0 8px 24px rgba(255,160,150,.28)}
+.l-login{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.22);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.l-ios{background:#f5f5f7;color:#111;border:0}
+.l-android{background:#3ddc84;color:#06301a;border:0}
+.l-dl svg{flex:none}
+.l-cta-row .btn:hover{filter:brightness(1.06)}
+@media (max-width:340px){.l-cta-row .btn{font-size:14px;padding:0 8px}}

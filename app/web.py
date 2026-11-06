@@ -71,6 +71,22 @@ SHELVES = {g: books for g, books in SHELVES.items() if books}
 CATALOG_INDEX = {(b["source"], b["id"]): b for b in CATALOG}
 POPULAR_ORDER = [tuple(k) for k in json.loads((DATA / "popular.json").read_text())["order"]]
 
+
+def _load_showcase() -> list[dict]:
+    """첫 화면 띠에 거는 유명한 책들(app/data/showcase.json). 앱에 본문이 있는 책만 읽기 링크를 달고,
+    나머지는 표지만 보여 준다. 표지 파일이 없으면 원본 주소를 쓴다."""
+    out = []
+    for b in json.loads((DATA / "showcase.json").read_text()):
+        b = dict(b)
+        b["readable"] = bool(b.get("readable")) and (b.get("source"), b.get("id")) in CATALOG_INDEX
+        if not (STATIC / b["cover"].removeprefix("/static/")).exists():
+            b["cover"] = b["cover_src"]
+        out.append(b)
+    return out
+
+
+SHOWCASE: list[dict] = _load_showcase()
+
 COVER_PALETTES = 8
 
 
@@ -158,7 +174,8 @@ async def home(
     user: User | None = Depends(auth.current_user),
 ) -> HTMLResponse:
     if user is None:
-        return _render(request, "landing.html", None, picks=(await popular(session, 9)), total=len(CATALOG))
+        picks = await popular(session, 9)
+        return _render(request, "landing.html", None, picks=picks, showcase=SHOWCASE, total=len(CATALOG))
     top = await popular(session, 30)
     return _render(
         request, "home.html", user, drum=[b | {"store": True} for b in STORE[:14]] + _fill(top, 30)

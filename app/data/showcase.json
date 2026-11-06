@@ -1,0 +1,150 @@
+[
+ {
+  "title": "데미안",
+  "author": "헤르만 헤세",
+  "publisher": "민음사",
+  "cover": "/static/covers/showcase/demian.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/26/0/cover500/s452139198_1.jpg",
+  "readable": false
+ },
+ {
+  "title": "채식주의자",
+  "author": "한강",
+  "publisher": "창비",
+  "cover": "/static/covers/showcase/vegetarian.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/29137/2/cover500/8936434594_2.jpg",
+  "readable": false
+ },
+ {
+  "title": "소년이 온다",
+  "author": "한강",
+  "publisher": "창비",
+  "cover": "/static/covers/showcase/human-acts.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/4086/97/cover500/8936434128_2.jpg",
+  "readable": false
+ },
+ {
+  "title": "작별하지 않는다",
+  "author": "한강",
+  "publisher": "문학동네",
+  "cover": "/static/covers/showcase/we-do-not-part.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/27877/5/cover500/8954682154_3.jpg",
+  "readable": false
+ },
+ {
+  "title": "흰",
+  "author": "한강",
+  "publisher": "문학동네",
+  "cover": "/static/covers/showcase/the-white-book.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/36099/46/cover500/k252038964_2.jpg",
+  "readable": false
+ },
+ {
+  "title": "변신·시골의사",
+  "author": "프란츠 카프카",
+  "publisher": "민음사",
+  "cover": "/static/covers/showcase/metamorphosis.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/6/4/cover500/s972932230_1.jpg",
+  "readable": true,
+  "source": "gutendex",
+  "id": "5200"
+ },
+ {
+  "title": "이방인",
+  "author": "알베르 카뮈",
+  "publisher": "민음사",
+  "cover": "/static/covers/showcase/the-stranger.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/21224/66/cover500/8937443848_1.jpg",
+  "readable": false
+ },
+ {
+  "title": "호밀밭의 파수꾼",
+  "author": "J. D. 샐린저",
+  "publisher": "민음사",
+  "cover": "/static/covers/showcase/catcher.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/27/97/cover500/s8937460475_1.jpg",
+  "readable": false
+ },
+ {
+  "title": "위대한 개츠비",
+  "author": "F. 스콧 피츠제럴드",
+  "publisher": "민음사",
+  "cover": "/static/covers/showcase/gatsby.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/41/79/cover500/s582934787_1.jpg",
+  "readable": true,
+  "source": "gutendex",
+  "id": "64317"
+ },
+ {
+  "title": "1984",
+  "author": "조지 오웰",
+  "publisher": "민음사",
+  "cover": "/static/covers/showcase/1984.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/41/89/cover500/s122531356_2.jpg",
+  "readable": false
+ },
+ {
+  "title": "동물농장",
+  "author": "조지 오웰",
+  "publisher": "민음사",
+  "cover": "/static/covers/showcase/animal-farm.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/4/6/cover500/s93746005x_3.jpg",
+  "readable": false
+ },
+ {
+  "title": "인간 실격",
+  "author": "다자이 오사무",
+  "publisher": "민음사",
+  "cover": "/static/covers/showcase/no-longer-human.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/49/16/cover500/893746103x_3.jpg",
+  "readable": false
+ },
+ {
+  "title": "노인과 바다",
+  "author": "어니스트 헤밍웨이",
+  "publisher": "민음사",
+  "cover": "/static/covers/showcase/old-man-sea.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/1452/24/cover500/8937462788_3.jpg",
+  "readable": false
+ },
+ {
+  "title": "운수 좋은 날",
+  "author": "현진건",
+  "publisher": "",
+  "cover": "/static/covers/showcase/lucky-day.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/1522/59/cover500/8965880777_1.jpg",
+  "readable": true,
+  "source": "wikisource",
+  "id": "운수 좋은 날"
+ },
+ {
+  "title": "메밀꽃 필 무렵",
+  "author": "이효석",
+  "publisher": "",
+  "cover": "/static/covers/showcase/buckwheat.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/21/16/cover500/8987721191_2.jpg",
+  "readable": true,
+  "source": "wikisource",
+  "id": "메밀꽃 필 무렵"
+ },
+ {
+  "title": "날개",
+  "author": "이상",
+  "publisher": "",
+  "cover": "/static/covers/showcase/wings.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/55/72/cover500/893201597x_1.jpg",
+  "readable": true,
+  "source": "wikisource",
+  "id": "날개"
+ },
+ {
+  "title": "진달래꽃",
+  "author": "김소월",
+  "publisher": "소와다리",
+  "cover": "/static/covers/showcase/azaleas.jpg",
+  "cover_src": "https://image.aladin.co.kr/product/6895/49/cover500/8998046679_1.jpg",
+  "readable": true,
+  "source": "wikisource",
+  "id": "진달래꽃 (시집)"
+ }
+]
