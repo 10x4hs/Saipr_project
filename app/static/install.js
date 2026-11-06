@@ -1,4 +1,4 @@
-// 다운로드 버튼 두 개: '안드로이드 다운로드'는 APK를 받고, 'iOS 다운로드'는 홈 화면 추가 안내 시트를 연다.
+// 다운로드 버튼 두 개: 'Android 다운로드'는 APK를 받고, 'iOS 다운로드'는 홈 화면 추가 안내 시트를 연다.
 (() => {
   const ios = document.querySelector('[data-install="ios"]');
   const android = document.querySelector('[data-install="android"]');
