@@ -1,6 +1,9 @@
 /* 첫 화면 유명한 책 띠 — app/data/showcase.json (app.css의 .marquee 움직임은 그대로 두고 덧씌운다) */
-.sc-strip .marquee-track{animation-duration:110s}
-.sc-strip:hover .marquee-track,.sc-strip:focus-within .marquee-track{animation-play-state:paused}
+.sc-strip{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x pan-y;cursor:grab}
+.sc-strip::-webkit-scrollbar{display:none}
+.sc-strip.dragging{cursor:grabbing;user-select:none}
+.sc-strip.dragging .sc-book{pointer-events:none}
+.sc-strip .marquee-track{animation:none}
 .sc-book{flex:none;display:block;padding:0;margin:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer;
   border-radius:4px;-webkit-tap-highlight-color:transparent;transition:transform .25s var(--ease,ease)}
 .sc-book:active{transform:scale(.96)}
@@ -13,4 +16,3 @@
   background:color-mix(in srgb,var(--text,#fff) 92%,transparent);color:var(--bg,#0a0a0a);box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none}
 .sc-toast.in{animation:sc-toast-in .35s var(--ease,ease)}
 @keyframes sc-toast-in{from{opacity:0;transform:translateX(-50%) translateY(-10px)}}
-@media (pointer:coarse){.sc-strip .marquee-track{animation-duration:170s}}

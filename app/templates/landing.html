@@ -29,8 +29,43 @@
   <script>
   (() => {
     const t = document.getElementById('scToast');
+    const strip = document.querySelector('.sc-strip');
     let timer;
-    document.querySelector('.sc-strip').addEventListener('click', (e) => {
+    // 저절로 흐르다가, 손가락·휠·마우스로 잡으면 멈추고 직접 넘길 수 있어요. 놓으면 2.5초 뒤 다시 흘러요.
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const speed = matchMedia('(pointer:coarse)').matches ? 18 : 26; // px/s
+    let held = false, idleUntil = 0, last = 0, pos = 0, drag = null, moved = false;
+    const half = () => strip.scrollWidth / 2;
+    const wrap = () => { const h = half(); if (h <= 0) return;
+      if (strip.scrollLeft >= h) strip.scrollLeft -= h; else if (strip.scrollLeft <= 0) strip.scrollLeft += h; };
+    const rest = () => { idleUntil = performance.now() + 2500; };
+    const tick = (now) => {
+      const dt = last ? Math.min(now - last, 100) : 0; last = now;
+      if (!held && !reduce && now > idleUntil) { pos += speed * dt / 1000; if (pos >= 1) { const n = Math.floor(pos); pos -= n; strip.scrollLeft += n; wrap(); } }
+      requestAnimationFrame(tick);
+    };
+    strip.addEventListener('scroll', () => { if (held || performance.now() < idleUntil) wrap(); }, { passive: true });
+    strip.addEventListener('wheel', rest, { passive: true });
+    strip.addEventListener('touchstart', () => { held = true; }, { passive: true });
+    strip.addEventListener('touchend', () => { held = false; rest(); }, { passive: true });
+    strip.addEventListener('mouseenter', () => { held = true; });
+    strip.addEventListener('mouseleave', () => { held = false; rest(); });
+    strip.addEventListener('focusin', () => { held = true; });
+    strip.addEventListener('focusout', () => { held = false; rest(); });
+    strip.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      drag = { x: e.clientX, left: strip.scrollLeft }; moved = false;
+    });
+    addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      if (!moved && Math.abs(dx) > 5) { moved = true; strip.classList.add('dragging'); }
+      if (moved) { strip.scrollLeft = drag.left - dx; wrap(); drag.left = strip.scrollLeft + dx; }
+    });
+    addEventListener('pointerup', () => { if (!drag) return; drag = null; strip.classList.remove('dragging'); rest(); });
+    strip.addEventListener('click', (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+    requestAnimationFrame(() => { strip.scrollLeft = 1; requestAnimationFrame(tick); });
+    strip.addEventListener('click', (e) => {
       if (!e.target.closest('[data-locked]')) return;
       t.hidden = false; t.classList.remove('in'); void t.offsetWidth; t.classList.add('in');
       clearTimeout(timer); timer = setTimeout(() => { t.hidden = true; }, 2200);
