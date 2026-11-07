@@ -45,7 +45,14 @@
       requestAnimationFrame(tick);
     };
     strip.addEventListener('scroll', () => { if (held || performance.now() < idleUntil) wrap(); }, { passive: true });
-    strip.addEventListener('wheel', rest, { passive: true });
+    // 세로 휠도 띠를 옆으로 넘겨요 (가로 휠·트랙패드는 브라우저 기본 그대로)
+    strip.addEventListener('wheel', (e) => {
+      rest();
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      e.preventDefault();
+      strip.scrollLeft += e.deltaMode === 1 ? e.deltaY * 32 : e.deltaY;
+      wrap();
+    }, { passive: false });
     strip.addEventListener('touchstart', () => { held = true; }, { passive: true });
     strip.addEventListener('touchend', () => { held = false; rest(); }, { passive: true });
     strip.addEventListener('mouseenter', () => { held = true; });
