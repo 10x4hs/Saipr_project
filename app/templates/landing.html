@@ -15,6 +15,10 @@
     <p class="eyebrow mono">고전 {{ total }}권 · 무료</p>
     <h1>같은 책을<br>각자의 속도로<br><em>함께</em> 읽어요</h1>
     <p class="l-lede">고전 {{ total }}권을 처음부터 끝까지. 내 EPUB·PDF도 같은 리더로 넘겨 읽어요.</p>
+    <button class="l-play" type="button" id="demoOpen" aria-haspopup="dialog">
+      <span class="l-play-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="12" height="12"><path fill="currentColor" d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg></span>
+      32초 영상으로 보기
+    </button>
   </section>
   <link rel="stylesheet" href="/static/landing-books.css">
   <div class="marquee sc-strip" role="group" aria-label="유명한 책들"><div class="marquee-track">
@@ -113,5 +117,25 @@
   </div>
   <div class="ios-arrow" aria-hidden="true">↓</div>
 </div>
+<div class="demo-modal" id="demoModal" hidden role="dialog" aria-modal="true" aria-label="해독 시연 영상">
+  <div class="demo-frame">
+    <video id="demoVideo" src="/demo/haedok-demo.mp4" poster="/demo/haedok-demo-poster.jpg" playsinline controls preload="none"></video>
+    <button class="demo-close" type="button" data-close aria-label="닫기">✕</button>
+  </div>
+</div>
+<script>
+(() => {
+  const m = document.getElementById('demoModal'), v = document.getElementById('demoVideo'), open = document.getElementById('demoOpen');
+  const close = () => { v.pause(); m.hidden = true; document.body.classList.remove('locked'); open.focus(); };
+  open.addEventListener('click', () => {
+    m.hidden = false; document.body.classList.add('locked');
+    v.currentTime = 0; v.play().catch(() => {});
+    m.querySelector('[data-close]').focus();
+  });
+  m.addEventListener('click', (e) => { if (e.target === m || e.target.closest('[data-close]')) close(); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !m.hidden) close(); });
+  v.addEventListener('ended', () => setTimeout(close, 600));
+})();
+</script>
 <script src="/static/install.js" defer></script>
 {% endblock %}
